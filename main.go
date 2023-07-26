@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"time"
-	"unify/internal/customer"
+	"unify/internal/handler"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -52,15 +52,15 @@ func main() {
 	} else {
 		log.Println("データベース接続完了")
 	}
-	r.POST("/customer", customer.PostCustomer)
-	r.GET("/customer", customer.GetCustomer)
-	r.DELETE("/customer", customer.DeleteCustomer)
-	r.PATCH("/customer", customer.UpdateCustomerCustomer)
+	r.POST("/customer", handler.PostCustomer)
+	r.GET("/customer", handler.GetCustomer)
+	r.DELETE("/customer", handler.DeleteCustomer)
+	r.PATCH("/customer", handler.UpdateCustomerCustomer)
 
-	r.POST("/transaction", customer.PostTransaction)
-	r.GET("/transaction", customer.GetTransaction)
-	r.DELETE("/transaction", customer.DeleteTransaction)
-	r.PATCH("/transaction", customer.UpdateTransaction)
+	r.POST("/transaction", handler.PostTransaction)
+	r.GET("/transaction", handler.GetTransaction)
+	r.DELETE("/transaction", handler.DeleteTransaction)
+	r.PATCH("/transaction", handler.UpdateTransaction)
 
 	authorized := r.Group("/admin", gin.BasicAuth(gin.Accounts{
 		os.Getenv("AUTH_USER"): os.Getenv("AUTH_PASS"),
@@ -69,10 +69,10 @@ func main() {
 		user := c.MustGet(gin.AuthUserKey).(string)
 		c.JSON(200, gin.H{"message": "Hello " + user})
 	})
-	authorized.GET("/items", customer.GetItem)
-	authorized.POST("/items", customer.PostItem)
-	authorized.PATCH("/items", customer.PatchItem)
-	authorized.DELETE("/items", customer.DeleteItem)
+	authorized.GET("/items", handler.GetItem)
+	authorized.POST("/items", handler.PostItem)
+	authorized.PATCH("/items", handler.PatchItem)
+	authorized.DELETE("/items", handler.DeleteItem)
 
 	r.Run(":8081") // 0.0.0.0:8080 でサーバーを立てます。
 
