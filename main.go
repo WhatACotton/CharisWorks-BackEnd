@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
+	"net/http"
 	"os"
 	"time"
 	"unify/internal/handler"
@@ -10,6 +11,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/sessions"
 )
 
 func main() {
@@ -52,6 +54,7 @@ func main() {
 	} else {
 		log.Println("データベース接続完了")
 	}
+
 	r.POST("/customer", handler.PostCustomer)
 	r.GET("/customer", handler.GetCustomer)
 	r.DELETE("/customer", handler.DeleteCustomer)
@@ -69,6 +72,7 @@ func main() {
 		user := c.MustGet(gin.AuthUserKey).(string)
 		c.JSON(200, gin.H{"message": "Hello " + user})
 	})
+
 	authorized.GET("/items", handler.GetItem)
 	authorized.POST("/items", handler.PostItem)
 	authorized.PATCH("/items", handler.PatchItem)
@@ -76,4 +80,25 @@ func main() {
 
 	r.Run(":8081") // 0.0.0.0:8080 でサーバーを立てます。
 
+}
+
+// Note: Don't store your key in your source code. Pass it via an
+// environmental variable, or flag (or both), and don't accidentally commit it
+// alongside your code. Ensure your key is sufficiently random - i.e. use Go's
+// crypto/rand or securecookie.GenerateRandomKey(32) and persist the result.
+var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+
+func MyHandler(w http.ResponseWriter, r *http.Request) {
+	// Get a session. We're ignoring the error resulted from decoding an
+	// existing session: Get() always returns a session, even if empty.
+	session, _ := store.Get(r, "session-name")
+	// Set some session values.
+	session.Values["foo"] = "bar"
+	session.Values[42] = 43
+	// Save it before we write to the response/return from the handler.
+	err := session.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
