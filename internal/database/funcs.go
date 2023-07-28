@@ -104,7 +104,7 @@ func TestSQL() {
 		log.Fatal(err)
 		return
 	} else {
-		log.Println("データベース接続完了")
+		log.Println("データベース接続確認")
 	}
 
 }

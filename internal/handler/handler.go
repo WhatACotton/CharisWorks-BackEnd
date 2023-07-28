@@ -1,45 +1,50 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+	"unify/internal/funcs"
+
+	"github.com/gin-gonic/gin"
+)
 
 func Customer(c *gin.Context) {
-	requestMethod := c.Request.Method
+	requestMethod := http.MethodGet
 	switch request := requestMethod; request {
 	case "GET":
-		GetCustomer(c)
+		funcs.GetCustomer(c)
 	case "POST":
-		PostCustomer(c)
+		funcs.PostCustomer(c)
 	case "PATCH":
-		PatchCustomer(c)
+		funcs.PatchCustomer(c)
 	case "DELETE":
-		DeleteCustomer(c)
+		funcs.DeleteCustomer(c)
 	}
 }
 
 func Item(c *gin.Context) {
-	requestMethod := c.Request.Method
+	requestMethod := http.MethodGet
 	switch request := requestMethod; request {
 	case "GET":
-		GetItem(c)
+		funcs.GetItem(c)
 	case "POST":
-		PostItem(c)
+		funcs.PostItem(c)
 	case "PATCH":
-		PatchItem(c)
+		funcs.PatchItem(c)
 	case "DELETE":
-		DeleteItem(c)
+		funcs.DeleteItem(c)
 	}
 }
 
 func Transaction(c *gin.Context) {
-	requestMethod := c.Request.Method
+	requestMethod := http.MethodGet
 	switch request := requestMethod; request {
 	case "GET":
-		GetTransaction(c)
+		funcs.GetTransaction(c)
 	case "POST":
-		PostTransaction(c)
+		funcs.PostTransaction(c)
 	case "PATCH":
-		PatchTransaction(c)
+		funcs.PatchTransaction(c)
 	case "DELETE":
-		DeleteTransaction(c)
+		funcs.DeleteTransaction(c)
 	}
 }

@@ -1,43 +1,31 @@
 package validation
 
 import (
+	"context"
 	"log"
+	"net/http"
+	"time"
 
 	firebase "firebase.google.com/go"
+	"firebase.google.com/go/auth"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/api/option"
 )
 
-// client := &http.Client{
-// 	CheckRedirect: func(req *http.Request, via []*http.Request) error {
-// 		fmt.Printf("Redirected from %s to %s\n", via[len(via)-1].URL.String(), req.URL.String())
-// 		return nil
-// 	},
-// }
+type User struct {
+	Userdata auth.UserRecord
+}
 
-// resp, err := client.Get("http://example.com")
-// if err != nil {
-// 	fmt.Println(err)
-// 	return
-// }
+func (user User) Verify(c *gin.Context) {
+	// Firebaseアプリを初期化する
+	conf := &firebase.Config{
+		ProjectID: "iris-test-52dcd",
+	}
 
-// defer resp.Body.Close()
-
-// fmt.Println(resp.StatusCode)
-// authorized := r.Group("/admin", gin.BasicAuth(gin.Accounts{
-// 	os.Getenv("AUTH_USER"): os.Getenv("AUTH_PASS"),
-// }))
-// authorized.GET("/hello", func(c *gin.Context) {
-// 	user := c.MustGet(gin.AuthUserKey).(string)
-// 	c.JSON(200, gin.H{"message": "Hello " + user})
-// })
-
-// authorized.GET("/items", handler.GetItem)
-// authorized.POST("/items", handler.PostItem)
-// authorized.PATCH("/items", handler.PatchItem)
-// authorized.DELETE("/items", handler.DeleteItem)
-
-func Verify(c *gin.Context, uid string) {
-	app, err := firebase.NewApp(c, nil)
+	opt := option.WithCredentialsFile("application_default_credentials.json")
+	app, err := firebase.NewApp(context.Background(), conf, opt)
+	uid := c.Query("uid")
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)
 	}
@@ -52,5 +40,35 @@ func Verify(c *gin.Context, uid string) {
 		log.Fatalf("error getting user %s: %v\n", uid, err)
 	}
 	log.Printf("Successfully fetched user data: %v\n", u)
+	user.Userdata = *u
+	c.JSON(http.StatusOK, *&u.UID)
 
+}
+
+func CORS(r *gin.Engine) {
+	r.Use(cors.New(cors.Config{
+		// アクセス許可するオリジン
+		AllowOrigins: []string{
+			"http://localhost:3000",
+		},
+		// アクセス許可するHTTPメソッド
+		AllowMethods: []string{
+			"POST",
+			"GET",
+			"OPTIONS",
+			"PATCH",
+		},
+		// 許可するHTTPリクエストヘッダ
+		AllowHeaders: []string{
+			"Content-Type",
+			"Access-Control-Allow-Origin",
+			"Access-Control-Allow-Headers",
+			"Authorization",
+			"Access-Control-Allow-Credentials",
+		},
+		// cookieなどの情報を必要とするかどうか
+		AllowCredentials: false,
+		// preflightリクエストの結果をキャッシュする時間
+		MaxAge: 24 * time.Hour,
+	}))
 }

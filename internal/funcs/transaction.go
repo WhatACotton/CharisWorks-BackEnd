@@ -1,4 +1,4 @@
-package handler
+package funcs
 
 import (
 	"net/http"
@@ -27,8 +27,8 @@ func PatchTransaction(c *gin.Context) {
 }
 
 func GetTransaction(c *gin.Context) {
-	uid := c.Query("uid")
-	var response = database.GetTransaction(uid)
+	transactionId := c.Query("transactionId")
+	var response = database.GetTransaction(transactionId)
 	if response.UID == "" {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "customer not found"})
 		return
