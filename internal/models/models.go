@@ -1,5 +1,16 @@
 package models
 
+type Item struct {
+	ID          string `json:"id"`
+	Price       int    `json:"price"`
+	Name        string `json:"Name"`
+	Stonesize   int    `json:"Stonesize"`
+	Minlength   int    `json:"Minlength"`
+	Maxlength   int    `json:"Maxlength"`
+	Decsription string `json:"Description"`
+	Keyword     string `json:"Keyword"`
+}
+
 type CustomerRequestPayload struct {
 	UID         string `json:"uid"`
 	CreatedDate string `json:"CreatedDate"`
@@ -14,10 +25,9 @@ type Customer struct {
 }
 
 type TransactionRequestPayload struct {
-	UID        string `json:"UID"`
-	ItemId     string `json:"itemid"`
-	Count      int    `json:"count"`
-	IsFinished bool   `json:"isFinished"`
+	UID    string `json:"UID"`
+	ItemId string `json:"itemid"`
+	Count  int    `json:"count"`
 }
 type Transaction struct {
 	UID             string `json:"UID"`
@@ -26,21 +36,4 @@ type Transaction struct {
 	TransactionDate string `json:"transactionDate"`
 	Count           string `json:"count"`
 	IsFinished      bool   `json:"isFinished"`
-}
-
-type Item struct {
-	ID          string `json:"id"`
-	Price       int    `json:"price"`
-	Name        string `json:"Name"`
-	Stonesize   int    `json:"Stonesize"`
-	Minlength   int    `json:"Minlength"`
-	Maxlength   int    `json:"Maxlength"`
-	Decsription string `json:"Description"`
-	Keyword     string `json:"Keyword"`
-}
-type PatchRequestPayload struct {
-	ID        string `json:"id"`
-	Attribute string `json:"attribute"`
-	Value     string `json:"value"`
-	Isint     bool   `json:"isint"`
 }

@@ -1,9 +1,9 @@
-package customer
+package funcs
 
 import (
 	"net/http"
 
-	"unify/internal/handler"
+	"unify/internal/database"
 	"unify/internal/models"
 
 	"github.com/gin-gonic/gin"
@@ -12,28 +12,28 @@ import (
 var customers []models.Customer
 
 func PostCustomer(c *gin.Context) {
-	var CreatedDate = handler.GetDate()
+	var CreatedDate = database.GetDate()
 	var newCustomer models.CustomerRequestPayload
 	if err := c.BindJSON(&newCustomer); err != nil {
 		return
 	}
 	newCustomer.CreatedDate = CreatedDate
-	res := handler.PostCustomer(newCustomer)
+	res := database.PostCustomer(newCustomer)
 	c.IndentedJSON(http.StatusOK, res)
 }
-func UpdateCustomerCustomer(c *gin.Context) {
-	var fixCustomer models.Customer
-	if err := c.BindJSON(&fixCustomer); err != nil {
+
+func PatchCustomer(c *gin.Context) {
+	h := new(database.PatchRequestPayload)
+	if err := c.BindJSON(&h); err != nil {
 		return
 	}
-	res := handler.UpdateCustomer(fixCustomer)
-	c.IndentedJSON(http.StatusOK, res)
-
+	h.Patch("user", "uid")
+	GetCustomer(c)
 }
 
 func GetCustomer(c *gin.Context) {
 	uid := c.Query("uid")
-	var response = handler.GetCustomer(uid)
+	var response = database.GetCustomer(uid)
 	if response.UID == "" {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "customer not found"})
 		return
@@ -43,6 +43,6 @@ func GetCustomer(c *gin.Context) {
 
 func DeleteCustomer(c *gin.Context) {
 	uid := c.Query("uid")
-	var response = handler.DeleteCustomer(uid)
-	c.IndentedJSON(http.StatusOK, response)
+	database.Delete("user", "uid", uid)
+	GetCustomer(c)
 }
