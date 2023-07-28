@@ -8,6 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func GetItem(c *gin.Context) {
+	id := c.Query("id")
+	if id == "" {
+		GetItemList(c)
+	} else {
+		GetAItem(c, id)
+	}
+}
+
+func GetItemList(c *gin.Context) { c.JSON(http.StatusOK, database.GetItemList()) }
+
+func GetAItem(c *gin.Context, id string) { c.JSON(http.StatusOK, database.GetItem(id)) }
+
 func PostItem(c *gin.Context) {
 	var newItem models.Item
 	if err := c.BindJSON(&newItem); err != nil {
@@ -21,26 +34,8 @@ func PatchItem(c *gin.Context) {
 	if err := c.BindJSON(&h); err != nil {
 		return
 	}
-	var isint bool
-	if h.Attribute == "Price" ||
-		h.Attribute == "Stonesize" ||
-		h.Attribute == "Minlength" ||
-		h.Attribute == "Maxlength" {
-		isint = true
-	} else {
-		isint = false
-	}
-	h.Patch("itemlist", isint, "ID")
+	h.Patch("itemlist", "ID")
 	c.JSON(http.StatusOK, database.GetItemList())
-}
-
-func GetItemList(c *gin.Context) {
-	c.JSON(http.StatusOK, database.GetItemList())
-}
-
-func GetItem(c *gin.Context) {
-	id := c.Query("id")
-	c.JSON(http.StatusOK, database.GetItem(id))
 }
 
 func DeleteItem(c *gin.Context) {

@@ -1,21 +1,13 @@
 package database
 
 import (
-	"database/sql"
 	"log"
-	"os"
 	"unify/internal/models"
 )
 
 func PostCustomer(req models.CustomerRequestPayload) (res models.Customer) {
 	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_PASS")+":"+os.Getenv("MYSQL_USER")+"@tcp(localhost:3306)/go_test")
-
-	if err != nil {
-		// ここではエラーを返さない
-		log.Fatal(err)
-	}
-	defer db.Close()
+	db := ConnectSQL()
 
 	// SQLの準備
 	ins, err := db.Prepare("INSERT INTO user VALUES(?,?,?,?,?)")
@@ -34,13 +26,7 @@ func PostCustomer(req models.CustomerRequestPayload) (res models.Customer) {
 
 func GetCustomer(uid string) (res models.Customer) {
 	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_PASS")+":"+os.Getenv("MYSQL_USER")+"@tcp(localhost:3306)/go_test")
-
-	if err != nil {
-		// ここではエラーを返さない
-		log.Fatal(err)
-	}
-	defer db.Close()
+	db := ConnectSQL()
 
 	// SQLの実行
 	rows, err := db.Query("SELECT * FROM user WHERE uid = ?", uid)

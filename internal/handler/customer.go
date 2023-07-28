@@ -22,12 +22,12 @@ func PostCustomer(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, res)
 }
 
-func UpdateCustomerCustomer(c *gin.Context) {
+func PatchCustomer(c *gin.Context) {
 	h := new(database.PatchRequestPayload)
 	if err := c.BindJSON(&h); err != nil {
 		return
 	}
-	h.Patch("user", false, "uid")
+	h.Patch("user", "uid")
 	GetCustomer(c)
 }
 

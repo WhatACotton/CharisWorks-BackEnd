@@ -17,12 +17,12 @@ func PostTransaction(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, res)
 }
 
-func UpdateTransaction(c *gin.Context) {
+func PatchTransaction(c *gin.Context) {
 	h := new(database.PatchRequestPayload)
 	if err := c.BindJSON(&h); err != nil {
 		return
 	}
-	h.Patch("transaction", false, "transactionid")
+	h.Patch("transaction", "transactionid")
 	c.JSON(http.StatusOK, database.GetItemList())
 }
 

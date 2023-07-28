@@ -1,22 +1,13 @@
 package database
 
 import (
-	"database/sql"
 	"log"
-	"os"
 	"unify/internal/models"
 )
 
 func PostItem(newItem models.Item) (Itemlist []models.Item) {
 	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_PASS")+":"+os.Getenv("MYSQL_USER")+"@tcp(localhost:3306)/go_test")
-
-	if err != nil {
-		// ここではエラーを返さない
-		//log.Fatal(err)
-		panic(err.Error())
-
-	}
+	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの準備
@@ -49,12 +40,7 @@ func PostItem(newItem models.Item) (Itemlist []models.Item) {
 
 func GetItemList() (Itemlist []models.Item) {
 	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_PASS")+":"+os.Getenv("MYSQL_USER")+"@tcp(localhost:3306)/go_test")
-
-	if err != nil {
-		// ここではエラーを返さない
-		log.Fatal(err)
-	}
+	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの実行
@@ -87,12 +73,7 @@ func GetItemList() (Itemlist []models.Item) {
 
 func GetItem(id string) (returnmodels models.Item) {
 	// データベースのハンドルを取得する
-
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_PASS")+":"+os.Getenv("MYSQL_USER")+"@tcp(localhost:3306)/go_test")
-	if err != nil {
-		// ここではエラーを返さない
-		log.Fatal(err)
-	}
+	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの実行

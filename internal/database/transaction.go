@@ -1,21 +1,15 @@
 package database
 
 import (
-	"database/sql"
 	"log"
-	"os"
 	"unify/internal/models"
 )
 
 func PostTransaction(req models.TransactionRequestPayload) (res models.Transaction) {
 	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_PASS")+":"+os.Getenv("MYSQL_USER")+"@tcp(localhost:3306)/go_test")
-
-	if err != nil {
-		// ここではエラーを返さない
-		log.Fatal(err)
-	}
+	db := ConnectSQL()
 	defer db.Close()
+
 	TransactionDate := GetDate()
 	TransactionId := GettransactionId()
 	// SQLの準備
@@ -35,12 +29,7 @@ func PostTransaction(req models.TransactionRequestPayload) (res models.Transacti
 
 func GetTransaction(transactionId string) (res models.Transaction) {
 	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_PASS")+":"+os.Getenv("MYSQL_USER")+"@tcp(localhost:3306)/go_test")
-
-	if err != nil {
-		// ここではエラーを返さない
-		log.Fatal(err)
-	}
+	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの実行
@@ -59,14 +48,10 @@ func GetTransaction(transactionId string) (res models.Transaction) {
 	}
 	return Customer
 }
+
 func GetTransactionList(uid string) (res []models.Transaction) {
 	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_PASS")+":"+os.Getenv("MYSQL_USER")+"@tcp(localhost:3306)/go_test")
-
-	if err != nil {
-		// ここではエラーを返さない
-		log.Fatal(err)
-	}
+	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの実行
@@ -96,12 +81,7 @@ func GetTransactionList(uid string) (res []models.Transaction) {
 
 func ChangeTransactionState(isFinished bool, transactionid string) {
 	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_PASS")+":"+os.Getenv("MYSQL_USER")+"@tcp(localhost:3306)/go_test")
-
-	if err != nil {
-		// ここではエラーを返さない
-		log.Fatal(err)
-	}
+	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの準備

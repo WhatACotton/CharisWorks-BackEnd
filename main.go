@@ -1,20 +1,18 @@
 package main
 
 import (
-	"database/sql"
-	"log"
 	"net/http"
-	"os"
 	"time"
+	"unify/internal/database"
 	"unify/internal/handler"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/sessions"
 )
 
 func main() {
+
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		// アクセス許可するオリジン
@@ -32,73 +30,20 @@ func main() {
 		AllowHeaders: []string{
 			"Content-Type",
 			"Access-Control-Allow-Origin",
+			"Access-Control-Allow-Headers",
+			"Authorization",
+			"Access-Control-Allow-Credentials",
 		},
 		// cookieなどの情報を必要とするかどうか
 		AllowCredentials: false,
 		// preflightリクエストの結果をキャッシュする時間
 		MaxAge: 24 * time.Hour,
 	}))
-	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_PASS")+":"+os.Getenv("MYSQL_USER")+"@tcp(localhost:3306)/go_test")
-	if err != nil {
-		// ここではエラーを返さない
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	// 実際に接続する
-	err = db.Ping()
-	if err != nil {
-		log.Fatal(err)
-		return
-	} else {
-		log.Println("データベース接続完了")
-	}
-
-	r.POST("/customer", handler.PostCustomer)
-	r.GET("/customer", handler.GetCustomer)
-	r.DELETE("/customer", handler.DeleteCustomer)
-	r.PATCH("/customer", handler.UpdateCustomerCustomer)
-
-	r.POST("/transaction", handler.PostTransaction)
-	r.GET("/transaction", handler.GetTransaction)
-	r.DELETE("/transaction", handler.DeleteTransaction)
-	r.PATCH("/transaction", handler.UpdateTransaction)
-
-	authorized := r.Group("/admin", gin.BasicAuth(gin.Accounts{
-		os.Getenv("AUTH_USER"): os.Getenv("AUTH_PASS"),
-	}))
-	authorized.GET("/hello", func(c *gin.Context) {
-		user := c.MustGet(gin.AuthUserKey).(string)
-		c.JSON(200, gin.H{"message": "Hello " + user})
-	})
-
-	authorized.GET("/items", handler.GetItem)
-	authorized.POST("/items", handler.PostItem)
-	authorized.PATCH("/items", handler.PatchItem)
-	authorized.DELETE("/items", handler.DeleteItem)
+	database.TestSQL()
+	r.Handle(http.MethodGet, "/customer", handler.Customer)
+	r.Handle(http.MethodGet, "/transaction", handler.Transaction)
+	r.Handle(http.MethodGet, "/item", handler.Item)
 
 	r.Run(":8081") // 0.0.0.0:8080 でサーバーを立てます。
 
-}
-
-// Note: Don't store your key in your source code. Pass it via an
-// environmental variable, or flag (or both), and don't accidentally commit it
-// alongside your code. Ensure your key is sufficiently random - i.e. use Go's
-// crypto/rand or securecookie.GenerateRandomKey(32) and persist the result.
-var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
-
-func MyHandler(w http.ResponseWriter, r *http.Request) {
-	// Get a session. We're ignoring the error resulted from decoding an
-	// existing session: Get() always returns a session, even if empty.
-	session, _ := store.Get(r, "session-name")
-	// Set some session values.
-	session.Values["foo"] = "bar"
-	session.Values[42] = 43
-	// Save it before we write to the response/return from the handler.
-	err := session.Save(r, w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 }
