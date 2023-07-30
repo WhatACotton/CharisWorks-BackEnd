@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	firebase "firebase.google.com/go"
@@ -17,7 +18,8 @@ type User struct {
 	Userdata auth.UserRecord
 }
 
-func (user User) Verify(c *gin.Context) {
+func (user User) Verify(c *gin.Context) (authorized bool) {
+	authorized = false
 	// Firebaseアプリを初期化する
 	conf := &firebase.Config{
 		ProjectID: "iris-test-52dcd",
@@ -42,7 +44,15 @@ func (user User) Verify(c *gin.Context) {
 	log.Printf("Successfully fetched user data: %v\n", u)
 	user.Userdata = *u
 	c.JSON(http.StatusOK, *&u.UID)
+	authorized = true
+	return authorized
+}
 
+func Basic(r *gin.Engine) (routergroup *gin.RouterGroup) {
+	authorized := r.Group("/admin", gin.BasicAuth(gin.Accounts{
+		os.Getenv("AUTH_USER"): os.Getenv("AUTH_PASS"),
+	}))
+	return authorized
 }
 
 func CORS(r *gin.Engine) {
