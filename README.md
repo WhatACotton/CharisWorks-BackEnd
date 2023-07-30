@@ -62,7 +62,8 @@ account{
   string name "名前"
   string address "住所"
   int phone_number "電話番号"
-  strng Email "Eメール"
+  string Email "Eメール"
+  timestamp modified_date "修正日時"
 }
 cart{
   reference UID FK "ユーザID"
