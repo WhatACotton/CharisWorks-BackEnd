@@ -15,11 +15,19 @@ func main() {
 	validation.CORS(r)
 	authorized := validation.Basic(r)
 	database.TestSQL()
-	r.POST("/SignUp", handler.TemporaryRegistration)
-	r.POST("/Registration", handler.UserRegistration)
-	r.Handle(http.MethodGet, "/transaction", handler.Transaction)
+
 	r.GET("/item", handler.GetItem)
 	r.GET("/itemlist", handler.GetItemList)
+
+	r.GET("/Login", handler.LogIn)
+	r.POST("/SignUp", handler.TemporarySignUp)
+	r.POST("/Registration", handler.SignUp)
+	r.POST("/Modify", handler.ModifyCustomer)
+	r.DELETE("/DeleteCustomer", handler.DeleteCustomer)
+
+	r.POST("/Cart", handler.PostCart)
+
+	r.Handle(http.MethodGet, "/transaction", handler.Transaction)
 
 	authorized.Handle(http.MethodGet, "/customer", handler.CustomerAuthorized)
 	authorized.Handle(http.MethodGet, "/transaction", handler.TransactionAuthorized)

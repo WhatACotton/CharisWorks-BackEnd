@@ -15,18 +15,31 @@ type Item struct {
 
 type CustomerRequestPayload struct {
 	UID         string `json:"uid"`
-	CreatedDate time.Time
 	Email       string `json:"contact"`
+	CreatedDate time.Time
+}
+type CustomerRegisterPayload struct {
+	Name        string `json:"Name"`
+	Address     string `json:"address"`
+	Email       string `json:"Contact"`
+	PhoneNumber int    `json:"PhoneNumber"`
 }
 type Customer struct {
 	UID            string `json:"UID"`
-	CreatedDate    time.Time
 	Name           string `json:"Name"`
 	Address        string `json:"address"`
 	Email          string `json:"Contact"`
 	PhoneNumber    int    `json:"PhoneNumber"`
+	Register       bool
+	CreatedDate    time.Time
 	ModifiedDate   time.Time
 	RegisteredDate time.Time
+	LastLogInDate  time.Time
+}
+type LogInLog struct {
+	UID     string
+	LoginId string
+	Login   time.Time
 }
 
 type TransactionRequestPayload struct {
@@ -38,7 +51,7 @@ type Transaction struct {
 	UID             string `json:"UID"`
 	ItemId          string `json:"itemid"`
 	TransactionId   string `json:"transactionId"`
-	TransactionDate string `json:"transactionDate"`
 	Count           string `json:"count"`
 	IsFinished      bool   `json:"isFinished"`
+	TransactionDate time.Time
 }

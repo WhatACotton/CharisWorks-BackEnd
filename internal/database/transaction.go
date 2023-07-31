@@ -11,7 +11,7 @@ func PostTransaction(req models.TransactionRequestPayload) (res models.Transacti
 	defer db.Close()
 
 	TransactionDate := GetDate()
-	TransactionId := GettransactionId()
+	TransactionId := GetUUID()
 	// SQLの準備
 	ins, err := db.Prepare("INSERT INTO transaction VALUES(?,?,?,?,?,?)")
 	if err != nil {

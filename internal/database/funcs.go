@@ -19,7 +19,7 @@ func GetDate() time.Time {
 	return t
 }
 
-func GettransactionId() string {
+func GetUUID() string {
 	uuidObj, _ := uuid.NewUUID()
 	return uuidObj.String()
 }

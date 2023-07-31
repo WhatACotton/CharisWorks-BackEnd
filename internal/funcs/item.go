@@ -7,15 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetItemAuth(c *gin.Context) {
-	id := c.Query("id")
-	if id == "" {
-		GetItemList(c)
-	} else {
-		GetItem(c, id)
-	}
-}
-
 func GetItemList(c *gin.Context) { c.JSON(http.StatusOK, database.GetItemList()) }
 
 func GetItem(c *gin.Context, id string) { c.JSON(http.StatusOK, database.GetItem(id)) }
