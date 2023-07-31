@@ -15,6 +15,7 @@ item ||--o{ transaction:""
 transaction||--||status_of_transaction:"取引情報"
 account ||--o{transaction:""
 account ||--o{cart:""
+account ||--o{login:""
 
 item{
 	string ID PK "商品ID"
@@ -70,5 +71,11 @@ cart{
   string cartId PK "カートID"
   reference ID "商品ID"
   int quantity "数量"
+}
+login{
+  string sessionId PK "セッションID"
+  reference UID FK "ユーザID"
+  timestamp Login "ログイン日時"
+
 }
 ```
