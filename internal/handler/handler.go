@@ -2,74 +2,51 @@ package handler
 
 import (
 	"net/http"
+	"unify/internal/auth"
 	"unify/internal/funcs"
+
 	"unify/validation"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Customer(c *gin.Context) {
+func TemporaryRegistration(c *gin.Context) {
+	//signup処理
+	//仮登録を行う。ここでの登録内容はUIDと作成日時だけ。
 	user := new(validation.User)
-	requestMethod := http.MethodGet
-	if user.Verify(c) {
-		switch request := requestMethod; request {
-		case "GET":
-			funcs.GetCustomer(c)
-		case "POST":
-			funcs.PostCustomer(c)
-		case "PATCH":
-			funcs.PatchCustomer(c)
-		case "DELETE":
-			funcs.DeleteCustomer(c)
-		}
+	if user.Verify(c) { //認証
+		funcs.SignUpCustomer(*user, c)
 	}
-
 }
 
-func Item(c *gin.Context) {
+func UserRegistration(c *gin.Context) {
+	//本登録処理
+	//本登録を行う。bodyにアカウントの詳細情報が入っている。
 	user := new(validation.User)
-	requestMethod := http.MethodGet
-	switch request := requestMethod; request {
-	case "GET":
-		funcs.GetItem(c)
+	if user.Verify(c) { //認証
+		funcs.RegisterCustomer(*user, c)
 	}
-	if user.Verify(c) {
-		switch request := requestMethod; request {
-		case "POST":
-			funcs.PostItem(c)
-		case "PATCH":
-			funcs.PatchItem(c)
-		case "DELETE":
-			funcs.DeleteItem(c)
-		}
-	}
+}
 
+func GetItem(c *gin.Context) {
+	id := c.Query("id")
+	funcs.GetItem(c, id)
+
+}
+func GetItemList(c *gin.Context) {
+	funcs.GetItemList(c)
 }
 
 func Transaction(c *gin.Context) {
 	requestMethod := http.MethodGet
 	switch request := requestMethod; request {
 	case "GET":
-		funcs.GetTransaction(c)
+		auth.GetTransaction(c)
 	case "POST":
-		funcs.PostTransaction(c)
+		auth.PostTransaction(c)
 	case "PATCH":
-		funcs.PatchTransaction(c)
+		auth.PatchTransaction(c)
 	case "DELETE":
-		funcs.DeleteTransaction(c)
-	}
-}
-
-func Authorized(c *gin.Context) {
-	requestMethod := http.MethodGet
-	switch request := requestMethod; request {
-	case "GET":
-		funcs.GetTransaction(c)
-	case "POST":
-		funcs.PostTransaction(c)
-	case "PATCH":
-		funcs.PatchTransaction(c)
-	case "DELETE":
-		funcs.DeleteTransaction(c)
+		auth.DeleteTransaction(c)
 	}
 }

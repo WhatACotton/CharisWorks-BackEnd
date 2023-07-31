@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type Item struct {
 	ID          string `json:"id"`
 	Price       int    `json:"price"`
@@ -13,15 +15,18 @@ type Item struct {
 
 type CustomerRequestPayload struct {
 	UID         string `json:"uid"`
-	CreatedDate string `json:"CreatedDate"`
-	Contact     string `json:"contact"`
+	CreatedDate time.Time
+	Email       string `json:"contact"`
 }
 type Customer struct {
-	UID         string `json:"UID"`
-	CreatedDate string `json:"CreatedDate"`
-	Name        string `json:"Name"`
-	Address     string `json:"address"`
-	Contact     string `json:"Contact"`
+	UID            string `json:"UID"`
+	CreatedDate    time.Time
+	Name           string `json:"Name"`
+	Address        string `json:"address"`
+	Email          string `json:"Contact"`
+	PhoneNumber    int    `json:"PhoneNumber"`
+	ModifiedDate   time.Time
+	RegisteredDate time.Time
 }
 
 type TransactionRequestPayload struct {

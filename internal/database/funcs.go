@@ -12,11 +12,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetDate() string {
+func GetDate() time.Time {
 	const template = "2006-01-02 15:04:05"
 	t := time.Now()
 	t.Format(template)
-	return t.String()
+	return t
 }
 
 func GettransactionId() string {

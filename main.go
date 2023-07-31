@@ -15,13 +15,15 @@ func main() {
 	validation.CORS(r)
 	authorized := validation.Basic(r)
 	database.TestSQL()
-	r.Handle(http.MethodGet, "/customer", handler.Customer)
+	r.POST("/SignUp", handler.TemporaryRegistration)
+	r.POST("/Registration", handler.UserRegistration)
 	r.Handle(http.MethodGet, "/transaction", handler.Transaction)
-	r.Handle(http.MethodGet, "/item", handler.Item)
+	r.GET("/item", handler.GetItem)
+	r.GET("/itemlist", handler.GetItemList)
 
-	authorized.Handle(http.MethodGet, "/customer", handler.Customer)
-	authorized.Handle(http.MethodGet, "/transaction", handler.Transaction)
-	authorized.Handle(http.MethodGet, "/item", handler.Item)
+	authorized.Handle(http.MethodGet, "/customer", handler.CustomerAuthorized)
+	authorized.Handle(http.MethodGet, "/transaction", handler.TransactionAuthorized)
+	authorized.Handle(http.MethodGet, "/item", handler.ItemAuthorized)
 	r.Run(":8080") // 0.0.0.0:8080 でサーバーを立てます。
 
 }
