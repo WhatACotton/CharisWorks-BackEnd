@@ -55,3 +55,21 @@ type Transaction struct {
 	IsFinished      bool   `json:"isFinished"`
 	TransactionDate time.Time
 }
+
+type Cart struct {
+	UID            string
+	ItemId         string
+	Quantity       int
+	CartId         string
+	RegisteredDate time.Time
+}
+
+type CartRequestPayload struct {
+	ItemId   string
+	Quantity int
+}
+
+type Session struct {
+	SessionId string
+	Date      time.Time
+}

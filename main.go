@@ -25,8 +25,9 @@ func main() {
 	r.POST("/Modify", handler.ModifyCustomer)
 	r.DELETE("/DeleteCustomer", handler.DeleteCustomer)
 
-	r.POST("/Cart", handler.PostCart)
-
+	r.POST("/LoggedInCart", handler.LoggedInPostCart)
+	//r.POST("/Cart", handler.PostCart)
+	r.POST("/sessionStart", handler.SessionStart)
 	r.Handle(http.MethodGet, "/transaction", handler.Transaction)
 
 	authorized.Handle(http.MethodGet, "/customer", handler.CustomerAuthorized)
