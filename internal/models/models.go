@@ -52,7 +52,7 @@ type Transaction struct {
 	Count           string `json:"count"`
 	IsFinished      bool   `json:"isFinished"`
 	TransactionDate string
-}実装
+}
 
 type Cart struct {
 	UID            string
