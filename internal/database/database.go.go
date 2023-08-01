@@ -12,11 +12,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetDate() time.Time {
-	const template = "2006-01-02 15:04:05"
+func GetDate() string {
 	t := time.Now()
-	t.Format(template)
-	return t
+	ft := t.Format("2006-01-02 15:04:05")
+	return ft
 }
 
 func GetUUID() string {

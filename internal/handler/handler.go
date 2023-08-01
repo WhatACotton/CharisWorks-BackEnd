@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"unify/internal/auth"
 	"unify/internal/database"
@@ -33,31 +32,25 @@ func Transaction(c *gin.Context) {
 func SessionStart(c *gin.Context) {
 	//registory := c.Request.Context()
 	session := c.Request.Cookies()
-	fmt.Println(session)
 	if len(session) == 0 {
 		SessionID := database.GetUUID()
 		validation.Generate(c.Writer, c.Request, SessionID)
 		funcs.StoreSession(SessionID)
 	} else {
-		SessionID := validation.GetSessionId(c.Writer, c.Request)
-		fmt.Println(SessionID)
+		_ = validation.GetSessionId(c.Writer, c.Request)
 	}
 }
 
-// func GetSessionID(c *gin.Context) (Session string) {
-// 	session := c.Request.Cookies()
-// 	fmt.Println(session)
-
-// 	if len(session) == 0 {
-// 		SessionID := database.GetUUID()
-// 		validation.Generate(c.Writer, c.Request, SessionID)
-// 		funcs.StoreSession(SessionID)
-// 		fmt.Println(SessionID, session)
-
-// 		return SessionID
-// 	} else {
-// 		SessionID := validation.GetSessionId(c.Writer, c.Request)
-// 		fmt.Println(SessionID)
-// 		return SessionID
-// 	}
-// }
+func GetsessionId(c *gin.Context) string {
+	//registory := c.Request.Context()
+	session := c.Request.Cookies()
+	if len(session) == 0 {
+		SessionID := database.GetUUID()
+		validation.Generate(c.Writer, c.Request, SessionID)
+		funcs.StoreSession(SessionID)
+		return SessionID
+	} else {
+		SessionID := validation.GetSessionId(c.Writer, c.Request)
+		return SessionID
+	}
+}

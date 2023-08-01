@@ -59,7 +59,7 @@ type Cart struct {
 	CartId         string
 	ItemId         string
 	Quantity       int
-	RegisteredDate []uint8
+	RegisteredDate string
 }
 
 type CartRequestPayload struct {

@@ -119,6 +119,12 @@ func GetSessionId(w http.ResponseWriter, r *http.Request) (sessionId string) {
 		return
 	}
 	sessionId = session.Values["session-id"].(string)
+	// Save it before we write to the response/return from the handler.
+	err = session.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	return sessionId
 }
 
