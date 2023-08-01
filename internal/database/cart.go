@@ -5,44 +5,46 @@ import (
 	"unify/internal/models"
 )
 
-func PostCart(req models.CartRequestPayload, uid string) (cart models.Cart) {
+func PostCart(req models.CartRequestPayload, uid string) (carts []models.Cart) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
 	// SQLの準備
 	//UID,ItemId,Quantity
 
-	ins, err := db.Prepare("INSERT INTO user VALUES(?,?,?,?,?)")
+	ins, err := db.Prepare("INSERT INTO cartlist VALUES(?,?,?,?,?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer ins.Close()
 	CartId := GetUUID()
 	// SQLの実行
-	_, err = ins.Exec(uid, req.ItemId, req.Quantity, CartId, GetDate())
+	_, err = ins.Exec(uid, CartId, req.ItemId, req.Quantity, GetDate())
 	if err != nil {
 		log.Fatal(err)
 	}
-	return GetCart(CartId)
+	return GetCart(uid)
 }
 
-func GetCart(CartId string) (Cart models.Cart) {
+func GetCart(uid string) (Carts []models.Cart) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
-
+	var Cart models.Cart
 	// SQLの実行
-	rows, err := db.Query("SELECT * FROM cartlist WHERE id = ?", CartId)
+	rows, err := db.Query("SELECT * FROM cartlist WHERE uid = ?", uid)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&Cart)
+		err := rows.Scan(&Cart.UID, &Cart.CartId, &Cart.ItemId, &Cart.Quantity, &Cart.RegisteredDate)
 		if err != nil {
 			panic(err.Error())
 		}
+		Carts = append(Carts, Cart)
 	}
-	return Cart
+
+	return Carts
 }

@@ -24,6 +24,16 @@ func GetUUID() string {
 	return uuidObj.String()
 }
 
+// []uint8型の値をtime.Time型に変換する
+func ConvertBytesToTime(b []uint8) time.Time {
+	str := string(b)
+	i, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return time.Time{}
+	}
+	return time.Unix(i, 0)
+}
+
 type PatchRequestPayload struct {
 	ID        string `json:"id"`
 	Attribute string `json:"attribute"`

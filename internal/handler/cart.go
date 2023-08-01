@@ -16,6 +16,6 @@ func LoggedInPostCart(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
 }
-func PostCartWithSession(c *gin.Context) {
-
+func PostCart(c *gin.Context) {
+	funcs.PostCartWithSession(c)
 }

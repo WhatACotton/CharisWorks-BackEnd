@@ -1,7 +1,6 @@
 package funcs
 
 import (
-	"time"
 	"unify/internal/database"
 )
 
@@ -9,6 +8,6 @@ func StoreSession(sessionId string) {
 	database.Storesession(sessionId)
 }
 
-func Getsession(sessionId string) (date time.Time) {
+func Getsession(sessionId string) (date []uint8) {
 	return database.Getsession(sessionId)
 }

@@ -15,14 +15,11 @@ var customers []models.Customer
 func SignUpCustomer(usr validation.User, c *gin.Context) {
 	//アカウント登録処理
 
-	//アカウント作成日時を取得
-	var CreatedDate = database.GetDate()
 	//新しいアカウントの構造体を作成
 	var newCustomer models.CustomerRequestPayload
 
 	newCustomer.UID = usr.Userdata.UID
 	newCustomer.Email = usr.Userdata.Email
-	newCustomer.CreatedDate = CreatedDate
 
 	//アカウント登録
 	res := database.SignUpCustomer(newCustomer)

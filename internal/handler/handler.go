@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"unify/internal/auth"
 	"unify/internal/database"
@@ -28,16 +29,35 @@ func Transaction(c *gin.Context) {
 		auth.PostTransaction(c)
 	}
 }
-func SessionStart(c *gin.Context) {
-	registory := c.Request.Context()
-	if registory.Value(registory) == nil {
-		sessionId := database.GetUUID()
-		validation.Generate(c.Writer, c.Request, sessionId)
-		//funcs.StoreSession(sessionId)
-	} else {
-		//sessionID := validation.GetSessionId(c.Writer, c.Request)
-		//ExpiredDate := funcs.Getsession(sessionID)
-		//c.JSON(http.StatusOK, sessionID)
 
+func SessionStart(c *gin.Context) {
+	//registory := c.Request.Context()
+	session := c.Request.Cookies()
+	fmt.Println(session)
+	if len(session) == 0 {
+		SessionID := database.GetUUID()
+		validation.Generate(c.Writer, c.Request, SessionID)
+		funcs.StoreSession(SessionID)
+	} else {
+		SessionID := validation.GetSessionId(c.Writer, c.Request)
+		fmt.Println(SessionID)
 	}
 }
+
+// func GetSessionID(c *gin.Context) (Session string) {
+// 	session := c.Request.Cookies()
+// 	fmt.Println(session)
+
+// 	if len(session) == 0 {
+// 		SessionID := database.GetUUID()
+// 		validation.Generate(c.Writer, c.Request, SessionID)
+// 		funcs.StoreSession(SessionID)
+// 		fmt.Println(SessionID, session)
+
+// 		return SessionID
+// 	} else {
+// 		SessionID := validation.GetSessionId(c.Writer, c.Request)
+// 		fmt.Println(SessionID)
+// 		return SessionID
+// 	}
+// }

@@ -2,7 +2,6 @@ package database
 
 import (
 	"log"
-	"time"
 	"unify/internal/models"
 )
 
@@ -24,23 +23,23 @@ func Storesession(sessionId string) {
 		log.Fatal(err)
 	}
 }
-func Getsession(sessionId string) (SessionDate time.Time) {
+func Getsession(sessionId string) (SessionDate []uint8) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
 	// SQLの実行
-	rows, err := db.Query("SELECT * FROM user WHERE sessionId = ?", sessionId)
+	rows, err := db.Query("SELECT * FROM session WHERE sessionid = ?", sessionId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	var Customer models.Session
+	var Session models.Session
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&Customer)
+		err := rows.Scan(&Session.SessionId, &Session.Date)
 		if err != nil {
 			panic(err.Error())
 		}
 	}
-	return Customer.Date
+	return Session.Date
 }

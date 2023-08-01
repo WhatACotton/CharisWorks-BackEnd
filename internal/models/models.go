@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type Item struct {
 	ID          string `json:"id"`
 	Price       int    `json:"price"`
@@ -16,7 +14,7 @@ type Item struct {
 type CustomerRequestPayload struct {
 	UID         string `json:"uid"`
 	Email       string `json:"contact"`
-	CreatedDate time.Time
+	CreatedDate []uint8
 }
 type CustomerRegisterPayload struct {
 	Name        string `json:"Name"`
@@ -31,15 +29,15 @@ type Customer struct {
 	Email          string `json:"Contact"`
 	PhoneNumber    int    `json:"PhoneNumber"`
 	Register       bool
-	CreatedDate    time.Time
-	ModifiedDate   time.Time
-	RegisteredDate time.Time
-	LastLogInDate  time.Time
+	CreatedDate    []uint8
+	ModifiedDate   []uint8
+	RegisteredDate []uint8
+	LastLogInDate  []uint8
 }
 type LogInLog struct {
 	UID     string
 	LoginId string
-	Login   time.Time
+	Login   []uint8
 }
 
 type TransactionRequestPayload struct {
@@ -53,23 +51,23 @@ type Transaction struct {
 	TransactionId   string `json:"transactionId"`
 	Count           string `json:"count"`
 	IsFinished      bool   `json:"isFinished"`
-	TransactionDate time.Time
+	TransactionDate []uint8
 }
 
 type Cart struct {
 	UID            string
+	CartId         string
 	ItemId         string
 	Quantity       int
-	CartId         string
-	RegisteredDate time.Time
+	RegisteredDate []uint8
 }
 
 type CartRequestPayload struct {
-	ItemId   string
-	Quantity int
+	ItemId   string `json:"itemid"`
+	Quantity int    `json:"quantity"`
 }
 
 type Session struct {
 	SessionId string
-	Date      time.Time
+	Date      []uint8
 }

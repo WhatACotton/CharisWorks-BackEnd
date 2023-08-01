@@ -101,7 +101,7 @@ func Generate(w http.ResponseWriter, r *http.Request, uuid string) {
 		return
 	}
 	// Set some session values.
-	session.Values["sessionID"] = uuid
+	session.Values["session-id"] = uuid
 
 	// Save it before we write to the response/return from the handler.
 	err = session.Save(r, w)
@@ -110,6 +110,7 @@ func Generate(w http.ResponseWriter, r *http.Request, uuid string) {
 		return
 	}
 }
+
 func GetSessionId(w http.ResponseWriter, r *http.Request) (sessionId string) {
 	// Get a session. Get() always returns a session, even if empty.
 	session, err := store.Get(r, "session-name")
@@ -117,7 +118,7 @@ func GetSessionId(w http.ResponseWriter, r *http.Request) (sessionId string) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	sessionId = session.Values["sessionID"].(string)
+	sessionId = session.Values["session-id"].(string)
 	return sessionId
 }
 

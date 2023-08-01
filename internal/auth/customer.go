@@ -12,12 +12,10 @@ import (
 var customers []models.Customer
 
 func PostCustomer(c *gin.Context) {
-	var CreatedDate = database.GetDate()
 	var newCustomer models.CustomerRequestPayload
 	if err := c.BindJSON(&newCustomer); err != nil {
 		return
 	}
-	newCustomer.CreatedDate = CreatedDate
 	res := database.SignUpCustomer(newCustomer)
 	c.IndentedJSON(http.StatusOK, res)
 }
