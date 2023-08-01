@@ -2,49 +2,55 @@ package handler
 
 import (
 	"net/http"
+	"unify/internal/auth"
+	"unify/internal/database"
 	"unify/internal/funcs"
+	"unify/validation"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Customer(c *gin.Context) {
-	requestMethod := http.MethodGet
-	switch request := requestMethod; request {
-	case "GET":
-		funcs.GetCustomer(c)
-	case "POST":
-		funcs.PostCustomer(c)
-	case "PATCH":
-		funcs.PatchCustomer(c)
-	case "DELETE":
-		funcs.DeleteCustomer(c)
-	}
+func GetItem(c *gin.Context) {
+	id := c.Query("id")
+	funcs.GetItem(c, id)
 }
 
-func Item(c *gin.Context) {
-	requestMethod := http.MethodGet
-	switch request := requestMethod; request {
-	case "GET":
-		funcs.GetItem(c)
-	case "POST":
-		funcs.PostItem(c)
-	case "PATCH":
-		funcs.PatchItem(c)
-	case "DELETE":
-		funcs.DeleteItem(c)
-	}
+func GetItemList(c *gin.Context) {
+	funcs.GetItemList(c)
 }
 
 func Transaction(c *gin.Context) {
 	requestMethod := http.MethodGet
 	switch request := requestMethod; request {
 	case "GET":
-		funcs.GetTransaction(c)
+		auth.GetTransaction(c)
 	case "POST":
-		funcs.PostTransaction(c)
-	case "PATCH":
-		funcs.PatchTransaction(c)
-	case "DELETE":
-		funcs.DeleteTransaction(c)
+		auth.PostTransaction(c)
+	}
+}
+
+func SessionStart(c *gin.Context) {
+	//registory := c.Request.Context()
+	session := c.Request.Cookies()
+	if len(session) == 0 {
+		SessionID := database.GetUUID()
+		validation.Generate(c.Writer, c.Request, SessionID)
+		funcs.StoreSession(SessionID)
+	} else {
+		_ = validation.GetSessionId(c.Writer, c.Request)
+	}
+}
+
+func GetsessionId(c *gin.Context) string {
+	//registory := c.Request.Context()
+	session := c.Request.Cookies()
+	if len(session) == 0 {
+		SessionID := database.GetUUID()
+		validation.Generate(c.Writer, c.Request, SessionID)
+		funcs.StoreSession(SessionID)
+		return SessionID
+	} else {
+		SessionID := validation.GetSessionId(c.Writer, c.Request)
+		return SessionID
 	}
 }

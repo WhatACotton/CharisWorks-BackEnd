@@ -7,20 +7,32 @@ import (
 	"unify/validation"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
 
 	r := gin.Default()
 	validation.CORS(r)
+	authorized := validation.Basic(r)
 	database.TestSQL()
-	user := new(validation.User)
-	r.POST("/validation", user.Verify)
-	r.Handle(http.MethodGet, "/customer", handler.Customer)
-	r.Handle(http.MethodGet, "/transaction", handler.Transaction)
-	r.Handle(http.MethodGet, "/item", handler.Item)
 
+	r.GET("/item", handler.GetItem)
+	r.GET("/itemlist", handler.GetItemList)
+
+	r.GET("/Login", handler.LogIn)
+	r.POST("/SignUp", handler.TemporarySignUp)
+	r.POST("/Registration", handler.SignUp)
+	r.POST("/Modify", handler.ModifyCustomer)
+	r.DELETE("/DeleteCustomer", handler.DeleteCustomer)
+
+	r.POST("/LoggedInCart", handler.LoggedInPostCart)
+	r.POST("/PostSessionCart", handler.PostCart)
+	r.POST("/sessionStart", handler.SessionStart)
+	r.Handle(http.MethodGet, "/transaction", handler.Transaction)
+
+	authorized.Handle(http.MethodGet, "/customer", handler.CustomerAuthorized)
+	authorized.Handle(http.MethodGet, "/transaction", handler.TransactionAuthorized)
+	authorized.Handle(http.MethodGet, "/item", handler.ItemAuthorized)
 	r.Run(":8080") // 0.0.0.0:8080 でサーバーを立てます。
 
 }

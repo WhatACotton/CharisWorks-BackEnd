@@ -1,4 +1,4 @@
-package funcs
+package auth
 
 import (
 	"net/http"
@@ -17,6 +17,15 @@ func PostTransaction(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, res)
 }
 
+func PatchTransaction(c *gin.Context) {
+	h := new(database.PatchRequestPayload)
+	if err := c.BindJSON(&h); err != nil {
+		return
+	}
+	h.Patch("transaction", "transactionid")
+	c.JSON(http.StatusOK, database.GetItemList())
+}
+
 func GetTransaction(c *gin.Context) {
 	transactionId := c.Query("transactionId")
 	var response = database.GetTransaction(transactionId)
@@ -25,4 +34,10 @@ func GetTransaction(c *gin.Context) {
 		return
 	}
 	c.IndentedJSON(http.StatusOK, response)
+}
+
+func DeleteTransaction(c *gin.Context) {
+	transactionid := c.Query("transactionid")
+	database.Delete("transaction", "ID", transactionid)
+	c.JSON(http.StatusOK, gin.H{"message": "transaction was successfully deleted"})
 }

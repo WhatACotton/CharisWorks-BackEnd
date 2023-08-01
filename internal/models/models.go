@@ -13,15 +13,31 @@ type Item struct {
 
 type CustomerRequestPayload struct {
 	UID         string `json:"uid"`
-	CreatedDate string `json:"CreatedDate"`
-	Contact     string `json:"contact"`
+	Email       string `json:"contact"`
+	CreatedDate []uint8
 }
-type Customer struct {
-	UID         string `json:"UID"`
-	CreatedDate string `json:"CreatedDate"`
+type CustomerRegisterPayload struct {
 	Name        string `json:"Name"`
 	Address     string `json:"address"`
-	Contact     string `json:"Contact"`
+	Email       string `json:"Contact"`
+	PhoneNumber int    `json:"PhoneNumber"`
+}
+type Customer struct {
+	UID            string `json:"UID"`
+	Name           string `json:"Name"`
+	Address        string `json:"address"`
+	Email          string `json:"Contact"`
+	PhoneNumber    int    `json:"PhoneNumber"`
+	Register       bool
+	CreatedDate    []uint8
+	ModifiedDate   []uint8
+	RegisteredDate []uint8
+	LastLogInDate  []uint8
+}
+type LogInLog struct {
+	UID     string
+	LoginId string
+	Login   []uint8
 }
 
 type TransactionRequestPayload struct {
@@ -33,7 +49,25 @@ type Transaction struct {
 	UID             string `json:"UID"`
 	ItemId          string `json:"itemid"`
 	TransactionId   string `json:"transactionId"`
-	TransactionDate string `json:"transactionDate"`
 	Count           string `json:"count"`
 	IsFinished      bool   `json:"isFinished"`
+	TransactionDate []uint8
+}
+
+type Cart struct {
+	UID            string
+	CartId         string
+	ItemId         string
+	Quantity       int
+	RegisteredDate string
+}
+
+type CartRequestPayload struct {
+	ItemId   string `json:"itemid"`
+	Quantity int    `json:"quantity"`
+}
+
+type Session struct {
+	SessionId string
+	Date      []uint8
 }

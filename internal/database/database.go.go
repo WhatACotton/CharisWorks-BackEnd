@@ -13,15 +13,24 @@ import (
 )
 
 func GetDate() string {
-	const template = "2006-01-02 15:04:05"
 	t := time.Now()
-	t.Format(template)
-	return t.String()
+	ft := t.Format("2006-01-02 15:04:05")
+	return ft
 }
 
-func GettransactionId() string {
+func GetUUID() string {
 	uuidObj, _ := uuid.NewUUID()
 	return uuidObj.String()
+}
+
+// []uint8型の値をtime.Time型に変換する
+func ConvertBytesToTime(b []uint8) time.Time {
+	str := string(b)
+	i, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return time.Time{}
+	}
+	return time.Unix(i, 0)
 }
 
 type PatchRequestPayload struct {

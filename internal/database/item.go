@@ -54,15 +54,7 @@ func GetItemList() (Itemlist []models.Item) {
 	var resultItemList []models.Item
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(
-			&resultItem.ID,
-			&resultItem.Price,
-			&resultItem.Name,
-			&resultItem.Stonesize,
-			&resultItem.Minlength,
-			&resultItem.Maxlength,
-			&resultItem.Decsription,
-			&resultItem.Keyword)
+		err := rows.Scan(&resultItem.ID, &resultItem.Price, &resultItem.Name, &resultItem.Stonesize, &resultItem.Minlength, &resultItem.Maxlength, &resultItem.Decsription, &resultItem.Keyword)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -85,15 +77,7 @@ func GetItem(id string) (returnmodels models.Item) {
 	var resultItem models.Item
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(
-			&resultItem.ID,
-			&resultItem.Price,
-			&resultItem.Name,
-			&resultItem.Stonesize,
-			&resultItem.Minlength,
-			&resultItem.Maxlength,
-			&resultItem.Decsription,
-			&resultItem.Keyword)
+		err := rows.Scan(&resultItem.ID, &resultItem.Price, &resultItem.Name, &resultItem.Stonesize, &resultItem.Minlength, &resultItem.Maxlength, &resultItem.Decsription, &resultItem.Keyword)
 		if err != nil {
 			panic(err.Error())
 		}
