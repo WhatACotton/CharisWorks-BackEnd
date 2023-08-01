@@ -1,6 +1,7 @@
 package database
 
 import (
+	"html"
 	"log"
 	"unify/internal/models"
 	"unify/validation"
@@ -47,7 +48,7 @@ func RegisterCustomer(usr validation.User, customer models.CustomerRegisterPaylo
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(customer.Name, customer.Address, customer.PhoneNumber, true, GetDate(), usr.Userdata.UID)
+	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.Address), customer.PhoneNumber, true, GetDate(), usr.Userdata.UID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,7 +75,7 @@ func ModifyCustomer(usr validation.User, customer models.CustomerRegisterPayload
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(customer.Name, customer.Address, customer.PhoneNumber, true, GetDate(), usr.Userdata.UID)
+	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.Address), customer.PhoneNumber, true, GetDate(), usr.Userdata.UID)
 	if err != nil {
 		log.Fatal(err)
 	}

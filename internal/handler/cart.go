@@ -20,3 +20,7 @@ func PostCart(c *gin.Context) {
 	SessionId := GetsessionId(c)
 	funcs.PostCartWithSession(c, SessionId)
 }
+func GetCart(c *gin.Context) {
+	SessionId := GetsessionId(c)
+	funcs.GetCartWithSession(c, SessionId)
+}

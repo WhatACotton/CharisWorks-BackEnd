@@ -37,7 +37,7 @@ type Customer struct {
 type LogInLog struct {
 	UID     string
 	LoginId string
-	Login   []uint8
+	Login   string
 }
 
 type TransactionRequestPayload struct {

@@ -9,17 +9,17 @@ import (
 )
 
 func PostTransaction(c *gin.Context) {
-	var newCustomer models.TransactionRequestPayload
+	newCustomer := new(models.TransactionRequestPayload)
 	if err := c.BindJSON(&newCustomer); err != nil {
 		return
 	}
-	res := database.PostTransaction(newCustomer)
+	res := database.PostTransaction(*newCustomer)
 	c.IndentedJSON(http.StatusOK, res)
 }
 
 func GetTransaction(c *gin.Context) {
 	transactionId := c.Query("transactionId")
-	var response = database.GetTransaction(transactionId)
+	response := database.GetTransaction(transactionId)
 	if response.UID == "" {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "customer not found"})
 		return

@@ -16,13 +16,13 @@ func SignUpCustomer(usr validation.User, c *gin.Context) {
 	//アカウント登録処理
 
 	//新しいアカウントの構造体を作成
-	var newCustomer models.CustomerRequestPayload
+	newCustomer := new(models.CustomerRequestPayload)
 
 	newCustomer.UID = usr.Userdata.UID
 	newCustomer.Email = usr.Userdata.Email
 
 	//アカウント登録
-	res := database.SignUpCustomer(newCustomer)
+	res := database.SignUpCustomer(*newCustomer)
 
 	c.IndentedJSON(http.StatusOK, res)
 }
@@ -63,7 +63,7 @@ func LogIn(usr validation.User, c *gin.Context) {
 
 func GetCustomer(c *gin.Context) (err int) {
 	uid := c.Query("uid")
-	var response = database.GetCustomer(uid)
+	response := database.GetCustomer(uid)
 	if response.UID == "" {
 		return http.StatusNotFound
 	}
