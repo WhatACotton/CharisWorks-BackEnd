@@ -33,6 +33,7 @@ type Customer struct {
 	ModifiedDate   string
 	RegisteredDate string
 	LastLogInDate  string
+	LastSessionId  string
 }
 type LogInLog struct {
 	UID     string

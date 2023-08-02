@@ -57,8 +57,8 @@ func DeleteCustomer(usr validation.User, c *gin.Context) {
 	}
 }
 
-func LogIn(usr validation.User, c *gin.Context) {
-	c.JSON(http.StatusOK, database.LogInCustomer(usr.Userdata.UID))
+func LogIn(usr validation.User, SessionId string, c *gin.Context) {
+	c.JSON(http.StatusOK, database.LogInCustomer(usr.Userdata.UID, SessionId))
 }
 
 func GetCustomer(c *gin.Context) (err int) {

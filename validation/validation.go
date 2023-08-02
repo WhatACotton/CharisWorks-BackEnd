@@ -51,6 +51,7 @@ func (user User) Verify(c *gin.Context) (authorized bool) {
 	return authorized
 }
 
+// ベーシック認証周りの設定
 func Basic(r *gin.Engine) (routergroup *gin.RouterGroup) {
 	authorized := r.Group("/admin", gin.BasicAuth(gin.Accounts{
 		os.Getenv("AUTH_USER"): os.Getenv("AUTH_PASS"),
@@ -58,6 +59,7 @@ func Basic(r *gin.Engine) (routergroup *gin.RouterGroup) {
 	return authorized
 }
 
+// CORSの設定
 func CORS(r *gin.Engine) {
 	r.Use(cors.New(cors.Config{
 		// アクセス許可するオリジン
@@ -93,16 +95,16 @@ func CORS(r *gin.Engine) {
 // Ensure SESSION_KEY exists in the environment, or sessions will fail.
 var store = sessions.NewCookieStore([]byte(GenerateRandomKey()))
 
-func Generate(w http.ResponseWriter, r *http.Request, uuid string) {
+// SessionKeyをcookieに保存する。SessionIDは引き継ぐ。
+func Generate(w http.ResponseWriter, r *http.Request, SessionID string) {
 	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, "session-name")
+	session, err := store.Get(r, "sessionkey")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// Set some session values.
-	session.Values["session-id"] = uuid
-
+	session.Values["session-id"] = SessionID
 	// Save it before we write to the response/return from the handler.
 	err = session.Save(r, w)
 	if err != nil {
@@ -111,9 +113,10 @@ func Generate(w http.ResponseWriter, r *http.Request, uuid string) {
 	}
 }
 
+// SessionIDを取得する。SessionKeyはRequestのcookieの中に入っている。
 func GetSessionId(w http.ResponseWriter, r *http.Request) (sessionId string) {
 	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, "session-name")
+	session, err := store.Get(r, "sessionkey")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -128,6 +131,7 @@ func GetSessionId(w http.ResponseWriter, r *http.Request) (sessionId string) {
 	return sessionId
 }
 
+// SessionKeyの発行
 func GenerateRandomKey() (sessionKey string) {
 	// 32バイトのランダムなバイト列を生成する
 	key := make([]byte, 32)

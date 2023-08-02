@@ -34,7 +34,8 @@ func LogIn(c *gin.Context) {
 	//LogIn処理
 	user := new(validation.User)
 	if user.Verify(c) { //認証
-		funcs.LogIn(*user, c)
+		SessionId := GetsessionId(c)
+		funcs.LogIn(*user, SessionId, c)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
