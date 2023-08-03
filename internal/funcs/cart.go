@@ -10,17 +10,20 @@ import (
 )
 
 func PostCartLoggedIn(usr validation.User, c *gin.Context) {
-	var newCartReq models.CartRequestPayload
+	newCartReq := new(models.CartRequestPayload)
 	if err := c.BindJSON(&newCartReq); err != nil {
 		return
 	}
-	c.JSON(http.StatusOK, database.PostCart(newCartReq, usr.Userdata.UID))
+	c.JSON(http.StatusOK, database.PostCart(*newCartReq, usr.Userdata.UID))
 }
 
 func PostCartWithSession(c *gin.Context, SessionId string) {
-	var newCartReq models.CartRequestPayload
+	newCartReq := new(models.CartRequestPayload)
 	if err := c.BindJSON(&newCartReq); err != nil {
 		return
 	}
-	c.JSON(http.StatusOK, database.PostCart(newCartReq, SessionId))
+	c.JSON(http.StatusOK, database.PostCart(*newCartReq, SessionId))
+}
+func GetCartWithSession(c *gin.Context, SessionId string) {
+	c.JSON(http.StatusOK, database.GetCart(SessionId))
 }

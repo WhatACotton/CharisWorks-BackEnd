@@ -16,7 +16,7 @@ func PostCustomer(c *gin.Context) {
 	if err := c.BindJSON(&newCustomer); err != nil {
 		return
 	}
-	res := database.SignUpCustomer(newCustomer)
+	res := database.SignUpCustomer(newCustomer, "")
 	c.IndentedJSON(http.StatusOK, res)
 }
 

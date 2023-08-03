@@ -23,7 +23,7 @@ func Storesession(sessionId string) {
 		log.Fatal(err)
 	}
 }
-func Getsession(sessionId string) (SessionDate []uint8) {
+func Getsession(sessionId string) (SessionDate string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 

@@ -14,7 +14,7 @@ type Item struct {
 type CustomerRequestPayload struct {
 	UID         string `json:"uid"`
 	Email       string `json:"contact"`
-	CreatedDate []uint8
+	CreatedDate string
 }
 type CustomerRegisterPayload struct {
 	Name        string `json:"Name"`
@@ -29,15 +29,16 @@ type Customer struct {
 	Email          string `json:"Contact"`
 	PhoneNumber    int    `json:"PhoneNumber"`
 	Register       bool
-	CreatedDate    []uint8
-	ModifiedDate   []uint8
-	RegisteredDate []uint8
-	LastLogInDate  []uint8
+	CreatedDate    string
+	ModifiedDate   string
+	RegisteredDate string
+	LastLogInDate  string
+	LastSessionId  string
 }
 type LogInLog struct {
 	UID     string
 	LoginId string
-	Login   []uint8
+	Login   string
 }
 
 type TransactionRequestPayload struct {
@@ -51,7 +52,7 @@ type Transaction struct {
 	TransactionId   string `json:"transactionId"`
 	Count           string `json:"count"`
 	IsFinished      bool   `json:"isFinished"`
-	TransactionDate []uint8
+	TransactionDate string
 }
 
 type Cart struct {
@@ -69,5 +70,5 @@ type CartRequestPayload struct {
 
 type Session struct {
 	SessionId string
-	Date      []uint8
+	Date      string
 }

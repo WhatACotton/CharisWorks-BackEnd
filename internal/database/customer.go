@@ -1,12 +1,13 @@
 package database
 
 import (
+	"html"
 	"log"
 	"unify/internal/models"
 	"unify/validation"
 )
 
-func SignUpCustomer(req models.CustomerRequestPayload) (res models.Customer) {
+func SignUpCustomer(req models.CustomerRequestPayload, SessionID string) (res models.Customer) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -47,7 +48,7 @@ func RegisterCustomer(usr validation.User, customer models.CustomerRegisterPaylo
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(customer.Name, customer.Address, customer.PhoneNumber, true, GetDate(), usr.Userdata.UID)
+	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.Address), customer.PhoneNumber, true, GetDate(), usr.Userdata.UID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,14 +75,14 @@ func ModifyCustomer(usr validation.User, customer models.CustomerRegisterPayload
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(customer.Name, customer.Address, customer.PhoneNumber, true, GetDate(), usr.Userdata.UID)
+	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.Address), customer.PhoneNumber, true, GetDate(), usr.Userdata.UID)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return GetCustomer(usr.Userdata.UID)
 }
 
-func LogInCustomer(uid string) (res models.Customer) {
+func LogInCustomer(uid string, SessionId string) (res models.Customer) {
 	LogInTimeStamp(uid)
 	LogInLog(uid)
 	db := ConnectSQL()
@@ -123,7 +124,7 @@ func LogInLog(uid string) {
 	// SQLの準備
 	//UID,Name,Address,Email,PhoneNumber,Register,CreatedDate,ModifiedDate,RegisteredDate,LastLogInDate
 
-	ins, err := db.Prepare("INSERT INTO user VALUES(?,?,?)")
+	ins, err := db.Prepare("INSERT INTO loginlog VALUES(?,?,?)")
 	if err != nil {
 		log.Fatal(err)
 	}

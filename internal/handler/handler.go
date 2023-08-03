@@ -36,8 +36,6 @@ func SessionStart(c *gin.Context) {
 		SessionID := database.GetUUID()
 		validation.Generate(c.Writer, c.Request, SessionID)
 		funcs.StoreSession(SessionID)
-	} else {
-		_ = validation.GetSessionId(c.Writer, c.Request)
 	}
 }
 

@@ -27,6 +27,7 @@ func main() {
 
 	r.POST("/LoggedInCart", handler.LoggedInPostCart)
 	r.POST("/PostSessionCart", handler.PostCart)
+	r.GET("/GetSessionCart", handler.GetCart)
 	r.POST("/sessionStart", handler.SessionStart)
 	r.Handle(http.MethodGet, "/transaction", handler.Transaction)
 
