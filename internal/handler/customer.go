@@ -13,7 +13,6 @@ func TemporarySignUp(c *gin.Context) {
 	//仮登録を行う。ここでの登録内容はUIDと作成日時だけ。
 	user := new(validation.User)
 	if user.Verify(c) { //認証
-		funcs.SignUpCustomer(*user, c)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
 	}
@@ -34,8 +33,6 @@ func LogIn(c *gin.Context) {
 	//LogIn処理
 	user := new(validation.User)
 	if user.Verify(c) { //認証
-		SessionId := GetsessionId(c)
-		funcs.LogIn(*user, SessionId, c)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}

@@ -20,6 +20,7 @@ func main() {
 	r.GET("/itemlist", handler.GetItemList)
 
 	r.GET("/Login", handler.LogIn)
+	//r.GET("/SessionRestart", handler.SessionRestart)
 	r.POST("/SignUp", handler.TemporarySignUp)
 	r.POST("/Registration", handler.SignUp)
 	r.POST("/Modify", handler.ModifyCustomer)
@@ -28,7 +29,7 @@ func main() {
 	r.POST("/LoggedInCart", handler.LoggedInPostCart)
 	r.POST("/PostSessionCart", handler.PostCart)
 	r.GET("/GetSessionCart", handler.GetCart)
-	r.POST("/sessionStart", handler.SessionStart)
+	//r.GET("/DeleteSession", handler.DeleteLoginSession)
 	r.Handle(http.MethodGet, "/transaction", handler.Transaction)
 
 	authorized.Handle(http.MethodGet, "/customer", handler.CustomerAuthorized)

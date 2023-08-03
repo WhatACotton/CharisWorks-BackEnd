@@ -13,7 +13,6 @@ import (
 	"firebase.google.com/go/auth"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/sessions"
 	"google.golang.org/api/option"
 )
 
@@ -86,49 +85,6 @@ func CORS(r *gin.Engine) {
 		// preflightリクエストの結果をキャッシュする時間
 		MaxAge: 24 * time.Hour,
 	}))
-}
-
-// Note: Don't store your key in your source code. Pass it via an
-// environmental variable, or flag (or both), and don't accidentally commit it
-// alongside your code. Ensure your key is sufficiently random - i.e. use Go's
-// crypto/rand or securecookie.GenerateRandomKey(32) and persist the result.
-// Ensure SESSION_KEY exists in the environment, or sessions will fail.
-var store = sessions.NewCookieStore([]byte(GenerateRandomKey()))
-
-// SessionKeyをcookieに保存する。SessionIDは引き継ぐ。
-func Generate(w http.ResponseWriter, r *http.Request, SessionID string) {
-	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, "sessionkey")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// Set some session values.
-	session.Values["session-id"] = SessionID
-	// Save it before we write to the response/return from the handler.
-	err = session.Save(r, w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-// SessionIDを取得する。SessionKeyはRequestのcookieの中に入っている。
-func GetSessionId(w http.ResponseWriter, r *http.Request) (sessionId string) {
-	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, "sessionkey")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	sessionId = session.Values["session-id"].(string)
-	// Save it before we write to the response/return from the handler.
-	err = session.Save(r, w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	return sessionId
 }
 
 // SessionKeyの発行

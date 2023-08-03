@@ -21,7 +21,7 @@ func SignUpCustomer(req models.CustomerRequestPayload, SessionID string) (res mo
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(req.UID, nil, nil, req.Email, nil, false, GetDate(), nil, nil, nil)
+	_, err = ins.Exec(req.UID, nil, nil, req.Email, nil, false, GetDate(), nil, nil, nil, SessionID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,8 +95,8 @@ func LogInCustomer(uid string, SessionId string) (res models.Customer) {
 	var Customer models.Customer
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&Customer)
-		//err := rows.Scan(&Customer.UID, &Customer.CreatedDate, &Customer.Name, &Customer.Email, &Customer.Address, &Customer.PhoneNumber)
+		//err := rows.Scan(&Customer)
+		err := rows.Scan(&Customer.UID, &Customer.CreatedDate, &Customer.Name, &Customer.Email, &Customer.Address, &Customer.PhoneNumber, &Customer.LastSessionId)
 		if err != nil {
 			panic(err.Error())
 		}

@@ -12,7 +12,7 @@ import (
 
 var customers []models.Customer
 
-func SignUpCustomer(usr validation.User, c *gin.Context) {
+func SignUpCustomer(usr validation.User, SessionID string, c *gin.Context) {
 	//アカウント登録処理
 
 	//新しいアカウントの構造体を作成
@@ -22,7 +22,7 @@ func SignUpCustomer(usr validation.User, c *gin.Context) {
 	newCustomer.Email = usr.Userdata.Email
 
 	//アカウント登録
-	res := database.SignUpCustomer(*newCustomer)
+	res := database.SignUpCustomer(*newCustomer, SessionID)
 
 	c.IndentedJSON(http.StatusOK, res)
 }
@@ -69,4 +69,9 @@ func GetCustomer(c *gin.Context) (err int) {
 	}
 	c.JSON(http.StatusOK, response)
 	return http.StatusOK
+}
+
+func GetCustomerSessionId(uid string) string {
+	Customer := database.GetCustomer(uid)
+	return Customer.LastSessionId
 }

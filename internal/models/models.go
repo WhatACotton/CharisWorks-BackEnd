@@ -32,13 +32,12 @@ type Customer struct {
 	CreatedDate    string
 	ModifiedDate   string
 	RegisteredDate string
-	LastLogInDate  string
 	LastSessionId  string
 }
 type LogInLog struct {
-	UID     string
-	LoginId string
-	Login   string
+	UID       string
+	LoginId   string
+	LoginDate string
 }
 
 type TransactionRequestPayload struct {
