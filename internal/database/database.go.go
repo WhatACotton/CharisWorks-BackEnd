@@ -9,18 +9,12 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/google/uuid"
 )
 
 func GetDate() string {
 	t := time.Now()
 	ft := t.Format("2006-01-02 15:04:05")
 	return ft
-}
-
-func GetUUID() string {
-	uuidObj, _ := uuid.NewUUID()
-	return uuidObj.String()
 }
 
 // []uint8型の値をtime.Time型に変換する

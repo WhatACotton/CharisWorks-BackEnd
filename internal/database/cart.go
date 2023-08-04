@@ -3,6 +3,7 @@ package database
 import (
 	"log"
 	"unify/internal/models"
+	"unify/validation"
 )
 
 func PostCart(req models.CartRequestPayload, uid string) (carts []models.Cart) {
@@ -17,7 +18,7 @@ func PostCart(req models.CartRequestPayload, uid string) (carts []models.Cart) {
 		log.Fatal(err)
 	}
 	defer ins.Close()
-	CartId := GetUUID()
+	CartId := validation.GetUUID()
 	// SQLの実行
 	_, err = ins.Exec(uid, CartId, req.ItemId, req.Quantity, GetDate())
 	if err != nil {

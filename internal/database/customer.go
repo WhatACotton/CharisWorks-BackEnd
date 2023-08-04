@@ -131,7 +131,7 @@ func LogInLog(uid string) {
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(uid, GetUUID(), GetDate())
+	_, err = ins.Exec(uid, validation.GetUUID(), GetDate())
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -3,6 +3,7 @@ package database
 import (
 	"log"
 	"unify/internal/models"
+	"unify/validation"
 )
 
 func PostTransaction(req models.TransactionRequestPayload) (res models.Transaction) {
@@ -11,7 +12,7 @@ func PostTransaction(req models.TransactionRequestPayload) (res models.Transacti
 	defer db.Close()
 
 	TransactionDate := GetDate()
-	TransactionId := GetUUID()
+	TransactionId := validation.GetUUID()
 	// SQLの準備
 	ins, err := db.Prepare("INSERT INTO transaction VALUES(?,?,?,?,?,?)")
 	if err != nil {

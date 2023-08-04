@@ -11,13 +11,18 @@ import (
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
+	"github.com/alexedwards/scs/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"google.golang.org/api/option"
 )
 
 type User struct {
 	Userdata auth.UserRecord
+}
+type SessionManager struct {
+	Session *scs.SessionManager
 }
 
 func (user User) Verify(c *gin.Context) (authorized bool) {
@@ -98,4 +103,8 @@ func GenerateRandomKey() (sessionKey string) {
 	// バイト列をBase64エンコードして、文字列に変換する
 	sessionKey = base64.URLEncoding.EncodeToString(key)
 	return
+}
+func GetUUID() string {
+	uuidObj, _ := uuid.NewUUID()
+	return uuidObj.String()
 }

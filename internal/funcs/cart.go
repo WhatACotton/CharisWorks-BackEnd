@@ -17,13 +17,13 @@ func PostCartLoggedIn(usr validation.User, c *gin.Context) {
 	c.JSON(http.StatusOK, database.PostCart(*newCartReq, usr.Userdata.UID))
 }
 
-func PostCartWithSession(c *gin.Context) {
-	newCartReq := new(models.CartRequestPayload)
-	if err := c.BindJSON(&newCartReq); err != nil {
-		return
-	}
-	c.JSON(http.StatusOK, database.PostCart(*newCartReq))
-}
+//	func PostCartWithSession(c *gin.Context) {
+//		newCartReq := new(models.CartRequestPayload)
+//		if err := c.BindJSON(&newCartReq); err != nil {
+//			return
+//		}
+//		c.JSON(http.StatusOK, database.PostCart(*newCartReq))
+//	}
 func GetCartWithSession(c *gin.Context) {
-	c.JSON(http.StatusOK)
+
 }
