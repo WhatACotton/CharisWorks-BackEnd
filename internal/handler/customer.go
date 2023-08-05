@@ -59,15 +59,18 @@ func LogIn(c *gin.Context) {
 
 func ContinueLogIn(c *gin.Context) {
 	OldSessionKey, NewSessionKey := validation.SessionStart(c)
+	uid := c.Query("uid")
+	log.Println(uid)
+
 	log.Printf(OldSessionKey)
 	log.Printf(NewSessionKey)
 	if OldSessionKey == "new" {
 		c.JSON(http.StatusOK, "未ログインです")
 	} else {
 		if database.VerifyCustomer(OldSessionKey) {
-			uid := c.Query("uid")
 			database.LogInLog(uid, NewSessionKey)
 			database.Invalid(OldSessionKey)
+			c.JSON(http.StatusOK, "SuccessFully Logined!!")
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "不正なアクセスです"})
 
