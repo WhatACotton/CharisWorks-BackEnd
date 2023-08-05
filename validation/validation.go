@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
@@ -13,6 +12,8 @@ import (
 	"firebase.google.com/go/auth"
 	"github.com/alexedwards/scs/v2"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"google.golang.org/api/option"
@@ -25,13 +26,12 @@ type SessionManager struct {
 	Session *scs.SessionManager
 }
 
-func (user User) Verify(c *gin.Context) (authorized bool) {
+func (user *User) Verify(c *gin.Context) (authorized bool) {
 	authorized = false
 	// Firebaseアプリを初期化する
 	conf := &firebase.Config{
 		ProjectID: "iris-test-52dcd",
 	}
-
 	opt := option.WithCredentialsFile("application_default_credentials.json")
 	app, err := firebase.NewApp(context.Background(), conf, opt)
 	uid := c.Query("uid")
@@ -50,7 +50,6 @@ func (user User) Verify(c *gin.Context) (authorized bool) {
 	}
 	log.Printf("Successfully fetched user data: %v\n", u)
 	user.Userdata = *u
-	c.JSON(http.StatusOK, *&u.UID)
 	authorized = true
 	return authorized
 }
@@ -107,4 +106,28 @@ func GenerateRandomKey() (sessionKey string) {
 func GetUUID() string {
 	uuidObj, _ := uuid.NewUUID()
 	return uuidObj.String()
+}
+
+func SessionConfig(r *gin.Engine) {
+	store := cookie.NewStore([]byte(GenerateRandomKey()))
+	r.Use(sessions.Sessions("mysession", store))
+}
+
+func SessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
+	session := sessions.Default(c)
+	if session.Get("SessionKey") == nil {
+		SessionKey := GetUUID()
+		session.Set("SessionKey", SessionKey)
+		err := session.Save()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "new", SessionKey
+	} else {
+		SessionKey := session.Get("SessionKey")
+		NewSessionKey := GetUUID()
+		session.Set("SessionKey", NewSessionKey)
+		session.Save()
+		return SessionKey.(string), NewSessionKey
+	}
 }

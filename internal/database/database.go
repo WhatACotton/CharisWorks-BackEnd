@@ -85,7 +85,7 @@ func Delete(table string, where string, id string) {
 
 func ConnectSQL() (db *sql.DB) {
 	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_USER")+":"+os.Getenv("MYSQL_PASS")+"@tcp(localhost:3306)/go_test")
+	db, err := sql.Open("mysql", os.Getenv("MYSQL_USER")+":"+os.Getenv("MYSQL_PASS")+"@tcp(localhost:3306)/test")
 
 	if err != nil {
 		// ここではエラーを返さない
@@ -96,7 +96,7 @@ func ConnectSQL() (db *sql.DB) {
 
 func TestSQL() {
 	// データベースのハンドルを取得する
-	mysql := os.Getenv("MYSQL_USER") + ":" + os.Getenv("MYSQL_PASS") + "@tcp(localhost:3306)/go_test"
+	mysql := os.Getenv("MYSQL_USER") + ":" + os.Getenv("MYSQL_PASS") + "@tcp(localhost:3306)/test"
 	log.Println(mysql)
 	db, err := sql.Open("mysql", mysql)
 

@@ -8,6 +8,7 @@ import (
 )
 
 func SignUpCustomer(req models.CustomerRequestPayload, SessionID string) (res models.Customer) {
+	log.Printf("SignUpCustomer Called")
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -21,10 +22,12 @@ func SignUpCustomer(req models.CustomerRequestPayload, SessionID string) (res mo
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(req.UID, nil, nil, req.Email, nil, false, GetDate(), nil, nil, nil, SessionID)
+	_, err = ins.Exec(req.UID, "default", "default", req.Email, "00000000000", false, GetDate(), 20000101, 20000101, SessionID)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf(req.Email)
+
 	return GetCustomer(req.UID)
 }
 
@@ -82,9 +85,9 @@ func ModifyCustomer(usr validation.User, customer models.CustomerRegisterPayload
 	return GetCustomer(usr.Userdata.UID)
 }
 
-func LogInCustomer(uid string, SessionId string) (res models.Customer) {
-	LogInTimeStamp(uid)
-	LogInLog(uid)
+func StoredLogInCustomer(uid string, NewSessionKey string, OldSessionKey string) {
+	LogInLog(uid, NewSessionKey)
+	Invalid(OldSessionKey)
 	db := ConnectSQL()
 	// SQLの実行
 	rows, err := db.Query("SELECT * FROM user WHERE uid = ?", uid)
@@ -96,45 +99,83 @@ func LogInCustomer(uid string, SessionId string) (res models.Customer) {
 	// SQLの実行
 	for rows.Next() {
 		//err := rows.Scan(&Customer)
-		err := rows.Scan(&Customer.UID, &Customer.CreatedDate, &Customer.Name, &Customer.Email, &Customer.Address, &Customer.PhoneNumber, &Customer.LastSessionId)
+		err := rows.Scan(&Customer.UID, &Customer.Name, &Customer.Address, &Customer.Email, &Customer.PhoneNumber, &Customer.Register, &Customer.CreatedDate, &Customer.ModifiedDate, &Customer.RegisteredDate, &Customer.LastSessionId)
 		if err != nil {
 			panic(err.Error())
 		}
 	}
-	return Customer
 }
-
-func LogInTimeStamp(uid string) {
-	// SQLの準備
+func VerifyCustomer(OldSessionKey string) bool {
+	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
-	upd, err := db.Prepare("UPDATE user SET LastLogInDate = ? WHERE ? = ?")
+	// SQLの実行
+	rows, err := db.Query("SELECT Available FROM loginlog WHERE SessionKey = ?", OldSessionKey)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer upd.Close()
+	defer rows.Close()
+	var loginlog bool
 	// SQLの実行
-	_, err = upd.Exec(GetDate(), uid)
+	for rows.Next() {
+		err := rows.Scan(&loginlog)
+
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+	return loginlog
+}
+func NewLogInCustomer(uid string, NewSessionKey string) {
+	LogInLog(uid, NewSessionKey)
+	db := ConnectSQL()
+	// SQLの実行
+	rows, err := db.Query("SELECT * FROM user WHERE uid = ?", uid)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	var Customer models.Customer
+	// SQLの実行
+	for rows.Next() {
+		//err := rows.Scan(&Customer)
+		err := rows.Scan(&Customer.UID, &Customer.Name, &Customer.Address, &Customer.Email, &Customer.PhoneNumber, &Customer.Register, &Customer.CreatedDate, &Customer.ModifiedDate, &Customer.RegisteredDate, &Customer.LastSessionId)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
 }
 
-func LogInLog(uid string) {
+func LogInLog(uid string, NewSessionKey string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
 	// SQLの準備
-	//UID,Name,Address,Email,PhoneNumber,Register,CreatedDate,ModifiedDate,RegisteredDate,LastLogInDate
+	//UID SessionKey LoginedDate Available
+	ins, err := db.Prepare("INSERT INTO loginlog VALUES(?,?,?,true)")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	ins, err := db.Prepare("INSERT INTO loginlog VALUES(?,?,?)")
+	// SQLの実行
+	_, err = ins.Exec(uid, NewSessionKey, GetDate())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer ins.Close()
 
-	// SQLの実行
-	_, err = ins.Exec(uid, validation.GetUUID(), GetDate())
+}
+func Invalid(SessionKey string) {
+	log.Println("Invalid called")
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	ins, err := db.Prepare("UPDATE loginlog SET Available = false WHERE SessionKey = ?")
 	if err != nil {
 		log.Fatal(err)
 	}
+	// SQLの実行
+	_, err = ins.Exec(SessionKey)
+	defer ins.Close()
 }
 
 func GetCustomer(uid string) (res models.Customer) {
@@ -150,7 +191,8 @@ func GetCustomer(uid string) (res models.Customer) {
 	var Customer models.Customer
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&Customer.UID, &Customer.CreatedDate, &Customer.Name, &Customer.Email, &Customer.Address)
+		err := rows.Scan(&Customer.UID, &Customer.Name, &Customer.Address, &Customer.Email, &Customer.PhoneNumber, &Customer.Register, &Customer.CreatedDate, &Customer.ModifiedDate, &Customer.RegisteredDate, &Customer.LastSessionId)
+
 		if err != nil {
 			panic(err.Error())
 		}

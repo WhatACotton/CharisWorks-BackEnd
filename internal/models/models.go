@@ -27,7 +27,7 @@ type Customer struct {
 	Name           string `json:"Name"`
 	Address        string `json:"address"`
 	Email          string `json:"Contact"`
-	PhoneNumber    int    `json:"PhoneNumber"`
+	PhoneNumber    string `json:"PhoneNumber"`
 	Register       bool
 	CreatedDate    string
 	ModifiedDate   string
@@ -39,6 +39,7 @@ type LogInLog struct {
 	UID       string
 	LoginId   string
 	LoginDate string
+	Available bool
 }
 
 type TransactionRequestPayload struct {
@@ -68,7 +69,9 @@ type CartRequestPayload struct {
 	Quantity int    `json:"quantity"`
 }
 
-type Session struct {
+type CartSession struct {
+	CartId    string
 	SessionId string
 	Date      string
+	Available bool
 }

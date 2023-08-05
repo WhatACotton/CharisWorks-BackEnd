@@ -1,6 +1,7 @@
 package funcs
 
 import (
+	"log"
 	"net/http"
 
 	"unify/internal/database"
@@ -20,11 +21,10 @@ func SignUpCustomer(usr validation.User, SessionID string, c *gin.Context) {
 
 	newCustomer.UID = usr.Userdata.UID
 	newCustomer.Email = usr.Userdata.Email
-
+	log.Printf(newCustomer.UID, newCustomer.Email)
 	//アカウント登録
 	res := database.SignUpCustomer(*newCustomer, SessionID)
-
-	c.IndentedJSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, res)
 }
 
 func RegisterCustomer(usr validation.User, c *gin.Context) {
@@ -57,10 +57,12 @@ func DeleteCustomer(usr validation.User, c *gin.Context) {
 	}
 }
 
-func LogIn(usr validation.User, SessionId string, c *gin.Context) {
-	c.JSON(http.StatusOK, database.LogInCustomer(usr.Userdata.UID, SessionId))
+func StoredLogIn(usr validation.User, OldSessionKey string, NewSessionKey string) {
+	database.StoredLogInCustomer(usr.Userdata.UID, NewSessionKey, OldSessionKey)
 }
-
+func NewLogIn(usr validation.User, NewSessionKey string) {
+	database.NewLogInCustomer(usr.Userdata.UID, NewSessionKey)
+}
 func GetCustomer(c *gin.Context) (err int) {
 	uid := c.Query("uid")
 	response := database.GetCustomer(uid)
