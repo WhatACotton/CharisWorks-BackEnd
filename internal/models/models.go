@@ -34,7 +34,6 @@ type Customer struct {
 	RegisteredDate string
 	LastSessionId  string
 }
-
 type LogInLog struct {
 	UID       string
 	LoginId   string
@@ -56,12 +55,18 @@ type Transaction struct {
 	TransactionDate string
 }
 
-type Cart struct {
-	UID            string
+type CartList struct {
 	CartId         string
-	ItemId         string
-	Quantity       int
+	UID            string
+	SessionKey     string
 	RegisteredDate string
+	Valid          bool
+}
+
+type Cart struct {
+	CartId   string
+	ItemId   string
+	Quantity int
 }
 
 type CartRequestPayload struct {

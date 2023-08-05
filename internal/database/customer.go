@@ -105,15 +105,16 @@ func StoredLogInCustomer(uid string, NewSessionKey string, OldSessionKey string)
 		}
 	}
 }
-func VerifyCustomer(OldSessionKey string) bool {
+func VerifyCustomer(uid string, OldSessionKey string) bool {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
 	// SQLの実行
-	rows, err := db.Query("SELECT Available FROM loginlog WHERE SessionKey = ?", OldSessionKey)
+	rows, err := db.Query("SELECT Available FROM loginlog WHERE uid = ? & SessionKey = ?", uid, OldSessionKey)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	defer rows.Close()
 	var loginlog bool
 	// SQLの実行
@@ -177,7 +178,26 @@ func Invalid(SessionKey string) {
 	_, err = ins.Exec(SessionKey)
 	defer ins.Close()
 }
+func GetUID(SessionKey string) (uid string) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	// SQLの実行
+	rows, err := db.Query("SELECT uid FROM loginlog WHERE SessionKey = ?", SessionKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	var UID string
+	// SQLの実行
+	for rows.Next() {
+		err := rows.Scan(&UID)
 
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+	return UID
+}
 func GetCustomer(uid string) (res models.Customer) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()

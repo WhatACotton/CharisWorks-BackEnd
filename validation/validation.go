@@ -26,7 +26,7 @@ type SessionManager struct {
 	Session *scs.SessionManager
 }
 
-func (user *User) Verify(c *gin.Context) (authorized bool) {
+func (user *User) Verify(c *gin.Context, uid string) (authorized bool) {
 	authorized = false
 	// Firebaseアプリを初期化する
 	conf := &firebase.Config{
@@ -34,7 +34,6 @@ func (user *User) Verify(c *gin.Context) (authorized bool) {
 	}
 	opt := option.WithCredentialsFile("application_default_credentials.json")
 	app, err := firebase.NewApp(context.Background(), conf, opt)
-	uid := c.Query("uid")
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)
 	}
@@ -110,7 +109,7 @@ func GetUUID() string {
 
 func SessionConfig(r *gin.Engine) {
 	store := cookie.NewStore([]byte(GenerateRandomKey()))
-	r.Use(sessions.Sessions("mysession", store))
+	r.Use(sessions.Sessions("mySession", store))
 }
 
 func SessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
@@ -127,6 +126,37 @@ func SessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
 		SessionKey := session.Get("SessionKey")
 		NewSessionKey := GetUUID()
 		session.Set("SessionKey", NewSessionKey)
+		session.Save()
+		return SessionKey.(string), NewSessionKey
+	}
+}
+
+func CartConfig(r *gin.Engine) {
+	store := cookie.NewStore([]byte(GenerateRandomKey()))
+	r.Use(sessions.Sessions("cartKey", store))
+}
+func LogInStatus(c *gin.Context) bool {
+	session := sessions.Default(c)
+	if session.Get("SessionKey") == nil {
+		return false
+	} else {
+		return true
+	}
+}
+func CartSessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
+	session := sessions.Default(c)
+	if session.Get("CartSessionKey") == nil {
+		SessionKey := GetUUID()
+		session.Set("CartSessionKey", SessionKey)
+		err := session.Save()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "new", SessionKey
+	} else {
+		SessionKey := session.Get("CartSessionKey")
+		NewSessionKey := GetUUID()
+		session.Set("CartSessionKey", NewSessionKey)
 		session.Save()
 		return SessionKey.(string), NewSessionKey
 	}
