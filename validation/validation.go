@@ -5,29 +5,33 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
+	"github.com/alexedwards/scs/v2"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/sessions"
+	"github.com/google/uuid"
 	"google.golang.org/api/option"
 )
 
 type User struct {
 	Userdata auth.UserRecord
 }
+type SessionManager struct {
+	Session *scs.SessionManager
+}
 
-func (user User) Verify(c *gin.Context) (authorized bool) {
+func (user *User) Verify(c *gin.Context) (authorized bool) {
 	authorized = false
 	// Firebaseアプリを初期化する
 	conf := &firebase.Config{
 		ProjectID: "iris-test-52dcd",
 	}
-
 	opt := option.WithCredentialsFile("application_default_credentials.json")
 	app, err := firebase.NewApp(context.Background(), conf, opt)
 	uid := c.Query("uid")
@@ -46,7 +50,6 @@ func (user User) Verify(c *gin.Context) (authorized bool) {
 	}
 	log.Printf("Successfully fetched user data: %v\n", u)
 	user.Userdata = *u
-	c.JSON(http.StatusOK, *&u.UID)
 	authorized = true
 	return authorized
 }
@@ -88,49 +91,6 @@ func CORS(r *gin.Engine) {
 	}))
 }
 
-// Note: Don't store your key in your source code. Pass it via an
-// environmental variable, or flag (or both), and don't accidentally commit it
-// alongside your code. Ensure your key is sufficiently random - i.e. use Go's
-// crypto/rand or securecookie.GenerateRandomKey(32) and persist the result.
-// Ensure SESSION_KEY exists in the environment, or sessions will fail.
-var store = sessions.NewCookieStore([]byte(GenerateRandomKey()))
-
-// SessionKeyをcookieに保存する。SessionIDは引き継ぐ。
-func Generate(w http.ResponseWriter, r *http.Request, SessionID string) {
-	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, "sessionkey")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// Set some session values.
-	session.Values["session-id"] = SessionID
-	// Save it before we write to the response/return from the handler.
-	err = session.Save(r, w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-// SessionIDを取得する。SessionKeyはRequestのcookieの中に入っている。
-func GetSessionId(w http.ResponseWriter, r *http.Request) (sessionId string) {
-	// Get a session. Get() always returns a session, even if empty.
-	session, err := store.Get(r, "sessionkey")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	sessionId = session.Values["session-id"].(string)
-	// Save it before we write to the response/return from the handler.
-	err = session.Save(r, w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	return sessionId
-}
-
 // SessionKeyの発行
 func GenerateRandomKey() (sessionKey string) {
 	// 32バイトのランダムなバイト列を生成する
@@ -142,4 +102,32 @@ func GenerateRandomKey() (sessionKey string) {
 	// バイト列をBase64エンコードして、文字列に変換する
 	sessionKey = base64.URLEncoding.EncodeToString(key)
 	return
+}
+func GetUUID() string {
+	uuidObj, _ := uuid.NewUUID()
+	return uuidObj.String()
+}
+
+func SessionConfig(r *gin.Engine) {
+	store := cookie.NewStore([]byte(GenerateRandomKey()))
+	r.Use(sessions.Sessions("mysession", store))
+}
+
+func SessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
+	session := sessions.Default(c)
+	if session.Get("SessionKey") == nil {
+		SessionKey := GetUUID()
+		session.Set("SessionKey", SessionKey)
+		err := session.Save()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "new", SessionKey
+	} else {
+		SessionKey := session.Get("SessionKey")
+		NewSessionKey := GetUUID()
+		session.Set("SessionKey", NewSessionKey)
+		session.Save()
+		return SessionKey.(string), NewSessionKey
+	}
 }

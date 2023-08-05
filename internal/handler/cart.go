@@ -17,10 +17,8 @@ func LoggedInPostCart(c *gin.Context) {
 	}
 }
 func PostCart(c *gin.Context) {
-	SessionId := GetsessionId(c)
-	funcs.PostCartWithSession(c, SessionId)
+	//funcs.PostCartWithSession(c)
 }
 func GetCart(c *gin.Context) {
-	SessionId := GetsessionId(c)
-	funcs.GetCartWithSession(c, SessionId)
+	funcs.GetCartWithSession(c)
 }

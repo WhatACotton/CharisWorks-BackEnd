@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"log"
 	"net/http"
+	"unify/internal/database"
 	"unify/internal/funcs"
 	"unify/validation"
 
@@ -13,7 +15,10 @@ func TemporarySignUp(c *gin.Context) {
 	//仮登録を行う。ここでの登録内容はUIDと作成日時だけ。
 	user := new(validation.User)
 	if user.Verify(c) { //認証
-		funcs.SignUpCustomer(*user, c)
+		log.Printf(user.Userdata.Email)
+		_, NewSessionKey := validation.SessionStart(c)
+		log.Printf(NewSessionKey)
+		funcs.SignUpCustomer(*user, NewSessionKey, c)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
 	}
@@ -34,10 +39,39 @@ func LogIn(c *gin.Context) {
 	//LogIn処理
 	user := new(validation.User)
 	if user.Verify(c) { //認証
-		SessionId := GetsessionId(c)
-		funcs.LogIn(*user, SessionId, c)
+		log.Printf(user.Userdata.Email)
+		OldSessionKey, NewSessionKey := validation.SessionStart(c)
+		log.Printf(OldSessionKey)
+		log.Printf(NewSessionKey)
+		if OldSessionKey == "new" {
+			funcs.NewLogIn(*user, NewSessionKey)
+			c.JSON(http.StatusOK, user)
+
+		} else {
+			funcs.StoredLogIn(*user, OldSessionKey, NewSessionKey)
+			c.JSON(http.StatusOK, user)
+		}
+
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
+	}
+}
+
+func ContinueLogIn(c *gin.Context) {
+	OldSessionKey, NewSessionKey := validation.SessionStart(c)
+	log.Printf(OldSessionKey)
+	log.Printf(NewSessionKey)
+	if OldSessionKey == "new" {
+		c.JSON(http.StatusOK, "未ログインです")
+	} else {
+		if database.VerifyCustomer(OldSessionKey) {
+			uid := c.Query("uid")
+			database.LogInLog(uid, NewSessionKey)
+			database.Invalid(OldSessionKey)
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "不正なアクセスです"})
+
+		}
 	}
 }
 
