@@ -58,10 +58,11 @@ func DeleteCustomer(usr validation.User, c *gin.Context) {
 }
 
 func StoredLogIn(usr validation.User, OldSessionKey string, NewSessionKey string) {
-	database.StoredLogInCustomer(usr.Userdata.UID, NewSessionKey, OldSessionKey)
+	database.LogInCustomer(usr.Userdata.UID, NewSessionKey)
+	database.CartInvalid(OldSessionKey)
 }
 func NewLogIn(usr validation.User, NewSessionKey string) {
-	database.NewLogInCustomer(usr.Userdata.UID, NewSessionKey)
+	database.LogInCustomer(usr.Userdata.UID, NewSessionKey)
 }
 func GetCustomer(c *gin.Context) (err int) {
 	uid := c.Query("uid")

@@ -3,27 +3,48 @@ package database
 import (
 	"log"
 	"unify/internal/models"
-	"unify/validation"
 )
 
 func PostCart(req models.CartRequestPayload, CartId string) (carts []models.Cart) {
-	// データベースのハンドルを取得する
-	db := ConnectSQL()
+	Carts := GetCart(CartId)
+	if SearchCart(Carts, req.ItemId) {
+		if req.Quantity == 0 {
+			DeleteCart(CartId, req.ItemId)
+		} else {
+			UpdateCart(CartId, req)
+		}
+	} else {
+		if req.Quantity != 0 {
+			// データベースのハンドルを取得する
+			db := ConnectSQL()
 
-	// SQLの準備
-	//UID,ItemId,Quantity
+			// SQLの準備
+			//UID,ItemId,Quantity
 
-	ins, err := db.Prepare("INSERT INTO cart VALUES(?,?,?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer ins.Close()
-	// SQLの実行
-	_, err = ins.Exec(CartId, req.ItemId, req.Quantity)
-	if err != nil {
-		log.Fatal(err)
+			ins, err := db.Prepare("INSERT INTO cart VALUES(?,?,?)")
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer ins.Close()
+			// SQLの実行
+			_, err = ins.Exec(CartId, req.ItemId, req.Quantity)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 	return GetCart(CartId)
+}
+
+func SearchCart(Carts []models.Cart, ItemId string) bool {
+	for _, Cart := range Carts {
+		if Cart.ItemId == ItemId {
+			return true
+		} else {
+			return false
+		}
+	}
+	return false
 }
 
 func GetCart(CartId string) (Carts []models.Cart) {
@@ -49,46 +70,7 @@ func GetCart(CartId string) (Carts []models.Cart) {
 	return Carts
 }
 
-func NewCartSession(SessionKey string) (CartId string) {
-	// データベースのハンドルを取得する
-	db := ConnectSQL()
-	CartId = validation.GetUUID()
-	// SQLの準備
-	//UID,ItemId,Quantity
-
-	ins, err := db.Prepare("INSERT INTO cartlist VALUES(?,?,?,?,?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer ins.Close()
-	// SQLの実行
-	_, err = ins.Exec(CartId, nil, SessionKey, GetDate(), true)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return CartId
-}
-func NewCartLogin(SessionKey string, UID string) (CartId string) {
-	// データベースのハンドルを取得する
-	db := ConnectSQL()
-	CartId = validation.GetUUID()
-	// SQLの準備
-	//UID,ItemId,Quantity
-
-	ins, err := db.Prepare("INSERT INTO cartlist VALUES(?,?,?,?,?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer ins.Close()
-	// SQLの実行
-	_, err = ins.Exec(CartId, UID, SessionKey, GetDate(), true)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return CartId
-}
-
-func StoredLoginCart(SessionKey string, CartId string, UID string) {
+func LoginCart(SessionKey string, CartId string, UID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの準備
@@ -105,7 +87,7 @@ func StoredLoginCart(SessionKey string, CartId string, UID string) {
 		log.Fatal(err)
 	}
 }
-func StoredCartSession(SessionKey string, CartId string) {
+func SessionCart(SessionKey string, CartId string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの準備
@@ -179,4 +161,46 @@ func GetCartId(OldSessionKey string) (CartId string) {
 		}
 	}
 	return CartId
+}
+
+func SignUpCart(CartId string, UID string) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+
+	// SQLの実行
+	ins, err := db.Prepare("UPDATE cartlist SET UID = ? WHERE CartId = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// SQLの実行
+	_, err = ins.Exec(UID, CartId)
+	defer ins.Close()
+}
+
+func UpdateCart(CartId string, req models.CartRequestPayload) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+
+	// SQLの実行
+	ins, err := db.Prepare("UPDATE cart SET Quantity = ? WHERE CartId = ? AND ItemId = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// SQLの実行
+	_, err = ins.Exec(req.Quantity, CartId, req.ItemId)
+	defer ins.Close()
+}
+
+func DeleteCart(CartId string, ItemId string) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+
+	// SQLの実行
+	ins, err := db.Prepare("DELETE FROM cart WHERE CartId = ? AND ItemId = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// SQLの実行
+	_, err = ins.Exec(CartId, ItemId)
+	defer ins.Close()
 }

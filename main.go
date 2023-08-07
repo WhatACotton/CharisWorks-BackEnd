@@ -28,6 +28,7 @@ func main() {
 	r.DELETE("/DeleteCustomer", handler.DeleteCustomer)
 
 	r.GET("/SessionStart", handler.ContinueLogIn)
+	r.PATCH("/UpdateCart", handler.UpdateCart)
 	r.POST("/PostCart", handler.PostCart)
 	r.GET("/GetCart", handler.GetCart)
 	//r.GET("/DeleteSession", handler.DeleteLoginSession)

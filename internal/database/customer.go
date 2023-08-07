@@ -85,26 +85,6 @@ func ModifyCustomer(usr validation.User, customer models.CustomerRegisterPayload
 	return GetCustomer(usr.Userdata.UID)
 }
 
-func StoredLogInCustomer(uid string, NewSessionKey string, OldSessionKey string) {
-	LogInLog(uid, NewSessionKey)
-	Invalid(OldSessionKey)
-	db := ConnectSQL()
-	// SQLの実行
-	rows, err := db.Query("SELECT * FROM user WHERE uid = ?", uid)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-	var Customer models.Customer
-	// SQLの実行
-	for rows.Next() {
-		//err := rows.Scan(&Customer)
-		err := rows.Scan(&Customer.UID, &Customer.Name, &Customer.Address, &Customer.Email, &Customer.PhoneNumber, &Customer.Register, &Customer.CreatedDate, &Customer.ModifiedDate, &Customer.RegisteredDate, &Customer.LastSessionId)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-}
 func VerifyCustomer(uid string, OldSessionKey string) bool {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -127,8 +107,9 @@ func VerifyCustomer(uid string, OldSessionKey string) bool {
 	}
 	return loginlog
 }
-func NewLogInCustomer(uid string, NewSessionKey string) {
+func LogInCustomer(uid string, NewSessionKey string) {
 	LogInLog(uid, NewSessionKey)
+	UpdateKey(uid, NewSessionKey)
 	db := ConnectSQL()
 	// SQLの実行
 	rows, err := db.Query("SELECT * FROM user WHERE uid = ?", uid)
@@ -145,6 +126,17 @@ func NewLogInCustomer(uid string, NewSessionKey string) {
 			panic(err.Error())
 		}
 	}
+}
+func UpdateKey(uid string, NewSessionKey string) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	ins, err := db.Prepare("UPDATE user SET LastSessionId = ? WHERE uid = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// SQLの実行
+	_, err = ins.Exec(NewSessionKey, uid)
+	defer ins.Close()
 }
 
 func LogInLog(uid string, NewSessionKey string) {

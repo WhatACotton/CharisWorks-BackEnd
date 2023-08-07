@@ -113,7 +113,7 @@ func SessionConfig(r *gin.Engine) {
 }
 
 func SessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
-	session := sessions.Default(c)
+	session := sessions.DefaultMany(c, "SessionKey")
 	if session.Get("SessionKey") == nil {
 		SessionKey := GetUUID()
 		session.Set("SessionKey", SessionKey)
@@ -133,18 +133,21 @@ func SessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
 
 func CartConfig(r *gin.Engine) {
 	store := cookie.NewStore([]byte(GenerateRandomKey()))
-	r.Use(sessions.Sessions("cartKey", store))
+	cookies := []string{"CartSessionKey", "SessionKey"}
+	r.Use(sessions.SessionsMany(cookies, store))
 }
+
 func LogInStatus(c *gin.Context) bool {
-	session := sessions.Default(c)
+	session := sessions.DefaultMany(c, "SessionKey")
 	if session.Get("SessionKey") == nil {
 		return false
 	} else {
 		return true
 	}
 }
+
 func CartSessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
-	session := sessions.Default(c)
+	session := sessions.DefaultMany(c, "CartSessionKey")
 	if session.Get("CartSessionKey") == nil {
 		SessionKey := GetUUID()
 		session.Set("CartSessionKey", SessionKey)

@@ -18,7 +18,10 @@ func TemporarySignUp(c *gin.Context) {
 
 	if user.Verify(c, uid) { //認証
 		log.Printf(user.Userdata.Email)
-		_, NewSessionKey := validation.SessionStart(c)
+		OldCartSessionKey, NewSessionKey := validation.SessionStart(c)
+		if OldCartSessionKey != "new" {
+			database.SignUpCart(OldCartSessionKey, uid)
+		}
 		log.Printf(NewSessionKey)
 		funcs.SignUpCustomer(*user, NewSessionKey, c)
 	} else {
