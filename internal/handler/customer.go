@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"unify/internal/database"
-	"unify/internal/funcs"
+	"unify/internal/models"
 	"unify/validation"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +23,15 @@ func TemporarySignUp(c *gin.Context) {
 			database.SignUpCart(OldCartSessionKey, uid)
 		}
 		log.Printf(NewSessionKey)
-		funcs.SignUpCustomer(*user, NewSessionKey, c)
+		//新しいアカウントの構造体を作成
+		newCustomer := new(models.CustomerRequestPayload)
+
+		newCustomer.UID = user.Userdata.UID
+		newCustomer.Email = user.Userdata.Email
+		log.Printf(newCustomer.UID, newCustomer.Email)
+		//アカウント登録
+		res := database.SignUpCustomer(*newCustomer, NewSessionKey)
+		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
 	}
@@ -35,7 +43,14 @@ func SignUp(c *gin.Context) {
 	user := new(validation.User)
 	uid := c.Query("uid")
 	if user.Verify(c, uid) { //認証
-		funcs.RegisterCustomer(*user, c)
+		//アカウント本登録処理
+		//2回構造体を作るのは冗長かも知れないが、bindしている以上、
+		//インジェクションされて予期しない場所が変更される可能性がある。
+		h := new(models.CustomerRegisterPayload)
+		if err := c.BindJSON(&h); err != nil {
+			return
+		}
+		database.RegisterCustomer(*user, *h)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
 	}
@@ -52,10 +67,13 @@ func LogIn(c *gin.Context) {
 		log.Printf(OldSessionKey)
 		log.Printf(NewSessionKey)
 		if OldSessionKey == "new" {
-			funcs.NewLogIn(*user, NewSessionKey)
+			database.LogInCustomer(user.Userdata.UID, NewSessionKey)
+
 			c.JSON(http.StatusOK, "SuccessFully Logined!!")
 		} else {
-			funcs.StoredLogIn(*user, OldSessionKey, NewSessionKey)
+			database.LogInCustomer(user.Userdata.UID, NewSessionKey)
+			database.CartInvalid(OldSessionKey)
+
 			c.JSON(http.StatusOK, user)
 		}
 
@@ -91,7 +109,12 @@ func ModifyCustomer(c *gin.Context) {
 	uid := c.Query("uid")
 	user := new(validation.User)
 	if user.Verify(c, uid) { //認証
-		funcs.ModifyCustomer(*user, c)
+		//アカウント修正処理
+		h := new(models.CustomerRegisterPayload)
+		if err := c.BindJSON(&h); err != nil {
+			return
+		}
+		database.ModifyCustomer(*user, *h)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
 	}
@@ -102,8 +125,21 @@ func DeleteCustomer(c *gin.Context) {
 	user := new(validation.User)
 	uid := c.Query("uid")
 	if user.Verify(c, uid) { //認証
-		funcs.DeleteCustomer(*user, c)
+		database.DeleteCustomer(user.Userdata.UID)
+		user.DeleteCustomer(c, user.Userdata.UID)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
+	}
+	user.DeleteCustomer(c, uid)
+}
+func LogOut(c *gin.Context) {
+	//ログアウト
+	uid := c.Query("uid")
+	OldSessionKey, _ := validation.SessionStart(c)
+	if database.VerifyCustomer(uid, OldSessionKey) {
+		database.Invalid(OldSessionKey)
+		c.JSON(http.StatusOK, "SuccessFully Logouted!!")
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "不正なアクセスです"})
 	}
 }

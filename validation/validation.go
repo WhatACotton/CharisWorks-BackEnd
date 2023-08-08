@@ -53,6 +53,31 @@ func (user *User) Verify(c *gin.Context, uid string) (authorized bool) {
 	return authorized
 }
 
+func (user *User) DeleteCustomer(c *gin.Context, uid string) {
+	ctx := c.Request.Context()
+	// Firebaseアプリを初期化する
+	conf := &firebase.Config{
+		ProjectID: "iris-test-52dcd",
+	}
+	opt := option.WithCredentialsFile("application_default_credentials.json")
+	app, err := firebase.NewApp(context.Background(), conf, opt)
+	if err != nil {
+		log.Fatalf("error initializing app: %v\n", err)
+	}
+	// Get an auth client from the firebase.App
+	client, err := app.Auth(c)
+	if err != nil {
+		log.Fatalf("error getting Auth client: %v\n", err)
+	}
+
+	err = client.DeleteUser(ctx, uid)
+	if err != nil {
+		log.Fatalf("error deleting user: %v\n", err)
+	}
+	log.Printf("Successfully deleted user: %s\n", uid)
+
+}
+
 // ベーシック認証周りの設定
 func Basic(r *gin.Engine) (routergroup *gin.RouterGroup) {
 	authorized := r.Group("/admin", gin.BasicAuth(gin.Accounts{
@@ -106,12 +131,6 @@ func GetUUID() string {
 	uuidObj, _ := uuid.NewUUID()
 	return uuidObj.String()
 }
-
-func SessionConfig(r *gin.Engine) {
-	store := cookie.NewStore([]byte(GenerateRandomKey()))
-	r.Use(sessions.Sessions("mySession", store))
-}
-
 func SessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
 	session := sessions.DefaultMany(c, "SessionKey")
 	if session.Get("SessionKey") == nil {
@@ -131,7 +150,7 @@ func SessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
 	}
 }
 
-func CartConfig(r *gin.Engine) {
+func SessionConfig(r *gin.Engine) {
 	store := cookie.NewStore([]byte(GenerateRandomKey()))
 	cookies := []string{"CartSessionKey", "SessionKey"}
 	r.Use(sessions.SessionsMany(cookies, store))

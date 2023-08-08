@@ -11,7 +11,7 @@ func PostItem(newItem models.Item) (Itemlist []models.Item) {
 	defer db.Close()
 
 	// SQLの準備
-	ins, err := db.Prepare("INSERT INTO itemlist VALUES(?,?,?,?,?,?,?,?)")
+	ins, err := db.Prepare("INSERT INTO itemlist VALUES(?,?)")
 	if err != nil {
 		//log.Fatal(err)
 		panic(err.Error())
@@ -21,14 +21,8 @@ func PostItem(newItem models.Item) (Itemlist []models.Item) {
 
 	// SQLの実行
 	_, err = ins.Exec(
-		newItem.ID,
-		newItem.Price,
-		newItem.Name,
-		newItem.Stonesize,
-		newItem.Minlength,
-		newItem.Maxlength,
-		newItem.Decsription,
-		newItem.Keyword,
+		newItem.ItemId,
+		newItem.InfoId,
 	)
 	if err != nil {
 		//log.Fatal(err)
@@ -54,7 +48,7 @@ func GetItemList() (Itemlist []models.Item) {
 	var resultItemList []models.Item
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&resultItem.ID, &resultItem.Price, &resultItem.Name, &resultItem.Stonesize, &resultItem.Minlength, &resultItem.Maxlength, &resultItem.Decsription, &resultItem.Keyword)
+		err := rows.Scan(&resultItem.ItemId, &resultItem.InfoId)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -77,10 +71,49 @@ func GetItem(id string) (returnmodels models.Item) {
 	var resultItem models.Item
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&resultItem.ID, &resultItem.Price, &resultItem.Name, &resultItem.Stonesize, &resultItem.Minlength, &resultItem.Maxlength, &resultItem.Decsription, &resultItem.Keyword)
+		err := rows.Scan(&resultItem.ItemId, &resultItem.InfoId)
 		if err != nil {
 			panic(err.Error())
 		}
 	}
 	return resultItem
+}
+func DeleteItem(id string) (Itemlist []models.Item) {
+	DeleteItemFromCart(id)
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	defer db.Close()
+
+	// SQLの準備
+	ins, err := db.Prepare("DELETE FROM itemlist WHERE id = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer ins.Close()
+
+	// SQLの実行
+	_, err = ins.Exec(id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return GetItemList()
+}
+
+func DeleteItemFromCart(ItemId string) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	defer db.Close()
+
+	// SQLの準備
+	ins, err := db.Prepare("DELETE FROM cart WHERE ItemId = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer ins.Close()
+
+	// SQLの実行
+	_, err = ins.Exec(ItemId)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

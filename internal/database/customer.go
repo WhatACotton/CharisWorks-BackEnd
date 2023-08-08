@@ -109,7 +109,7 @@ func VerifyCustomer(uid string, OldSessionKey string) bool {
 }
 func LogInCustomer(uid string, NewSessionKey string) {
 	LogInLog(uid, NewSessionKey)
-	UpdateKey(uid, NewSessionKey)
+	UpdateSessionId(uid, NewSessionKey)
 	db := ConnectSQL()
 	// SQLの実行
 	rows, err := db.Query("SELECT * FROM user WHERE uid = ?", uid)
@@ -127,7 +127,7 @@ func LogInCustomer(uid string, NewSessionKey string) {
 		}
 	}
 }
-func UpdateKey(uid string, NewSessionKey string) {
+func UpdateSessionId(uid string, NewSessionKey string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	ins, err := db.Prepare("UPDATE user SET LastSessionId = ? WHERE uid = ?")
@@ -210,4 +210,15 @@ func GetCustomer(uid string) (res models.Customer) {
 		}
 	}
 	return Customer
+}
+func DeleteCustomer(uid string) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	ins, err := db.Prepare("DELETE FROM user WHERE uid = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// SQLの実行
+	_, err = ins.Exec(uid)
+	defer ins.Close()
 }

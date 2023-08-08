@@ -66,6 +66,7 @@ func GetCart(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": "カートが見つかりませんでした"})
 	}
 }
+
 func UpdateCart(c *gin.Context) {
 	CartId := new(string)
 	OldCartSessionKey, NewCartSessionKey := validation.CartSessionStart(c)

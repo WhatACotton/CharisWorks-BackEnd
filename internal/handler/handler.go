@@ -3,18 +3,19 @@ package handler
 import (
 	"net/http"
 	"unify/internal/auth"
-	"unify/internal/funcs"
+	"unify/internal/database"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetItem(c *gin.Context) {
 	id := c.Query("id")
-	funcs.GetItem(c, id)
+	c.JSON(http.StatusOK, database.GetItem(id))
 }
 
 func GetItemList(c *gin.Context) {
-	funcs.GetItemList(c)
+	c.JSON(http.StatusOK, database.GetItemList())
+
 }
 
 func Transaction(c *gin.Context) {
