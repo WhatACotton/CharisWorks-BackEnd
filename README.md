@@ -6,14 +6,7 @@
 
 データ構造は次のようなものを考えています。
 
-# gin-server
-
-**これは golang ベースで作られた開発中のバックエンドサーバです。**
-
-今まで商品管理・アカウント・取引を別々に開発していましたが、今回はそれをすべて統合した形となります。
-
-設計は次のようなものを考えています。
-カート・取引
+## カート・取引　データベース
 
 ```mermaid
 erDiagram
@@ -65,4 +58,39 @@ ItemInfo{
  string Description
  string Keyword
 }
+```
+
+## セッション
+
+```mermaid
+sequenceDiagram
+
+participant Server
+participant Client
+
+Client ->> Server:SessionRequest
+Note left of Server:validation
+Server ->> Server:issue New SessionKey
+Server ->> Server:invalidation of Requested SessionKey
+Server ->> Client:New SessionKey
+
+
+```
+
+## ログイン
+
+```mermaid
+sequenceDiagram
+
+participant Server
+participant firebase
+participant Client
+
+Client ->> firebase:email,password
+firebase ->> Client: uid,context
+Client ->> Server: uid,context
+Server ->> firebase:　
+firebase ->> Server:　
+Note left of firebase:Verify
+
 ```
