@@ -107,6 +107,7 @@ func VerifyCustomer(uid string, OldSessionKey string) bool {
 	}
 	return loginlog
 }
+
 func LogInCustomer(uid string, NewSessionKey string) {
 	LogInLog(uid, NewSessionKey)
 	UpdateSessionId(uid, NewSessionKey)
@@ -127,6 +128,7 @@ func LogInCustomer(uid string, NewSessionKey string) {
 		}
 	}
 }
+
 func UpdateSessionId(uid string, NewSessionKey string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -156,8 +158,8 @@ func LogInLog(uid string, NewSessionKey string) {
 		log.Fatal(err)
 	}
 	defer ins.Close()
-
 }
+
 func Invalid(SessionKey string) {
 	log.Println("Invalid called")
 	// データベースのハンドルを取得する
@@ -170,6 +172,7 @@ func Invalid(SessionKey string) {
 	_, err = ins.Exec(SessionKey)
 	defer ins.Close()
 }
+
 func GetUID(SessionKey string) (uid string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -190,6 +193,7 @@ func GetUID(SessionKey string) (uid string) {
 	}
 	return UID
 }
+
 func GetCustomer(uid string) (res models.Customer) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -211,6 +215,7 @@ func GetCustomer(uid string) (res models.Customer) {
 	}
 	return Customer
 }
+
 func DeleteCustomer(uid string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()

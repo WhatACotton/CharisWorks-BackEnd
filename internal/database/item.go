@@ -98,22 +98,3 @@ func DeleteItem(id string) (Itemlist []models.Item) {
 	}
 	return GetItemList()
 }
-
-func DeleteItemFromCart(ItemId string) {
-	// データベースのハンドルを取得する
-	db := ConnectSQL()
-	defer db.Close()
-
-	// SQLの準備
-	ins, err := db.Prepare("DELETE FROM cart WHERE ItemId = ?")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer ins.Close()
-
-	// SQLの実行
-	_, err = ins.Exec(ItemId)
-	if err != nil {
-		log.Fatal(err)
-	}
-}

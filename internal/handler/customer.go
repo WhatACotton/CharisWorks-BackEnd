@@ -132,6 +132,7 @@ func DeleteCustomer(c *gin.Context) {
 	}
 	user.DeleteCustomer(c, uid)
 }
+
 func LogOut(c *gin.Context) {
 	//ログアウト
 	uid := c.Query("uid")
