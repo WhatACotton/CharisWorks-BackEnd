@@ -22,7 +22,7 @@ type LogInLog struct {
 }
 
 type CustomerRequestPayload struct {
-	UID         string `json:"uid"`
+	UID         string `json:"UID"`
 	Email       string `json:"contact"`
 	CreatedDate string
 }
@@ -35,29 +35,51 @@ type CustomerRegisterPayload struct {
 
 // Cart関連
 type CartList struct {
-	CartId         string
-	UID            string
-	SessionKey     string
-	RegisteredDate string
-	Valid          bool
-}
-
-type CartSession struct {
-	CartId    string
-	SessionId string
-	Date      string
-	Available bool
+	CartId     string `json:"CartId"`
+	UID        string `json:"UID"`
+	SessionKey string `json:"sessionkey"`
+	Valid      bool   `json:"Valid"`
 }
 
 type Cart struct {
-	CartId   string
-	ItemId   string
-	Quantity int
+	CartId         string `json:"CartId"`
+	ItemId         string `json:"ItemId"`
+	InfoId         string `json:"InfoId"`
+	Quantity       int    `json:"Quantity"`
+	RegisteredDate string `json:"RegisteredDate"`
+	Status         string `json:"Status"`
 }
 
 type CartRequestPayload struct {
-	ItemId   string `json:"itemid"`
+	ItemId   string `json:"ItemId"`
 	Quantity int    `json:"quantity"`
+}
+
+// Transaction関連
+type TransactionRequestPayload struct {
+	UID    string `json:"UID"`
+	ItemId string `json:"ItemId"`
+	Count  int    `json:"count"`
+}
+
+type Transaction struct {
+	InfoId   string `json:"ItemId"`
+	CartId   string `json:"CartId"`
+	Quantity int    `json:"Quantity"`
+}
+type TransactionList struct {
+	CartId          string `json:"CartId"`
+	UID             string `json:"UID"`
+	TransactionDate string `json:"TransactionDate"`
+}
+
+type Bill struct {
+	CartId          string        `json:"CartId"`
+	UID             string        `json:"UID"`
+	TransactionDate string        `json:"TransactionDate"`
+	TotalPrice      int           `json:"TotalPrice"`
+	TotalCount      int           `json:"TotalCount"`
+	Transactions    []Transaction `json:"Items"`
 }
 
 // Item関連
@@ -75,19 +97,4 @@ type ItemInfo struct {
 	Maxlength   int    `json:"Maxlength"`
 	Decsription string `json:"Description"`
 	Keyword     string `json:"Keyword"`
-}
-
-// Transaction関連
-type TransactionRequestPayload struct {
-	UID    string `json:"UID"`
-	ItemId string `json:"itemid"`
-	Count  int    `json:"count"`
-}
-type Transaction struct {
-	UID             string `json:"UID"`
-	ItemId          string `json:"itemid"`
-	TransactionId   string `json:"transactionId"`
-	Count           string `json:"count"`
-	IsFinished      bool   `json:"isFinished"`
-	TransactionDate string
 }

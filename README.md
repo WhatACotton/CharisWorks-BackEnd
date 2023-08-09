@@ -13,18 +13,17 @@ erDiagram
 Transactionlist ||--||Cartlist:"取引とカートは1対1"
 Transactionlist ||--|{Transaction:""
 Cartlist}o--|{Cart:""
-Cart}o--||Item:"一つのカートに同じItem_Idが複数存在することはない"
-Item||--o{ItemInfo:""
-Transaction||--||ItemInfo:"ここでInfo_Idにしているので変更があっても旧Idに遡れる"
+Cart}o--||ItemList:"一つのカートに同じItem_Idが複数存在することはない"
+ItemList||--o{ItemInfo:""
+Transaction}o--||ItemInfo:"ここでInfo_Idにしているので変更があっても旧Idに遡れる"
 
 Transactionlist{
- string Transaction_Id
+ string Cart_Id
  timestamp TransactionTime
  string UID
- string Cart_Id
 }
 Transaction{
- string TransactionId
+ string Cart_Id
  string Info_Id
  int quantity
 }
@@ -33,17 +32,17 @@ Cartlist{
  string Cart_Id
  stirng UID
  string SessionKey
- timestamp RegisterdDate
  bool Valid
 }
 
 Cart{
+ timestamp CartTime
  string Cart_Id
  string Item_Id
  int quantity
 }
 
-Item{
+ItemList{
  string Item_Id
  string Info_Id "マイナーチェンジはItem_Idに紐付ける"
  string status "購入可能かどうか"

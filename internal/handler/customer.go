@@ -136,10 +136,10 @@ func DeleteCustomer(c *gin.Context) {
 func LogOut(c *gin.Context) {
 	//ログアウト
 	uid := c.Query("uid")
-	OldSessionKey, _ := validation.SessionStart(c)
+	OldSessionKey := validation.SessionEnd(c)
+	database.Invalid(OldSessionKey)
 	if database.VerifyCustomer(uid, OldSessionKey) {
-		database.Invalid(OldSessionKey)
-		c.JSON(http.StatusOK, "SuccessFully Logouted!!")
+		c.JSON(http.StatusOK, "SuccessFully Loggedout!!")
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "不正なアクセスです"})
 	}

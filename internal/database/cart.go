@@ -23,13 +23,13 @@ func PostCart(req models.CartRequestPayload, CartId string) (carts []models.Cart
 				// SQLの準備
 				//UID,ItemId,Quantity
 
-				ins, err := db.Prepare("INSERT INTO cart VALUES(?,?,?)")
+				ins, err := db.Prepare("INSERT INTO cart VALUES(?,?,?,?)")
 				if err != nil {
 					log.Fatal(err)
 				}
 				defer ins.Close()
 				// SQLの実行
-				_, err = ins.Exec(CartId, req.ItemId, req.Quantity)
+				_, err = ins.Exec(CartId, req.ItemId, req.Quantity, GetDate())
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -39,7 +39,6 @@ func PostCart(req models.CartRequestPayload, CartId string) (carts []models.Cart
 	} else {
 		return nil
 	}
-
 }
 
 func InspectItems(ItemId string, Itemlist []models.Item) bool {
@@ -50,6 +49,7 @@ func InspectItems(ItemId string, Itemlist []models.Item) bool {
 	}
 	return false
 }
+
 func SearchCart(Carts []models.Cart, ItemId string) bool {
 	for _, Cart := range Carts {
 		if Cart.ItemId == ItemId {
@@ -67,14 +67,14 @@ func GetCart(CartId string) (Carts []models.Cart) {
 	defer db.Close()
 	var Cart models.Cart
 	// SQLの実行
-	rows, err := db.Query("SELECT * FROM cart WHERE CartId = ?", CartId)
+	rows, err := db.Query("SELECT cart.* ,itemlist.* FROM cart JOIN itemlist ON cart.ItemId = itemlist.ItemId WHERE cart.CartId = ?", CartId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&Cart.CartId, &Cart.ItemId, &Cart.Quantity)
+		err := rows.Scan(&Cart.CartId, &Cart.ItemId, &Cart.Quantity, &Cart.InfoId, &Cart.Status)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -90,30 +90,31 @@ func LoginCart(SessionKey string, CartId string, UID string) {
 	// SQLの準備
 	//UID,ItemId,Quantity
 
-	ins, err := db.Prepare("INSERT INTO cartlist VALUES(?,?,?,?,?)")
+	ins, err := db.Prepare("INSERT INTO cartlist VALUES(?,?,?,?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer ins.Close()
 	// SQLの実行
-	_, err = ins.Exec(CartId, UID, SessionKey, GetDate(), true)
+	_, err = ins.Exec(CartId, UID, SessionKey, true)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
+
 func SessionCart(SessionKey string, CartId string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの準備
 	//UID,ItemId,Quantity
 
-	ins, err := db.Prepare("INSERT INTO cartlist VALUES(?,?,?,?,?)")
+	ins, err := db.Prepare("INSERT INTO cartlist VALUES(?,?,?,?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer ins.Close()
 	// SQLの実行
-	_, err = ins.Exec(CartId, nil, SessionKey, GetDate(), true)
+	_, err = ins.Exec(CartId, nil, SessionKey, true)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -130,8 +131,8 @@ func CartInvalid(SessionKey string) {
 	// SQLの実行
 	_, err = ins.Exec(SessionKey)
 	defer ins.Close()
-
 }
+
 func VerifyCart(OldSessionKey string) bool {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -218,6 +219,7 @@ func DeleteCart(CartId string, ItemId string) {
 	_, err = ins.Exec(CartId, ItemId)
 	defer ins.Close()
 }
+
 func DeleteItemFromCart(ItemId string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -235,4 +237,25 @@ func DeleteItemFromCart(ItemId string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func GetCartlist(UID string) (cartlist models.CartList) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	defer db.Close()
+
+	// SQLの実行
+	rows, err := db.Query("SELECT * FROM cartlist WHERE UID = ?", UID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	// SQLの実行
+	for rows.Next() {
+		err := rows.Scan(&cartlist.CartId, &cartlist.UID, &cartlist.SessionKey, &cartlist.Valid)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+	return cartlist
 }

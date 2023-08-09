@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"unify/internal/auth"
 	"unify/internal/database"
 
 	"github.com/gin-gonic/gin"
@@ -18,12 +17,12 @@ func GetItemList(c *gin.Context) {
 
 }
 
-func Transaction(c *gin.Context) {
-	requestMethod := http.MethodGet
-	switch request := requestMethod; request {
-	case "GET":
-		auth.GetTransaction(c)
-	case "POST":
-		auth.PostTransaction(c)
-	}
-}
+// func Transaction(c *gin.Context) {
+// 	requestMethod := http.MethodGet
+// 	switch request := requestMethod; request {
+// 	case "GET":
+// 		auth.GetTransaction(c)
+// 	case "POST":
+// 		auth.PostTransaction(c)
+// 	}
+// }

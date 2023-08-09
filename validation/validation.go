@@ -150,6 +150,22 @@ func SessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
 	}
 }
 
+func SessionEnd(c *gin.Context) (OldSessionKey string) {
+	session := sessions.DefaultMany(c, "SessionKey")
+	OldSessionKey = session.Get("SessionKey").(string)
+	session.Clear()
+	session.Save()
+	return OldSessionKey
+}
+
+func CartSessionEnd(c *gin.Context) (OldSessionKey string) {
+	session := sessions.DefaultMany(c, "CartSessionKey")
+	OldSessionKey = session.Get("CartSessionKey").(string)
+	session.Clear()
+	session.Save()
+	return OldSessionKey
+}
+
 func SessionConfig(r *gin.Engine) {
 	store := cookie.NewStore([]byte(GenerateRandomKey()))
 	cookies := []string{"CartSessionKey", "SessionKey"}
