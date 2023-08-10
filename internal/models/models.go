@@ -76,6 +76,10 @@ type TransactionList struct {
 type Bill struct {
 	CartId          string        `json:"CartId"`
 	UID             string        `json:"UID"`
+	Name            string        `json:"Name"`
+	Address         string        `json:"address"`
+	PhoneNumber     string        `json:"PhoneNumber"`
+	Email           string        `json:"Contact"`
 	TransactionDate string        `json:"TransactionDate"`
 	TotalPrice      int           `json:"TotalPrice"`
 	TotalCount      int           `json:"TotalCount"`

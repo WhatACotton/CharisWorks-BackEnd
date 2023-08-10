@@ -21,16 +21,20 @@ func BuyItem(c *gin.Context) {
 		Bill := new(models.Bill)
 		InspectedCarts := new([]models.Cart)
 		Carts := database.GetCart(CartId)
+		//カートから購入可能な商品のみを抽出
 		for _, Cart := range Carts {
 			if Cart.Status == "Available" {
 				*InspectedCarts = append(*InspectedCarts, Cart)
 			}
 		}
+		//購入可能な商品のみを購入履歴に追加
 		database.PostTransaction(*InspectedCarts)
+		//初期化
 		Transactions := new([]models.Transaction)
 		Transaction := new(models.Transaction)
 		TotalPrice := 0
 		TotalCount := 0
+		//購入履歴を作成
 		for _, Cart := range Carts {
 			Transaction = new(models.Transaction)
 			Transaction.InfoId = Cart.InfoId
@@ -48,6 +52,7 @@ func BuyItem(c *gin.Context) {
 		Bill.UID = UID
 		Bill.TransactionDate = database.GetDate()
 		database.PostTransactionList(CartId, UID, Bill.TransactionDate)
+		c.JSON(http.StatusOK, Bill)
 
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})

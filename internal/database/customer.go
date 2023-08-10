@@ -207,8 +207,17 @@ func GetCustomer(uid string) (res models.Customer) {
 	var Customer models.Customer
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&Customer.UID, &Customer.Name, &Customer.Address, &Customer.Email, &Customer.PhoneNumber, &Customer.Register, &Customer.CreatedDate, &Customer.ModifiedDate, &Customer.RegisteredDate, &Customer.LastSessionId)
-
+		err := rows.Scan(
+			&Customer.UID,
+			&Customer.Name,
+			&Customer.Address,
+			&Customer.Email,
+			&Customer.PhoneNumber,
+			&Customer.Register,
+			&Customer.CreatedDate,
+			&Customer.ModifiedDate,
+			&Customer.RegisteredDate,
+			&Customer.LastSessionId)
 		if err != nil {
 			panic(err.Error())
 		}
