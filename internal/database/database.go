@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -31,56 +30,6 @@ type PatchRequestPayload struct {
 	ID        string `json:"id"`
 	Attribute string `json:"attribute"`
 	Value     string `json:"value"`
-}
-
-func (patchItem PatchRequestPayload) Patch(table string, where string) {
-	db := ConnectSQL()
-	defer db.Close()
-
-	// SQLの準備
-	upd, err := db.Prepare("UPDATE ? SET ? = ? WHERE ? = ?")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer upd.Close()
-
-	if http.DetectContentType([]byte(patchItem.Value)) == "int" {
-		value, err := strconv.Atoi(patchItem.Value)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// SQLの実行
-		_, err = upd.Exec(table, patchItem.Attribute, value, where, patchItem.ID)
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		// SQLの実行
-		_, err = upd.Exec(table, patchItem.Attribute, patchItem.Attribute, where, patchItem.ID)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-}
-
-func Delete(table string, where string, id string) {
-	// データベースのハンドルを取得する
-	db := ConnectSQL()
-	defer db.Close()
-
-	// SQLの実行
-	del, err := db.Prepare("DELETE FROM ? WHERE ? = ?")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer del.Close()
-
-	// SQLの実行
-	_, err = del.Exec(table, where, id)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func ConnectSQL() (db *sql.DB) {

@@ -1,0 +1,41 @@
+openapi: "3.0.3"
+info:
+  title: "Iris-backend-ForClient"
+  description: "IrisProjectのクライアント側のサーバのAPIです。"
+  version: "1.0.0"
+
+servers:
+  - url: "http://localhost:8080"
+    description: "ローカル環境"
+
+tags:
+- name: "items"
+  description: "商品に関するAPI"
+  
+paths: 
+  "/item": 
+    get:
+      summary: "商品一覧を取得する"
+      tags: ["items"]
+      deprecated: false
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type:string }
+        example: "1"
+      - name: X-Api-key
+        in: header
+        required: true
+        description: "APIキーをヘッダーに付与"
+        schema: { type: string }
+        example: "xxx-xxx-xxx-xxx"
+      - name: token
+        in: cookie
+        description: "アクセストークン"
+        required: true
+        schema: { type: string }
+        example: "xxx-xxx-xxx"
+      responses:
+        "200":
+          description: "成功"

@@ -5,33 +5,6 @@ import (
 	"unify/internal/models"
 )
 
-func PostItem(newItem models.Item) (Itemlist []models.Item) {
-	// データベースのハンドルを取得する
-	db := ConnectSQL()
-	defer db.Close()
-
-	// SQLの準備
-	ins, err := db.Prepare("INSERT INTO itemlist VALUES(?,?)")
-	if err != nil {
-		//log.Fatal(err)
-		panic(err.Error())
-
-	}
-	defer ins.Close()
-
-	// SQLの実行
-	_, err = ins.Exec(
-		newItem.ItemId,
-		newItem.InfoId,
-	)
-	if err != nil {
-		//log.Fatal(err)
-		panic(err.Error())
-
-	}
-	return GetItemList()
-}
-
 func GetItemList() (Itemlist []models.Item) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -77,26 +50,6 @@ func GetItem(id string) (returnmodels models.Item) {
 		}
 	}
 	return resultItem
-}
-func DeleteItem(id string) (Itemlist []models.Item) {
-	DeleteItemFromCart(id)
-	// データベースのハンドルを取得する
-	db := ConnectSQL()
-	defer db.Close()
-
-	// SQLの準備
-	ins, err := db.Prepare("DELETE FROM itemlist WHERE id = ?")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer ins.Close()
-
-	// SQLの実行
-	_, err = ins.Exec(id)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return GetItemList()
 }
 
 func GetPrice(id string) (price int) {
