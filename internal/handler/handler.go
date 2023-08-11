@@ -16,13 +16,3 @@ func GetItemList(c *gin.Context) {
 	c.JSON(http.StatusOK, database.GetItemList())
 
 }
-
-// func Transaction(c *gin.Context) {
-// 	requestMethod := http.MethodGet
-// 	switch request := requestMethod; request {
-// 	case "GET":
-// 		auth.GetTransaction(c)
-// 	case "POST":
-// 		auth.PostTransaction(c)
-// 	}
-// }
