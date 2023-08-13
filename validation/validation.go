@@ -199,3 +199,4 @@ func CartSessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey strin
 		return SessionKey.(string), NewSessionKey
 	}
 }
+//認証を担当するコード
