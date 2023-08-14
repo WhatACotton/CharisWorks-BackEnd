@@ -201,3 +201,4 @@ func CartSessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey strin
 }
 
 //認証を担当するコード
+//git test
