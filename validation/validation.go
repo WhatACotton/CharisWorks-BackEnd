@@ -7,11 +7,9 @@ import (
 	"log"
 	"os"
 	"time"
-	"unify/internal/database"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
-	"github.com/alexedwards/scs/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -22,9 +20,6 @@ import (
 
 type User struct {
 	Userdata auth.UserRecord
-}
-type SessionManager struct {
-	Session *scs.SessionManager
 }
 
 func (user *User) Verify(c *gin.Context, uid string) (authorized bool) {
@@ -215,20 +210,3 @@ func Set_Cart_Session(c *gin.Context, Cart_Session_Key string) {
 	session.Set("CartSessionKey", Cart_Session_Key)
 	session.Save()
 }
-func Cart_List_Session_Start(c *gin.Context) (database.Cart_List, string) {
-	Cart_List := new(database.Cart_List)
-	Cart_Session_Key := validation.Get_Cart_Session(c)
-	if Cart_Session_Key != "new" {
-		Cart_List.Refresh_Cart_List()
-	} else {
-		Cart_List.Session_Key = validation.GetUUID()
-		Cart_List.Cart_ID = validation.GetUUID()
-		Cart_List.Create_Cart_List()
-	}
-	validation.Set_Cart_Session(c, Cart_List.Session_Key)
-
-	return *Cart_List, Cart_Session_Key
-}
-
-//認証を担当するコード
-//git test

@@ -18,7 +18,7 @@ type LogInLog struct {
 	UID       string
 	LoginId   string
 	LoginDate string
-	Available bool
+	Available int
 }
 
 type CustomerRequestPayload struct {
@@ -62,21 +62,4 @@ type Bill struct {
 	TotalPrice      int           `json:"TotalPrice"`
 	TotalCount      int           `json:"TotalCount"`
 	Transactions    []Transaction `json:"Items"`
-}
-
-// Item関連
-type Item struct {
-	ItemId string `json:"id"`
-	InfoId string `json:"infoid"`
-}
-
-type ItemInfo struct {
-	InfoId      string `json:"infoid"`
-	Price       int    `json:"price"`
-	Name        string `json:"Name"`
-	Stonesize   int    `json:"Stonesize"`
-	Minlength   int    `json:"Minlength"`
-	Maxlength   int    `json:"Maxlength"`
-	Decsription string `json:"Description"`
-	Keyword     string `json:"Keyword"`
 }

@@ -58,39 +58,33 @@ func LogIn(c *gin.Context) {
 	//LogIn処理
 	user := new(validation.User)
 	uid := c.Query("uid")
-
+	Customer := new(database.Customer)
 	if user.Verify(c, uid) { //認証
 		log.Printf(user.Userdata.Email)
 		OldSessionKey, NewSessionKey := validation.SessionStart(c)
-		log.Printf(OldSessionKey)
-		log.Printf(NewSessionKey)
+		Customer.LogInCustomer(user.Userdata.UID, NewSessionKey)
 		if OldSessionKey == "new" {
-			database.LogInCustomer(user.Userdata.UID, NewSessionKey)
-
 			c.JSON(http.StatusOK, "SuccessFully Logined!!")
 		} else {
-			database.LogInCustomer(user.Userdata.UID, NewSessionKey)
-
+			database.Invalid(OldSessionKey)
 			c.JSON(http.StatusOK, user)
 		}
-
+		log.Printf(OldSessionKey)
+		log.Printf(NewSessionKey)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
+
 }
 
 func ContinueLogIn(c *gin.Context) {
 	OldSessionKey, NewSessionKey := validation.SessionStart(c)
 	uid := c.Query("uid")
-	log.Println(uid)
-
-	log.Printf(OldSessionKey)
-	log.Printf(NewSessionKey)
 	if OldSessionKey == "new" {
 		c.JSON(http.StatusOK, "未ログインです")
 	} else {
 		if database.VerifyCustomer(uid, OldSessionKey) {
-			database.LogInLog(uid, NewSessionKey)
+			database.LogIn_Log(uid, NewSessionKey)
 			database.Invalid(OldSessionKey)
 			c.JSON(http.StatusOK, "SuccessFully Logined!!")
 		} else {
@@ -98,6 +92,9 @@ func ContinueLogIn(c *gin.Context) {
 
 		}
 	}
+	log.Println(uid)
+	log.Printf(OldSessionKey)
+	log.Printf(NewSessionKey)
 }
 
 func ModifyCustomer(c *gin.Context) {

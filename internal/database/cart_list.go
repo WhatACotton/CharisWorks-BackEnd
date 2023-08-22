@@ -1,7 +1,6 @@
 package database
 
 import (
-	"log"
 	"unify/validation"
 )
 
@@ -24,7 +23,7 @@ func (c *Cart_List) Get_Cart_List() error {
 	// SQLの実行
 	rows, err := db.Query("SELECT CartID FROM Cart_List WHERE Session_Key = ?", c.Session_Key)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer rows.Close()
@@ -45,7 +44,7 @@ func (c *Cart_List) Create_Cart_List() error {
 	// SQLの準備
 	ins, err := db.Prepare("INSERT INTO Cart_List VALUES(?,?)")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer ins.Close()
 
@@ -64,7 +63,7 @@ func (c *Cart_List) Delete_Cart_List() error {
 	// SQLの準備
 	del, err := db.Prepare("DELETE FROM Cart_List WHERE Cart_ID = ?")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer del.Close()
 

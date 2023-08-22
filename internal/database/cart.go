@@ -5,13 +5,13 @@ import (
 )
 
 type Cart struct {
-	Cart_ID   string `json:"CartId"`
-	Info_ID   string `json:"InfoId"`
-	Item_ID   string `json:"ItemId"`
+	Cart_ID   string `json:"Cart_ID"`
+	Info_ID   string `json:"Info_ID"`
+	Item_ID   string `json:"Item_ID"`
 	Quantity  int    `json:"Quantity"`
 	Order     int    `json:"Order"`
 	Status    string `json:"Status"`
-	Item_Name string `json:"ItemName"`
+	Item_Name string `json:"Item_Name"`
 	Price     int    `json:"Price"`
 }
 
@@ -19,7 +19,7 @@ type Return_Cart struct {
 	Quantity  int    `json:"Quantity"`
 	Order     int    `json:"Order"`
 	Status    string `json:"Status"`
-	Item_Name string `json:"ItemName"`
+	Item_Name string `json:"Item_Name"`
 	Price     int    `json:"Price"`
 }
 

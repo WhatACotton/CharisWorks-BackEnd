@@ -5,39 +5,29 @@ import (
 )
 
 // Item関連
-type Item struct {
-	ItemId string `json:"id"`
-	InfoId string `json:"infoid"`
+type Item_List struct {
+	Item_ID string `json:"id"`
+	Info_ID string `json:"infoid"`
+	Status  string `json:"status"`
 }
 
-type ItemInfo struct {
-	InfoId      string `json:"infoid"`
-	Price       int    `json:"price"`
-	Name        string `json:"Name"`
-	Stonesize   int    `json:"Stonesize"`
-	Minlength   int    `json:"Minlength"`
-	Maxlength   int    `json:"Maxlength"`
-	Decsription string `json:"Description"`
-	Keyword     string `json:"Keyword"`
-}
-
-func GetItemList() (Itemlist []Item) {
+func GetItemList() (Itemlist []Item_List) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの実行
-	rows, err := db.Query("SELECT * FROM itemlist ")
+	rows, err := db.Query("SELECT * FROM Item_List ")
 	if err != nil {
 
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	var resultItem Item
-	var resultItemList []Item
+	var resultItem Item_List
+	var resultItemList []Item_List
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&resultItem.ItemId, &resultItem.InfoId)
+		err := rows.Scan(&resultItem.Item_ID, &resultItem.Info_ID)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -46,21 +36,21 @@ func GetItemList() (Itemlist []Item) {
 	return resultItemList
 }
 
-func GetItem(id string) (returnmodels Item) {
+func GetItem(id string) (returnmodels Item_List) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの実行
-	rows, err := db.Query("SELECT * FROM itemlist WHERE id = ?", id)
+	rows, err := db.Query("SELECT * FROM Item_List WHERE id = ?", id)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	var resultItem Item
+	var resultItem Item_List
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&resultItem.ItemId, &resultItem.InfoId)
+		err := rows.Scan(&resultItem.Item_ID, &resultItem.Info_ID)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -74,7 +64,7 @@ func GetPrice(id string) (price int) {
 	defer db.Close()
 
 	// SQLの実行
-	rows, err := db.Query("SELECT price FROM infolist WHERE ItemId = ?", id)
+	rows, err := db.Query("SELECT price FROM Item_List WHERE ItemId = ?", id)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -25,9 +25,9 @@ func main() {
 	r.DELETE("/DeleteCustomer", handler.DeleteCustomer)
 
 	r.GET("/SessionStart", handler.ContinueLogIn)
-	r.PATCH("/UpdateCart", handler.UpdateCart)
-	r.POST("/PostCart", handler.PostCart)
-	r.GET("/GetCart", handler.GetCart)
+	r.PATCH("/UpdateCart", handler.Update_Cart)
+	r.POST("/PostCart", handler.Post_Cart)
+	r.GET("/GetCart", handler.Get_Cart)
 
 	r.POST("/Transaction", handler.BuyItem)
 	r.Run(":8080") // 0.0.0.0:8080 でサーバーを立てます。
