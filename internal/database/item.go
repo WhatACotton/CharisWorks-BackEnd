@@ -2,10 +2,26 @@ package database
 
 import (
 	"log"
-	"unify/internal/models"
 )
 
-func GetItemList() (Itemlist []models.Item) {
+// Item関連
+type Item struct {
+	ItemId string `json:"id"`
+	InfoId string `json:"infoid"`
+}
+
+type ItemInfo struct {
+	InfoId      string `json:"infoid"`
+	Price       int    `json:"price"`
+	Name        string `json:"Name"`
+	Stonesize   int    `json:"Stonesize"`
+	Minlength   int    `json:"Minlength"`
+	Maxlength   int    `json:"Maxlength"`
+	Decsription string `json:"Description"`
+	Keyword     string `json:"Keyword"`
+}
+
+func GetItemList() (Itemlist []Item) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -17,8 +33,8 @@ func GetItemList() (Itemlist []models.Item) {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	var resultItem models.Item
-	var resultItemList []models.Item
+	var resultItem Item
+	var resultItemList []Item
 	// SQLの実行
 	for rows.Next() {
 		err := rows.Scan(&resultItem.ItemId, &resultItem.InfoId)
@@ -30,7 +46,7 @@ func GetItemList() (Itemlist []models.Item) {
 	return resultItemList
 }
 
-func GetItem(id string) (returnmodels models.Item) {
+func GetItem(id string) (returnmodels Item) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -41,7 +57,7 @@ func GetItem(id string) (returnmodels models.Item) {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	var resultItem models.Item
+	var resultItem Item
 	// SQLの実行
 	for rows.Next() {
 		err := rows.Scan(&resultItem.ItemId, &resultItem.InfoId)

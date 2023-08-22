@@ -18,10 +18,8 @@ func TemporarySignUp(c *gin.Context) {
 
 	if user.Verify(c, uid) { //認証
 		log.Printf(user.Userdata.Email)
-		OldCartSessionKey, NewSessionKey := validation.SessionStart(c)
-		if OldCartSessionKey != "new" {
-			database.SignUpCart(OldCartSessionKey, uid)
-		}
+		_, NewSessionKey := validation.SessionStart(c)
+
 		log.Printf(NewSessionKey)
 		//新しいアカウントの構造体を作成
 		newCustomer := new(models.CustomerRequestPayload)
@@ -72,7 +70,6 @@ func LogIn(c *gin.Context) {
 			c.JSON(http.StatusOK, "SuccessFully Logined!!")
 		} else {
 			database.LogInCustomer(user.Userdata.UID, NewSessionKey)
-			database.CartInvalid(OldSessionKey)
 
 			c.JSON(http.StatusOK, user)
 		}

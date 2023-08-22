@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"time"
+	"unify/internal/database"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
@@ -198,6 +199,35 @@ func CartSessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey strin
 		session.Save()
 		return SessionKey.(string), NewSessionKey
 	}
+}
+func Get_Cart_Session(c *gin.Context) (Cart_Session_Key string) {
+	session := sessions.DefaultMany(c, "CartSessionKey")
+	if session.Get("CartSessionKey") == nil {
+		return "new"
+	} else {
+		Cart_Session_Key = session.Get("CartSessionKey").(string)
+		return Cart_Session_Key
+	}
+}
+
+func Set_Cart_Session(c *gin.Context, Cart_Session_Key string) {
+	session := sessions.DefaultMany(c, "CartSessionKey")
+	session.Set("CartSessionKey", Cart_Session_Key)
+	session.Save()
+}
+func Cart_List_Session_Start(c *gin.Context) (database.Cart_List, string) {
+	Cart_List := new(database.Cart_List)
+	Cart_Session_Key := validation.Get_Cart_Session(c)
+	if Cart_Session_Key != "new" {
+		Cart_List.Refresh_Cart_List()
+	} else {
+		Cart_List.Session_Key = validation.GetUUID()
+		Cart_List.Cart_ID = validation.GetUUID()
+		Cart_List.Create_Cart_List()
+	}
+	validation.Set_Cart_Session(c, Cart_List.Session_Key)
+
+	return *Cart_List, Cart_Session_Key
 }
 
 //認証を担当するコード

@@ -1,18 +1,25 @@
 package database
 
-import "unify/internal/models"
+type ItemInfo struct {
+	InfoId      string `json:"infoid"`
+	Price       int    `json:"price"`
+	Name        string `json:"Name"`
+	Stonesize   int    `json:"Stonesize"`
+	Minlength   int    `json:"Minlength"`
+	Maxlength   int    `json:"Maxlength"`
+	Decsription string `json:"Description"`
+	Keyword     string `json:"Keyword"`
+}
 
-func PostTransactionList(CartId string, UID string, TransactionDate string) {
+func PostTransactionList(CartId string, UID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの準備
-	ins, err := db.Prepare("INSERT INTO transactionlist VALUES(?,?,?)")
+	ins, err := db.Prepare("INSERT INTO transactionlist (Cart_ID,UID)VALUES(?,?,?)")
 	if err != nil {
-		//log.Fatal(err)
-		panic(err.Error())
-
+		return err
 	}
 	defer ins.Close()
 
@@ -20,15 +27,14 @@ func PostTransactionList(CartId string, UID string, TransactionDate string) {
 	_, err = ins.Exec(
 		CartId,
 		UID,
-		TransactionDate,
 	)
 	if err != nil {
-		//log.Fatal(err)
-		panic(err.Error())
+		return err
 	}
+	return nil
 }
 
-func PostTransaction(Carts []models.Cart) {
+func PostTransaction(Carts []Cart) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -36,22 +42,21 @@ func PostTransaction(Carts []models.Cart) {
 	// SQLの準備
 	ins, err := db.Prepare("INSERT INTO transactionlist VALUES(?,?,?)")
 	if err != nil {
-		//log.Fatal(err)
-		panic(err.Error())
+		return err
 
 	}
 	defer ins.Close()
 	for _, Cart := range Carts {
 		// SQLの実行
 		_, err = ins.Exec(
-			Cart.CartId,
-			Cart.InfoId,
+			Cart.Cart_ID,
+			Cart.Info_ID,
 			Cart.Quantity,
 		)
 		if err != nil {
-			//log.Fatal(err)
-			panic(err.Error())
+			return err
 
 		}
 	}
+	return nil
 }

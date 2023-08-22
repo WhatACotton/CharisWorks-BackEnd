@@ -33,28 +33,6 @@ type CustomerRegisterPayload struct {
 	PhoneNumber int    `json:"PhoneNumber"`
 }
 
-// Cart関連
-type CartList struct {
-	CartId     string `json:"CartId"`
-	UID        string `json:"UID"`
-	SessionKey string `json:"sessionkey"`
-	Valid      bool   `json:"Valid"`
-}
-
-type Cart struct {
-	CartId         string `json:"CartId"`
-	ItemId         string `json:"ItemId"`
-	InfoId         string `json:"InfoId"`
-	Quantity       int    `json:"Quantity"`
-	RegisteredDate string `json:"RegisteredDate"`
-	Status         string `json:"Status"`
-}
-
-type CartRequestPayload struct {
-	ItemId   string `json:"ItemId"`
-	Quantity int    `json:"quantity"`
-}
-
 // Transaction関連
 type TransactionRequestPayload struct {
 	UID    string `json:"UID"`
