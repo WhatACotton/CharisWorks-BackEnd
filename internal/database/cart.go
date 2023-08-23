@@ -1,9 +1,5 @@
 package database
 
-import (
-	"fmt"
-)
-
 type Cart struct {
 	Cart_ID   string `json:"Cart_ID"`
 	Info_ID   string `json:"Info_ID"`
@@ -45,7 +41,6 @@ func Get_Cart(Cart_ID string) (Carts []Cart, err error) {
 	if err != nil {
 		return nil, err
 	}
-	Carts = Get_Cart_With_Info(Carts)
 	for _, _Cart := range Carts {
 		Cart := new(Cart)
 		err := Cart.Get_Item_Name_And_Price()
@@ -61,6 +56,7 @@ func Get_Cart(Cart_ID string) (Carts []Cart, err error) {
 	}
 	return Carts, nil
 }
+
 func Get_Cart_Info(Cart_ID string) (Carts []Cart, err error) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -80,13 +76,27 @@ func Get_Cart_Info(Cart_ID string) (Carts []Cart, err error) {
 		}
 		Carts = append(Carts, *Cart)
 	}
+
+	for _, Cart := range Carts {
+		err := Cart.Get_Cart_Info()
+		if err != nil {
+			return nil, err
+		}
+		err = Cart.Get_Item_Name_And_Price()
+		if err != nil {
+			return nil, err
+		}
+	}
 	return Carts, nil
 }
 
 func (c Cart_Request_Payload) Cart(Cart_ID string) error {
-	Item_List := GetItemList()
-	//リクエストされた商品が存在するか確認
-	if Inspect_Items(c.Item_ID, Item_List) {
+	judge, err := Inspect_Items(c.Item_ID)
+	if err != nil {
+		return err
+	}
+	//リクエストされた商品が登録可能か判定
+	if judge {
 		Carts, err := Get_Cart_Info(Cart_ID)
 		if err != nil {
 			return err
@@ -110,9 +120,32 @@ func (c Cart_Request_Payload) Cart(Cart_ID string) error {
 				return err
 			}
 		}
-		return nil
+	}
+	return nil
+}
+
+func Inspect_Items(Item_ID string) (judge bool, err error) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	defer db.Close()
+	// SQLの実行
+	rows, err := db.Query("SELECT Status FROM Item_List WHERE Item_ID = ?", Item_ID)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	status := new(string)
+	// SQLの実行
+	for rows.Next() {
+		err := rows.Scan(&status)
+		if err != nil {
+			return false, err
+		}
+	}
+	if *status == "available" {
+		return true, nil
 	} else {
-		return fmt.Errorf("cart: item not found")
+		return false, nil
 	}
 }
 
@@ -134,15 +167,6 @@ func (c Cart_Request_Payload) Post_Cart(Cart_ID string) error {
 	return nil
 }
 
-func Inspect_Items(Item_ID string, Itemlist []Item_List) bool {
-	for _, Item := range Itemlist {
-		if Item_ID == Item.Item_ID {
-			return true
-		}
-	}
-	return false
-}
-
 func Search_Cart(Carts []Cart, Item_ID string) bool {
 	for _, Cart := range Carts {
 		if Cart.Item_ID == Item_ID {
@@ -154,30 +178,6 @@ func Search_Cart(Carts []Cart, Item_ID string) bool {
 	return false
 }
 
-func Get_Cart_With_Info(Carts []Cart) []Cart {
-	for _, Cart := range Carts {
-		Cart.Get_Cart_Info()
-	}
-	return Carts
-}
-
-func (c *Cart) Get_Item_Name_And_Price() error {
-	db := ConnectSQL()
-	defer db.Close()
-	// SQLの実行
-	rows, err := db.Query("SELECT Item_Name , Price FROM Item WHERE Info_ID = ?", c.Info_ID)
-	if err != nil {
-		return err
-	}
-	// SQLの実行
-	for rows.Next() {
-		err := rows.Scan(&c.Item_Name, &c.Price)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
 func (c *Cart) Get_Cart_Info() error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -191,6 +191,23 @@ func (c *Cart) Get_Cart_Info() error {
 	// SQLの実行
 	for rows.Next() {
 		err := rows.Scan(&c.Item_ID, &c.Info_ID, &c.Status)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func (c *Cart) Get_Item_Name_And_Price() error {
+	db := ConnectSQL()
+	defer db.Close()
+	// SQLの実行
+	rows, err := db.Query("SELECT Item_Name , Price FROM Item WHERE Info_ID = ?", c.Info_ID)
+	if err != nil {
+		return err
+	}
+	// SQLの実行
+	for rows.Next() {
+		err := rows.Scan(&c.Item_Name, &c.Price)
 		if err != nil {
 			return err
 		}

@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TemporarySignUp(c *gin.Context) {
+func Temporary_SignUp(c *gin.Context) {
 	//signup処理
 	//仮登録を行う。ここでの登録内容はUIDと作成日時だけ。
 	user := new(validation.User)
@@ -20,7 +20,7 @@ func TemporarySignUp(c *gin.Context) {
 		log.Printf(user.Userdata.Email)
 		_, NewSessionKey := validation.SessionStart(c)
 
-		log.Printf(NewSessionKey)
+		log.Print(NewSessionKey)
 		//新しいアカウントの構造体を作成
 		newCustomer := new(models.CustomerRequestPayload)
 
@@ -69,15 +69,15 @@ func LogIn(c *gin.Context) {
 			database.Invalid(OldSessionKey)
 			c.JSON(http.StatusOK, user)
 		}
-		log.Printf(OldSessionKey)
-		log.Printf(NewSessionKey)
+		log.Print(OldSessionKey)
+		log.Print(NewSessionKey)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
 
 }
 
-func ContinueLogIn(c *gin.Context) {
+func Continue_LogIn(c *gin.Context) {
 	OldSessionKey, NewSessionKey := validation.SessionStart(c)
 	uid := c.Query("uid")
 	if OldSessionKey == "new" {
@@ -93,11 +93,11 @@ func ContinueLogIn(c *gin.Context) {
 		}
 	}
 	log.Println(uid)
-	log.Printf(OldSessionKey)
-	log.Printf(NewSessionKey)
+	log.Print(OldSessionKey)
+	log.Print(NewSessionKey)
 }
 
-func ModifyCustomer(c *gin.Context) {
+func Modify_Customer(c *gin.Context) {
 	//登録情報変更処理
 	//bodyにアカウントの詳細情報が入っている。
 	uid := c.Query("uid")
@@ -114,20 +114,20 @@ func ModifyCustomer(c *gin.Context) {
 	}
 }
 
-func DeleteCustomer(c *gin.Context) {
+func Delete_Customer(c *gin.Context) {
+	Log_Out(c)
 	//アカウントの削除
 	user := new(validation.User)
 	uid := c.Query("uid")
 	if user.Verify(c, uid) { //認証
+		user.DeleteCustomer(c, uid)
 		database.DeleteCustomer(user.Userdata.UID)
-		user.DeleteCustomer(c, user.Userdata.UID)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
-	user.DeleteCustomer(c, uid)
 }
 
-func LogOut(c *gin.Context) {
+func Log_Out(c *gin.Context) {
 	//ログアウト
 	uid := c.Query("uid")
 	OldSessionKey := validation.SessionEnd(c)

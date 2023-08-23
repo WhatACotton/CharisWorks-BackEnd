@@ -14,21 +14,30 @@ func main() {
 	validation.CORS(r)
 	validation.SessionConfig(r)
 	database.TestSQL()
-	r.GET("/item", handler.GetItem)
-	r.GET("/itemlist", handler.GetItemList)
-
+	// アカウント管理
+	//ログイン
 	r.GET("/Login", handler.LogIn)
-	r.POST("/SignUp", handler.TemporarySignUp)
-	r.GET("/Logout", handler.LogOut)
+	// 仮登録
+	r.POST("/SignUp", handler.Temporary_SignUp)
+	// ログアウト
+	r.GET("/Logout", handler.Log_Out)
+	// 本登録
 	r.POST("/Registration", handler.SignUp)
-	r.POST("/Modify", handler.ModifyCustomer)
-	r.DELETE("/DeleteCustomer", handler.DeleteCustomer)
+	// 登録内容の修正
+	r.POST("/Modify", handler.Modify_Customer)
+	// アカウントの削除
+	r.DELETE("/DeleteCustomer", handler.Delete_Customer)
+	// ログイン状態の継続
+	r.GET("/SessionStart", handler.Continue_LogIn)
 
-	r.GET("/SessionStart", handler.ContinueLogIn)
-	r.PATCH("/UpdateCart", handler.Update_Cart)
+	// カート機能
+	// 商品の登録・修正・削除
 	r.POST("/PostCart", handler.Post_Cart)
+	// カートの取得
 	r.GET("/GetCart", handler.Get_Cart)
 
+	// 購入処理
 	r.POST("/Transaction", handler.BuyItem)
+
 	r.Run(":8080") // 0.0.0.0:8080 でサーバーを立てます。
 }

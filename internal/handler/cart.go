@@ -31,7 +31,7 @@ func Post_Cart(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = NewCartReq.Post_Cart(Cart_List.Cart_ID)
+	err = NewCartReq.Cart(Cart_List.Cart_ID)
 	if err != nil {
 		log.Fatal(err)
 	}

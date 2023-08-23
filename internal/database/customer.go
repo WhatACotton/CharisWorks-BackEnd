@@ -36,7 +36,7 @@ func SignUpCustomer(req models.CustomerRequestPayload, SessionID string) error {
 	// SQLの実行
 	_, err = ins.Exec(req.UID, "default", "default", req.Email, "00000000000", false, GetDate(), 20000101, 20000101, SessionID)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	log.Printf(req.Email)
 
@@ -58,7 +58,7 @@ func RegisterCustomer(usr validation.User, customer models.CustomerRegisterPaylo
 		RegisteredDate = ?,
 		WHERE UID = ?`)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer ins.Close()
 
@@ -85,7 +85,7 @@ func ModifyCustomer(usr validation.User, customer models.CustomerRegisterPayload
 		ModifiedDate = ?,
 		WHERE UID = ?`)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer ins.Close()
 
@@ -105,6 +105,7 @@ func VerifyCustomer(uid string, OldSessionKey string) bool {
 	rows, err := db.Query("SELECT Available FROM LogIn WHERE UID = ? AND Session_Key = ?", uid, OldSessionKey)
 	if err != nil {
 		log.Fatal(err)
+		return false
 	}
 
 	defer rows.Close()

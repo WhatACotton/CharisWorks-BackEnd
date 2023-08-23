@@ -1,9 +1,5 @@
 package database
 
-import (
-	"log"
-)
-
 // Item関連
 type Item_List struct {
 	Item_ID string `json:"id"`
@@ -11,7 +7,7 @@ type Item_List struct {
 	Status  string `json:"status"`
 }
 
-func GetItemList() (Itemlist []Item_List) {
+func Get_Item_List() (Itemlist []Item_List, err error) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -19,8 +15,7 @@ func GetItemList() (Itemlist []Item_List) {
 	// SQLの実行
 	rows, err := db.Query("SELECT * FROM Item_List ")
 	if err != nil {
-
-		log.Fatal(err)
+		return nil, err
 	}
 	defer rows.Close()
 	var resultItem Item_List
@@ -29,14 +24,14 @@ func GetItemList() (Itemlist []Item_List) {
 	for rows.Next() {
 		err := rows.Scan(&resultItem.Item_ID, &resultItem.Info_ID)
 		if err != nil {
-			panic(err.Error())
+			return nil, err
 		}
 		resultItemList = append(resultItemList, resultItem)
 	}
-	return resultItemList
+	return resultItemList, nil
 }
 
-func GetItem(id string) (returnmodels Item_List) {
+func (returnmodels Item_List) Get_Item_List(id string) (err error) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -44,7 +39,7 @@ func GetItem(id string) (returnmodels Item_List) {
 	// SQLの実行
 	rows, err := db.Query("SELECT * FROM Item_List WHERE id = ?", id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer rows.Close()
 	var resultItem Item_List
@@ -52,21 +47,21 @@ func GetItem(id string) (returnmodels Item_List) {
 	for rows.Next() {
 		err := rows.Scan(&resultItem.Item_ID, &resultItem.Info_ID)
 		if err != nil {
-			panic(err.Error())
+			return err
 		}
 	}
-	return resultItem
+	return nil
 }
 
-func GetPrice(id string) (price int) {
+func Get_Price(Info_ID string) (price int, err error) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの実行
-	rows, err := db.Query("SELECT price FROM Item_List WHERE ItemId = ?", id)
+	rows, err := db.Query("SELECT price FROM Item WHERE Info_ID = ?", Info_ID)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 	defer rows.Close()
 	var resultPrice int
@@ -74,8 +69,8 @@ func GetPrice(id string) (price int) {
 	for rows.Next() {
 		err := rows.Scan(&resultPrice)
 		if err != nil {
-			panic(err.Error())
+			return 0, err
 		}
 	}
-	return resultPrice
+	return resultPrice, nil
 }

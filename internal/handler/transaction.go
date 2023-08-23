@@ -15,10 +15,9 @@ func BuyItem(c *gin.Context) {
 	Cart_List := new(database.Cart_List)
 	UID := c.Query("uid")
 	OldSessionKey, NewSessionKey := validation.SessionStart(c)
-	uid := c.Query("uid")
 	Customer := new(database.Customer)
 	if OldSessionKey != "new" {
-		if database.VerifyCustomer(uid, OldSessionKey) {
+		if database.VerifyCustomer(UID, OldSessionKey) {
 			database.Invalid(OldSessionKey)
 			c.JSON(http.StatusOK, "SuccessFully Logined!!")
 			Customer.LogInCustomer(UID, NewSessionKey)

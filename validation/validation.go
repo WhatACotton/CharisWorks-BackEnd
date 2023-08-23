@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"log"
-	"os"
 	"time"
 
 	firebase "firebase.google.com/go"
@@ -72,14 +71,6 @@ func (user *User) DeleteCustomer(c *gin.Context, uid string) {
 	}
 	log.Printf("Successfully deleted user: %s\n", uid)
 
-}
-
-// ベーシック認証周りの設定
-func Basic(r *gin.Engine) (routergroup *gin.RouterGroup) {
-	authorized := r.Group("/admin", gin.BasicAuth(gin.Accounts{
-		os.Getenv("AUTH_USER"): os.Getenv("AUTH_PASS"),
-	}))
-	return authorized
 }
 
 // CORSの設定
