@@ -28,7 +28,7 @@ func BuyItem(c *gin.Context) {
 					//ここからデータベースの処理
 					Bill := new(models.Bill)
 					InspectedCarts := new([]database.Cart)
-					Carts, err := database.Get_Cart(Cart_List.Cart_ID)
+					Carts, err := database.Get_Cart_Info(Cart_List.Cart_ID)
 					if err != nil {
 						log.Fatal(err)
 					}

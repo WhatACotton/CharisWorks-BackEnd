@@ -2,6 +2,8 @@ package database
 
 import (
 	"unify/validation"
+
+	"github.com/pkg/errors"
 )
 
 type Cart_List struct {
@@ -9,6 +11,7 @@ type Cart_List struct {
 	Session_Key string `json:"Session_Key"`
 }
 
+// Cart_Listを更新する。実行する条件は、Session_Keyが存在すること。
 func (c *Cart_List) Refresh_Cart_List() {
 	c.Get_Cart_List()
 	c.Delete_Cart_List()
@@ -21,9 +24,9 @@ func (c *Cart_List) Get_Cart_List() error {
 	db := ConnectSQL()
 
 	// SQLの実行
-	rows, err := db.Query("SELECT CartID FROM Cart_List WHERE Session_Key = ?", c.Session_Key)
+	rows, err := db.Query("SELECT Cart_ID FROM Cart_List WHERE Session_Key = ?", c.Session_Key)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Cart_ID")
 	}
 
 	defer rows.Close()
@@ -31,7 +34,7 @@ func (c *Cart_List) Get_Cart_List() error {
 	for rows.Next() {
 		err := rows.Scan(&c.Cart_ID)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "error in scanning Cart_ID")
 		}
 	}
 	return nil
@@ -42,16 +45,16 @@ func (c *Cart_List) Create_Cart_List() error {
 	db := ConnectSQL()
 
 	// SQLの準備
-	ins, err := db.Prepare("INSERT INTO Cart_List VALUES(?,?)")
+	ins, err := db.Prepare("INSERT INTO Cart_List (Session_Key,Cart_ID)VALUES(?,?)")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in preparing Cart_List")
 	}
 	defer ins.Close()
 
 	// SQLの実行
 	_, err = ins.Exec(c.Session_Key, c.Cart_ID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in inserting Cart_List")
 	}
 	return nil
 }
@@ -63,14 +66,14 @@ func (c *Cart_List) Delete_Cart_List() error {
 	// SQLの準備
 	del, err := db.Prepare("DELETE FROM Cart_List WHERE Cart_ID = ?")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in preparing to delete Cart_List")
 	}
 	defer del.Close()
 
 	// SQLの実行
 	_, err = del.Exec(c.Cart_ID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in deleting Cart_List")
 	}
 	return nil
 }
