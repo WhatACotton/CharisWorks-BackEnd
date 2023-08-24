@@ -28,7 +28,7 @@ func Temporary_SignUp(c *gin.Context) {
 		newCustomer.Email = user.Userdata.Email
 		log.Printf(newCustomer.UID, newCustomer.Email)
 		//アカウント登録
-		res := database.SignUpCustomer(*newCustomer, NewSessionKey)
+		res := database.SignUp_Customer(*newCustomer, NewSessionKey)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
@@ -48,7 +48,7 @@ func SignUp(c *gin.Context) {
 		if err := c.BindJSON(&h); err != nil {
 			return
 		}
-		database.RegisterCustomer(*user, *h)
+		database.Register_Customer(*user, *h)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
 	}
@@ -62,7 +62,7 @@ func LogIn(c *gin.Context) {
 	if user.Verify(c, uid) { //認証
 		log.Printf(user.Userdata.Email)
 		OldSessionKey, NewSessionKey := validation.SessionStart(c)
-		Customer.LogInCustomer(user.Userdata.UID, NewSessionKey)
+		Customer.LogIn_Customer(user.Userdata.UID, NewSessionKey)
 		if OldSessionKey == "new" {
 			c.JSON(http.StatusOK, "SuccessFully Logined!!")
 		} else {
@@ -83,7 +83,7 @@ func Continue_LogIn(c *gin.Context) {
 	if OldSessionKey == "new" {
 		c.JSON(http.StatusOK, "未ログインです")
 	} else {
-		if database.VerifyCustomer(uid, OldSessionKey) {
+		if database.Verify_Customer(uid, OldSessionKey) {
 			database.LogIn_Log(uid, NewSessionKey)
 			database.Invalid(OldSessionKey)
 			c.JSON(http.StatusOK, "SuccessFully Logined!!")
@@ -108,7 +108,7 @@ func Modify_Customer(c *gin.Context) {
 		if err := c.BindJSON(&h); err != nil {
 			return
 		}
-		database.ModifyCustomer(*user, *h)
+		database.Modify_Customer(*user, *h)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
 	}
@@ -121,7 +121,7 @@ func Delete_Customer(c *gin.Context) {
 	uid := c.Query("uid")
 	if user.Verify(c, uid) { //認証
 		user.DeleteCustomer(c, uid)
-		database.DeleteCustomer(user.Userdata.UID)
+		database.Delete_Customer(user.Userdata.UID)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
@@ -132,7 +132,7 @@ func Log_Out(c *gin.Context) {
 	uid := c.Query("uid")
 	OldSessionKey := validation.SessionEnd(c)
 	database.Invalid(OldSessionKey)
-	if database.VerifyCustomer(uid, OldSessionKey) {
+	if database.Verify_Customer(uid, OldSessionKey) {
 		c.JSON(http.StatusOK, "SuccessFully Loggedout!!")
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "不正なアクセスです"})

@@ -5,6 +5,8 @@ import (
 	"log"
 	"unify/internal/models"
 	"unify/validation"
+
+	"github.com/pkg/errors"
 ) // Customer関連
 type Customer struct {
 	UID            string `json:"UID"`
@@ -19,7 +21,7 @@ type Customer struct {
 	LastSessionId  string
 }
 
-func SignUpCustomer(req models.CustomerRequestPayload, SessionID string) error {
+func SignUp_Customer(req models.CustomerRequestPayload, SessionID string) error {
 	log.Printf("SignUpCustomer Called")
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -29,21 +31,21 @@ func SignUpCustomer(req models.CustomerRequestPayload, SessionID string) error {
 
 	ins, err := db.Prepare("INSERT INTO Customer VALUES(?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in preparing Customer /SignUp_Customer_1")
 	}
 	defer ins.Close()
 
 	// SQLの実行
 	_, err = ins.Exec(req.UID, "default", "default", req.Email, "00000000000", false, GetDate(), 20000101, 20000101, SessionID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in inserting Customer /SignUp_Customer_2")
 	}
 	log.Printf(req.Email)
 
 	return nil
 }
 
-func RegisterCustomer(usr validation.User, customer models.CustomerRegisterPayload) error {
+func Register_Customer(usr validation.User, customer models.CustomerRegisterPayload) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -58,19 +60,19 @@ func RegisterCustomer(usr validation.User, customer models.CustomerRegisterPaylo
 		RegisteredDate = ?,
 		WHERE UID = ?`)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in preparing Customer /Register_Customer_1")
 	}
 	defer ins.Close()
 
 	// SQLの実行
 	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.Address), customer.PhoneNumber, true, GetDate(), usr.Userdata.UID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in inserting Customer /Register_Customer_2")
 	}
 	return nil
 }
 
-func ModifyCustomer(usr validation.User, customer models.CustomerRegisterPayload) error {
+func Modify_Customer(usr validation.User, customer models.CustomerRegisterPayload) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -85,19 +87,19 @@ func ModifyCustomer(usr validation.User, customer models.CustomerRegisterPayload
 		ModifiedDate = ?,
 		WHERE UID = ?`)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in preparing Customer /Modify_Customer_1")
 	}
 	defer ins.Close()
 
 	// SQLの実行
 	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.Address), customer.PhoneNumber, true, GetDate(), usr.Userdata.UID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in inserting Customer /Modify_Customer_2")
 	}
 	return nil
 }
 
-func VerifyCustomer(uid string, OldSessionKey string) bool {
+func Verify_Customer(uid string, OldSessionKey string) bool {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -125,14 +127,14 @@ func VerifyCustomer(uid string, OldSessionKey string) bool {
 	}
 }
 
-func (c *Customer) LogInCustomer(uid string, NewSessionKey string) error {
+func (c *Customer) LogIn_Customer(uid string, NewSessionKey string) error {
 	LogIn_Log(uid, NewSessionKey)
-	UpdateSessionId(uid, NewSessionKey)
+	Update_Session_ID(uid, NewSessionKey)
 	db := ConnectSQL()
 	// SQLの実行
 	rows, err := db.Query("SELECT * FROM Customer WHERE UID = ?", uid)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Customer /LogIn_Customer_1")
 	}
 	defer rows.Close()
 	// SQLの実行
@@ -140,23 +142,23 @@ func (c *Customer) LogInCustomer(uid string, NewSessionKey string) error {
 		//err := rows.Scan(&Customer)
 		err := rows.Scan(&c.UID, &c.Name, &c.Address, &c.Email, &c.PhoneNumber, &c.Register, &c.CreatedDate, &c.ModifiedDate, &c.RegisteredDate, &c.LastSessionId)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "error in scanning Customer /LogIn_Customer_2")
 		}
 	}
 	return nil
 }
 
-func UpdateSessionId(uid string, NewSessionKey string) error {
+func Update_Session_ID(uid string, NewSessionKey string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	ins, err := db.Prepare("UPDATE Customer SET Last_Session_ID = ? WHERE UID = ?")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in preparing Customer /Update_Session_ID_1")
 	}
 	// SQLの実行
 	_, err = ins.Exec(NewSessionKey, uid)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in inserting Customer /Update_Session_ID_2")
 	}
 	defer ins.Close()
 	return nil
@@ -170,13 +172,13 @@ func LogIn_Log(uid string, NewSessionKey string) error {
 	//UID SessionKey LoginedDate Available
 	ins, err := db.Prepare("INSERT INTO LogIn (UID , Session_Key,LogIn_Date,Available)VALUES(?,?,?,1)")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in preparing Customer /LogIn_Log_1")
 	}
 
 	// SQLの実行
 	_, err = ins.Exec(uid, NewSessionKey, GetDate())
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in inserting Customer /LogIn_Log_2")
 	}
 	defer ins.Close()
 	return nil
@@ -188,25 +190,25 @@ func Invalid(SessionKey string) error {
 	db := ConnectSQL()
 	ins, err := db.Prepare("UPDATE LogIn SET Available = 0 WHERE Session_Key = ?")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in preparing Customer /Invalid_1")
 	}
 	// SQLの実行
 	_, err = ins.Exec(SessionKey)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in inserting Customer /Invalid_2")
 	}
 	defer ins.Close()
 	return nil
 }
 
-func GetUID(SessionKey string) (uid string, err error) {
+func Get_UID(SessionKey string) (uid string, err error) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの実行
 
 	rows, err := db.Query("SELECT UID FROM LogIn WHERE Session_Key = ?", SessionKey)
 	if err != nil {
-		return "error", err
+		return "error", errors.Wrap(err, "error in getting UID /Get_UID_1")
 	}
 	defer rows.Close()
 	var UID string
@@ -216,23 +218,23 @@ func GetUID(SessionKey string) (uid string, err error) {
 		err := rows.Scan(&UID)
 
 		if err != nil {
-			return "error", err
+			return "error", errors.Wrap(err, "error in scanning UID /Get_UID_2")
 		}
 	}
 	return UID, nil
 }
 
-func DeleteCustomer(uid string) error {
+func Delete_Customer(uid string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	ins, err := db.Prepare("DELETE FROM Customer WHERE UID = ?")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in preparing Customer /Delete_Customer_1")
 	}
 	// SQLの実行
 	_, err = ins.Exec(uid)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in inserting Customer /Delete_Customer_2")
 	}
 	defer ins.Close()
 	return nil

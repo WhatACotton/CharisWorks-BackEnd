@@ -134,7 +134,7 @@ func (c Cart_Request_Payload) Cart(Cart_ID string) error {
 			if c.Quantity != 0 {
 				err := c.Post_Cart(Cart_ID)
 				if err != nil {
-					return err
+					return errors.Wrap(err, "error in getting Cart_ID /Cart_5")
 				}
 
 			} else {
@@ -152,13 +152,13 @@ func (c Cart_Request_Payload) Post_Cart(Cart_ID string) error {
 	//UID,Item_ID,Quantity
 	ins, err := db.Prepare("INSERT INTO Cart (Cart_ID , Item_ID , Quantity) VALUES (? , ? , ?)")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Cart_ID /Post_Cart_1")
 	}
 	defer ins.Close()
 	// SQLの実行
 	_, err = ins.Exec(Cart_ID, c.Item_ID, c.Quantity)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Cart_ID /Post_Cart_2")
 	}
 	return nil
 }
@@ -181,13 +181,13 @@ func Start_Cart(SessionKey string, Cart_ID string) error {
 	//UID,Item_ID,Quantity
 	ins, err := db.Prepare("INSERT INTO Cart_List (Cart_ID,Session_Key)VALUES(?,?)")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Cart_ID /Start_Cart_1")
 	}
 	defer ins.Close()
 	// SQLの実行
 	_, err = ins.Exec(Cart_ID, SessionKey)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Cart_ID /Start_Cart_2")
 	}
 	return nil
 }
@@ -199,7 +199,7 @@ func Get_Cart_ID(OldSessionKey string) (Cart_ID string, err error) {
 	// SQLの実行
 	rows, err := db.Query("SELECT CartId FROM cartlist WHERE SessionKey = ?", OldSessionKey)
 	if err != nil {
-		return "none", err
+		return "none", errors.Wrap(err, "error in getting Cart_ID /Get_Cart_ID_1")
 	}
 
 	defer rows.Close()
@@ -208,7 +208,7 @@ func Get_Cart_ID(OldSessionKey string) (Cart_ID string, err error) {
 		err := rows.Scan(&Cart_ID)
 
 		if err != nil {
-			return "none", err
+			return "none", errors.Wrap(err, "error in scanning Cart_ID /Get_Cart_ID_2")
 		}
 	}
 	return Cart_ID, nil
@@ -221,12 +221,12 @@ func (c Cart_Request_Payload) Update_Cart(Cart_ID string) error {
 	// SQLの実行
 	ins, err := db.Prepare("UPDATE Cart SET Quantity = ? WHERE Cart_Id = ? AND Item_ID = ?")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Cart_ID /Update_Cart_1")
 	}
 	// SQLの実行
 	_, err = ins.Exec(c.Quantity, Cart_ID, c.Item_ID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Cart_ID /Update_Cart_2")
 	}
 	defer ins.Close()
 	return nil
@@ -239,12 +239,12 @@ func Delete_Cart(Cart_ID string, Item_ID string) error {
 	// SQLの実行
 	ins, err := db.Prepare("DELETE FROM Cart WHERE Cart_ID = ? AND Item_ID = ?")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Cart_ID /Delete_Cart_1")
 	}
 	// SQLの実行
 	_, err = ins.Exec(Cart_ID, Item_ID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Cart_ID /Delete_Cart_2")
 	}
 	defer ins.Close()
 	return nil
@@ -258,14 +258,14 @@ func Delete_Item_From_Cart(Item_ID string) error {
 	// SQLの準備
 	ins, err := db.Prepare("DELETE FROM Cart WHERE Item_ID = ?")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Cart_ID /Delete_Item_From_Cart_1")
 	}
 	defer ins.Close()
 
 	// SQLの実行
 	_, err = ins.Exec(Item_ID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error in getting Cart_ID /Delete_Item_From_Cart_2")
 	}
 	return nil
 }

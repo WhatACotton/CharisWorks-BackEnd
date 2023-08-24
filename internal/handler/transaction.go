@@ -17,10 +17,10 @@ func BuyItem(c *gin.Context) {
 	OldSessionKey, NewSessionKey := validation.SessionStart(c)
 	Customer := new(database.Customer)
 	if OldSessionKey != "new" {
-		if database.VerifyCustomer(UID, OldSessionKey) {
+		if database.Verify_Customer(UID, OldSessionKey) {
 			database.Invalid(OldSessionKey)
 			c.JSON(http.StatusOK, "SuccessFully Logined!!")
-			Customer.LogInCustomer(UID, NewSessionKey)
+			Customer.LogIn_Customer(UID, NewSessionKey)
 			if Customer.Register {
 				if user.Verify(c, UID) {
 					//ここで購入処理
