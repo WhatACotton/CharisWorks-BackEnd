@@ -15,13 +15,12 @@ func BuyItem(c *gin.Context) {
 	Cart_List := new(database.Cart_List)
 	UID := c.Query("uid")
 	OldSessionKey, NewSessionKey := validation.SessionStart(c)
-	uid := c.Query("uid")
 	Customer := new(database.Customer)
 	if OldSessionKey != "new" {
-		if database.VerifyCustomer(uid, OldSessionKey) {
+		if database.Verify_Customer(UID, OldSessionKey) {
 			database.Invalid(OldSessionKey)
 			c.JSON(http.StatusOK, "SuccessFully Logined!!")
-			Customer.LogInCustomer(UID, NewSessionKey)
+			Customer.LogIn_Customer(UID, NewSessionKey)
 			if Customer.Register {
 				if user.Verify(c, UID) {
 					//ここで購入処理
@@ -29,7 +28,7 @@ func BuyItem(c *gin.Context) {
 					//ここからデータベースの処理
 					Bill := new(models.Bill)
 					InspectedCarts := new([]database.Cart)
-					Carts, err := database.Get_Cart(Cart_List.Cart_ID)
+					Carts, err := database.Get_Cart_Info(Cart_List.Cart_ID)
 					if err != nil {
 						log.Fatal(err)
 					}
@@ -41,7 +40,7 @@ func BuyItem(c *gin.Context) {
 					}
 					if InspectedCarts == &Carts {
 						//購入可能な商品のみを購入履歴に追加
-						database.PostTransaction(*InspectedCarts)
+						database.PostTransaction(*InspectedCarts, Cart_List.Cart_ID)
 						//初期化
 						Transactions := new([]models.Transaction)
 						Transaction := new(models.Transaction)

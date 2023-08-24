@@ -1,18 +1,6 @@
 package models
 
-// Customer関連
-type Customer struct {
-	UID            string `json:"UID"`
-	Name           string `json:"Name"`
-	Address        string `json:"address"`
-	Email          string `json:"Contact"`
-	PhoneNumber    string `json:"PhoneNumber"`
-	Register       bool
-	CreatedDate    string
-	ModifiedDate   string
-	RegisteredDate string
-	LastSessionId  string
-}
+
 
 type LogInLog struct {
 	UID       string

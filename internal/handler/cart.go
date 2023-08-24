@@ -13,6 +13,7 @@ func Cart_List_Session_Start(c *gin.Context) (database.Cart_List, string) {
 	Cart_List := new(database.Cart_List)
 	Cart_Session_Key := validation.Get_Cart_Session(c)
 	if Cart_Session_Key != "new" {
+		Cart_List.Session_Key = Cart_Session_Key
 		Cart_List.Refresh_Cart_List()
 	} else {
 		Cart_List.Session_Key = validation.GetUUID()
@@ -31,11 +32,11 @@ func Post_Cart(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = NewCartReq.Post_Cart(Cart_List.Cart_ID)
+	err = NewCartReq.Cart(Cart_List.Cart_ID)
 	if err != nil {
 		log.Fatal(err)
 	}
-	Carts, err := database.Get_Cart(Cart_List.Cart_ID)
+	Carts, err := database.Get_Cart_Info(Cart_List.Cart_ID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,11 +45,12 @@ func Post_Cart(c *gin.Context) {
 
 func Get_Cart(c *gin.Context) {
 	Cart_List, _ := Cart_List_Session_Start(c)
-	Carts, err := database.Get_Cart(Cart_List.Cart_ID)
+	Carts, err := database.Get_Cart_Info(Cart_List.Cart_ID)
 	if err != nil {
 		log.Fatal(err)
 	}
 	c.JSON(http.StatusOK, Carts)
+	log.Print(Carts)
 }
 
 func Update_Cart(c *gin.Context) {
@@ -62,7 +64,7 @@ func Update_Cart(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Carts, err := database.Get_Cart(Cart_List.Cart_ID)
+	Carts, err := database.Get_Cart_Info(Cart_List.Cart_ID)
 	if err != nil {
 		log.Fatal(err)
 	}
