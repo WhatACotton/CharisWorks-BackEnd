@@ -34,7 +34,7 @@ func PostTransactionList(CartId string, UID string) error {
 	return nil
 }
 
-func PostTransaction(Carts []Cart) error {
+func PostTransaction(Carts []Cart, Cart_ID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -49,7 +49,7 @@ func PostTransaction(Carts []Cart) error {
 	for _, Cart := range Carts {
 		// SQLの実行
 		_, err = ins.Exec(
-			Cart.Cart_ID,
+			Cart_ID,
 			Cart.Info_ID,
 			Cart.Quantity,
 		)

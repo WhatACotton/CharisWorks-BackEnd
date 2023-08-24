@@ -1,5 +1,7 @@
 package database
 
+import "log"
+
 // Item関連
 type Item_List struct {
 	Item_ID string `json:"id"`
@@ -8,13 +10,13 @@ type Item_List struct {
 	Stock   int    `json:"stock"`
 }
 
-func (Item_List Item_List) Get_Item_List(Item_ID string) (err error) {
+func (Item_List *Item_List) Get_Item_List(Item_ID string) (err error) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの実行
-	rows, err := db.Query("SELECT Item_ID,Info_ID,Status,Stock FROM Item_List WHERE Item_ID = ?", Item_ID)
+	rows, err := db.Query("SELECT Item_List.Item_ID,Item_List.Info_ID,Item_List.Status,Item_Info.Stock FROM Item_List JOIN Item_Info ON Item_List.Info_ID = Item_Info.Info_ID WHERE Item_ID = ?", Item_ID)
 	if err != nil {
 		return err
 	}
@@ -26,5 +28,6 @@ func (Item_List Item_List) Get_Item_List(Item_ID string) (err error) {
 			return err
 		}
 	}
+	log.Print(Item_List)
 	return nil
 }

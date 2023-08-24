@@ -1,6 +1,7 @@
 package database
 
 import (
+	"log"
 	"unify/validation"
 
 	"github.com/pkg/errors"
@@ -13,9 +14,10 @@ type Cart_List struct {
 
 // Cart_Listを更新する。実行する条件は、Session_Keyが存在すること。
 func (c *Cart_List) Refresh_Cart_List() {
+	log.Println("reflesh called")
 	c.Get_Cart_List()
 	c.Delete_Cart_List()
-	c.Cart_ID = validation.GetUUID()
+	c.Session_Key = validation.GetUUID()
 	c.Create_Cart_List()
 }
 
@@ -45,14 +47,14 @@ func (c *Cart_List) Create_Cart_List() error {
 	db := ConnectSQL()
 
 	// SQLの準備
-	ins, err := db.Prepare("INSERT INTO Cart_List (Session_Key,Cart_ID)VALUES(?,?)")
+	ins, err := db.Prepare("INSERT INTO Cart_List (Cart_ID,Session_Key)VALUES(?,?)")
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Cart_List")
 	}
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(c.Session_Key, c.Cart_ID)
+	_, err = ins.Exec(c.Cart_ID, c.Session_Key)
 	if err != nil {
 		return errors.Wrap(err, "error in inserting Cart_List")
 	}

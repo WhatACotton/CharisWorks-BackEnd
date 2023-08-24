@@ -50,6 +50,7 @@ func Get_Cart(c *gin.Context) {
 		log.Fatal(err)
 	}
 	c.JSON(http.StatusOK, Carts)
+	log.Print(Carts)
 }
 
 func Update_Cart(c *gin.Context) {

@@ -40,7 +40,7 @@ func BuyItem(c *gin.Context) {
 					}
 					if InspectedCarts == &Carts {
 						//購入可能な商品のみを購入履歴に追加
-						database.PostTransaction(*InspectedCarts)
+						database.PostTransaction(*InspectedCarts, Cart_List.Cart_ID)
 						//初期化
 						Transactions := new([]models.Transaction)
 						Transaction := new(models.Transaction)
