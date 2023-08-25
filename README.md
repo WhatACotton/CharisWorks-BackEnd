@@ -30,13 +30,11 @@ Transaction{
 
 Cartlist{
  string Cart_Id
- stirng UID
  string SessionKey
- bool Valid
 }
 
 Cart{
- timestamp CartTime
+ int order "Auto Inctriment: 商品の登録した順番を管理"
  string Cart_Id
  string Item_Id
  int quantity
@@ -46,6 +44,7 @@ ItemList{
  string Item_Id
  string Info_Id "マイナーチェンジはItem_Idに紐付ける"
  string status "購入可能かどうか"
+ int stock
 }
 ItemInfo{
  string Info_Id
@@ -64,14 +63,17 @@ ItemInfo{
 ```mermaid
 sequenceDiagram
 
-participant Server
 participant Client
+participant Server
+participant DB
 
-Client ->> Server:SessionRequest
-Note left of Server:validation
-Server ->> Server:issue New SessionKey
-Server ->> Server:invalidation of Requested SessionKey
-Server ->> Client:New SessionKey
+Client ->> Server:SessionKey UID
+Server ->> DB:Session_Key UID
+DB ->> Server:Status
+Server ->> DB:invalidation with Requested SessionKey
+Server->>Server:issue newSession_Key
+Server ->> DB:NewSession_Key
+Server ->> Client:newSessionKey
 
 
 ```
@@ -80,16 +82,39 @@ Server ->> Client:New SessionKey
 
 ```mermaid
 sequenceDiagram
-
+participant Client
 participant Server
 participant firebase
+
+
+Client ->> firebase:email password
+firebase ->> Client: UID context
+Client ->> Server: UID context
+Server ->> firebase:UID context
+firebase ->>Server:UserData
+Note over Server:issue Session_Key
+Server ->> Client:Sesison_Key
+
+```
+
+## カート管理
+
+```mermaid
+sequenceDiagram
 participant Client
+participant Server
+participant DB
 
-Client ->> firebase:email,password
-firebase ->> Client: uid,context
-Client ->> Server: uid,context
-Server ->> firebase:　
-firebase ->> Server:　
-Note left of firebase:Verify
-
+Client ->> Server:POST/Session_Key Item_ID Quantity
+Note right of DB:Cart_List
+Server ->> DB:Session_Key
+DB ->> Server:Cart_ID　
+Server ->> DB:DELETE with Cart_ID
+Note over Server:issue newSession_Key
+Server ->> DB:newSession_Key Cart_ID
+Server ->> Client:newSession_Key
+Note right of DB:Cart
+Server ->> DB:Cart_ID Item_ID Quantity
+DB ->> Server:Carts from Cart_ID
+Server ->> Client:Carts
 ```
