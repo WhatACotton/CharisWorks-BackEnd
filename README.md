@@ -71,7 +71,7 @@ Client ->> Server:SessionKey UID
 Server ->> DB:Session_Key UID
 DB ->> Server:Status
 Server ->> DB:invalidation with Requested SessionKey
-Server->>Server:issue newSession_Key
+Note over Server: newSession_Key
 Server ->> DB:NewSession_Key
 Server ->> Client:newSessionKey
 
