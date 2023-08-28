@@ -10,19 +10,15 @@
 graph TD
 client --- Nginx
 subgraph  [Server]
-    Nginx --- FrontEndServer
-    FrontEndServer --- APIServer
-    APIServer --- DB
-        FrontEndServer --- BackEndServer
-
-        BackEndServer --- FireBaseAuth
-    subgraph  [cashing]
-        BackEndServer --- CashServer
-        CashServer --- Stripe
-    end
-    BackEndServer --- DB
-
-    FrontEndServer --- FireBaseAuth
+Nginx --- FrontEndServer
+FrontEndServer --- APIServer
+APIServer --- DB
+FrontEndServer --- BackEndServer
+FireBaseAuth --- BackEndServer
+BackEndServer --- DB
+BackEndServer --- CashServer
+CashServer --- Stripe
+FrontEndServer --- FireBaseAuth
 end
 
 ```
