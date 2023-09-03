@@ -107,7 +107,6 @@ func (c Cart_Request_Payload) Cart(Cart_ID string) error {
 	//リクエストされた商品が登録可能か判定
 	log.Println("Item_List.Status : " + Item_List.Status)
 	if Item_List.Status == "Available" {
-		log.Println("CartReq Available")
 		Carts, err := Get_Cart_Info(Cart_ID)
 		if err != nil {
 			return errors.Wrap(err, "error in getting Cart_ID /Cart_2")
@@ -132,9 +131,13 @@ func (c Cart_Request_Payload) Cart(Cart_ID string) error {
 			}
 		} else {
 			if c.Quantity != 0 {
-				err := c.Post_Cart(Cart_ID)
-				if err != nil {
-					return errors.Wrap(err, "error in getting Cart_ID /Cart_5")
+				if Item_List.Stock >= c.Quantity {
+					err := c.Post_Cart(Cart_ID)
+					if err != nil {
+						return errors.Wrap(err, "error in getting Cart_ID /Cart_5")
+					}
+				} else {
+					return errors.New("stock is not enough")
 				}
 
 			} else {
@@ -167,8 +170,6 @@ func Search_Cart(Carts []Cart, Item_ID string) bool {
 	for _, Cart := range Carts {
 		if Cart.Item_ID == Item_ID {
 			return true
-		} else {
-			return false
 		}
 	}
 	return false

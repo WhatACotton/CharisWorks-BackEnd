@@ -30,15 +30,15 @@ func Post_Cart(c *gin.Context) {
 	NewCartReq := new(database.Cart_Request_Payload)
 	err := c.BindJSON(&NewCartReq)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	err = NewCartReq.Cart(Cart_List.Cart_ID)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	Carts, err := database.Get_Cart_Info(Cart_List.Cart_ID)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	c.JSON(http.StatusOK, Carts)
 }
