@@ -17,12 +17,13 @@ import (
 	"google.golang.org/api/option"
 )
 
-type User struct {
-	Userdata auth.UserRecord
+type UserReqPayload struct {
+	Email   string `json:"contact"`
+	UID     string `json:"uid"`
+	IdToken string `json:"idToken"`
 }
 
-func (user *User) Verify(c *gin.Context, uid string) (authorized bool) {
-	authorized = false
+func (user *UserReqPayload) Verify(c *gin.Context) bool {
 	// Firebaseアプリを初期化する
 	conf := &firebase.Config{
 		ProjectID: "iris-test-52dcd",
@@ -32,23 +33,29 @@ func (user *User) Verify(c *gin.Context, uid string) (authorized bool) {
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)
 	}
-	// Get an auth client from the firebase.App
-	client, err := app.Auth(c)
+	Token := verifyIDToken(c, app, user.IdToken)
+	user.Email = Token.Claims["email"].(string)
+	user.UID = Token.Claims["user_id"].(string)
+	log.Printf("Successfully get \nemail: %v\nUID: %v\n", user.Email, user.UID)
+	return true
+}
+func verifyIDToken(ctx context.Context, app *firebase.App, idToken string) *auth.Token {
+	// [START verify_id_token_golang]
+	client, err := app.Auth(ctx)
 	if err != nil {
 		log.Fatalf("error getting Auth client: %v\n", err)
 	}
 
-	u, err := client.GetUser(c, uid)
+	token, err := client.VerifyIDToken(ctx, idToken)
 	if err != nil {
-		log.Fatalf("error getting user %s: %v\n", uid, err)
+		log.Fatalf("error verifying ID token: %v\n", err)
 	}
-	log.Printf("Successfully fetched user data: %v\n", u)
-	user.Userdata = *u
-	authorized = true
-	return authorized
-}
 
-func (user *User) DeleteCustomer(c *gin.Context, uid string) {
+	// [END verify_id_token_golang]
+
+	return token
+}
+func (user *UserReqPayload) DeleteCustomer(c *gin.Context) {
 	ctx := c.Request.Context()
 	// Firebaseアプリを初期化する
 	conf := &firebase.Config{
@@ -65,11 +72,11 @@ func (user *User) DeleteCustomer(c *gin.Context, uid string) {
 		log.Fatalf("error getting Auth client: %v\n", err)
 	}
 
-	err = client.DeleteUser(ctx, uid)
+	err = client.DeleteUser(ctx, user.UID)
 	if err != nil {
 		log.Fatalf("error deleting user: %v\n", err)
 	}
-	log.Printf("Successfully deleted user: %s\n", uid)
+	log.Printf("Successfully deleted user: %s\n", user)
 
 }
 

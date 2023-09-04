@@ -1,12 +1,9 @@
 package models
 
-
-
 type LogInLog struct {
 	UID       string
 	LoginId   string
 	LoginDate string
-	Available int
 }
 
 type CustomerRequestPayload struct {
