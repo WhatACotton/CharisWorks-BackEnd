@@ -34,12 +34,11 @@ participant Client
 participant Server
 participant DB
 
-Client ->> Server:SessionKey UID
-Server ->> DB:Session_Key UID
-DB ->> Server:Status
-Server ->> DB:invalidation with Requested SessionKey
+Client ->> Server:SessionKey
+Server ->> DB:Session_Key
+DB ->> Server:UID
 Note over Server: newSession_Key
-Server ->> DB:NewSession_Key
+Server ->> DB:NewSession_Key UID
 Server ->> Client:newSessionKey
 
 
@@ -50,15 +49,18 @@ Server ->> Client:newSessionKey
 ```mermaid
 sequenceDiagram
 participant Client
-participant Server
 participant firebase
+
+participant Server
 
 
 Client ->> firebase:email password
-firebase ->> Client: UID context
-Client ->> Server: UID context
-Server ->> firebase:UID context
-firebase ->>Server:UserData
+firebase ->> Client: userCredential
+Client ->> firebase:userCredential.user
+firebase ->> Client:IdToken
+Client ->> Server: IdToken
+Server ->> firebase:IdToken
+firebase ->>Server:Token
 Note over Server:issue Session_Key
 Server ->> Client:Sesison_Key
 
