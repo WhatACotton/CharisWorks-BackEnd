@@ -175,6 +175,7 @@ func Modify_Customer(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
 	}
 }
+
 func LogOut(c *gin.Context) {
 	//ログアウト処理
 	OldSessionKey := validation.SessionEnd(c)

@@ -85,3 +85,6 @@ func BuyItem(c *gin.Context) {
 	}
 
 }
+func Buy_Item(c *gin.Context) {
+
+}

@@ -88,14 +88,48 @@ sequenceDiagram
 participant Client
 participant Server
 participant DB
-
-Client ->> Server:POST/Session_Key Item_ID Quantity
-Note left of DB:カートID取得フロー
+Client ->> Server:Item_ID Quantity
+alt 未ログイン
+alt 初回
+Note right of DB:Cart_List
+else 2回目以降
+Client ->> Server:Cart_Session_Key
+Server ->> DB:Cart_Session_Key
 DB ->> Server:Cart_ID　
-
+Server ->> DB: delete Cart_List
+end
 Note over Server:issue newSession_Key
 Server ->> Client:newSession_Key
-Note right of DB:Cart
+Server ->> DB:newSession_Key
+else ログイン済み
+Client ->> Server: Session_Key
+Note right of DB: loginlog
+Server ->> DB: Session_Key
+DB ->> Server: UID
+Server ->> DB: UID
+alt Cart_IDが取得できた場合
+Note right of DB: Customer
+
+DB ->> Server:Cart_ID
+else
+
+alt Cart_Session_Keyが存在する場合
+
+Client ->> Server: Cart_Session_Key
+Server ->> Client: Delete Cart_Session_Key
+Note right of DB: Cart_List
+Server ->> DB: Cart_Session_Key
+
+DB ->> Server:Cart_ID
+else
+Note over Server: issue Cart_ID
+end
+end
+Note over Server: Session Reset
+Note right of DB: loginlog,Customer
+Server ->> DB:newSession_Key,Cart_ID
+Server ->> Client :newSession_Key
+end
 Server ->> DB:Cart_ID Item_ID Quantity
 DB ->> Server:Carts from Cart_ID
 Server ->> Client:Carts
