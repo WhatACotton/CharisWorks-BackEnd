@@ -57,9 +57,9 @@ participant Server
 Client ->> firebase:email password
 firebase ->> Client: userCredential
 Client ->> firebase:userCredential.user
-firebase ->> Client:IdToken
-Client ->> Server: IdToken
-Server ->> firebase:IdToken
+firebase ->> Client:IdToken(JWT)
+Client ->> Server: IdToken(JWT)
+Server ->> firebase:IdToken(JWT)
 firebase ->>Server:Token
 Note over Server:issue Session_Key
 Server ->> Client:Sesison_Key
@@ -68,6 +68,21 @@ Server ->> Client:Sesison_Key
 
 ### カート管理
 
+#### カート ID 取得フロー
+
+```mermaid
+graph TB
+A([start])-->B{login}
+    B--Yes-->C([get CartID from Customer])
+    B--No-->D([get CartID from Session])
+    D--failed-->E([issue CartID])
+    E-->F
+    D--SessionReflesh-->F
+    C--failed-->D
+    C-->F([Cart dealing])
+
+```
+
 ```mermaid
 sequenceDiagram
 participant Client
@@ -75,12 +90,10 @@ participant Server
 participant DB
 
 Client ->> Server:POST/Session_Key Item_ID Quantity
-Note right of DB:Cart_List
-Server ->> DB:Session_Key
+Note left of DB:カートID取得フロー
 DB ->> Server:Cart_ID　
-Server ->> DB:DELETE with Cart_ID
+
 Note over Server:issue newSession_Key
-Server ->> DB:newSession_Key Cart_ID
 Server ->> Client:newSession_Key
 Note right of DB:Cart
 Server ->> DB:Cart_ID Item_ID Quantity

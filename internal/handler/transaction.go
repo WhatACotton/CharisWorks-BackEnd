@@ -26,7 +26,7 @@ func BuyItem(c *gin.Context) {
 		if Customer.Register {
 			if user.Verify(c) {
 				//ここで購入処理
-				Cart_List.Refresh_Cart_List()
+				//Cart_List.Refresh_Cart_List()
 				//ここからデータベースの処理
 				Bill := new(models.Bill)
 				InspectedCarts := new([]database.Cart)

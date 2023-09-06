@@ -9,24 +9,70 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Cart_List_Session_Start(c *gin.Context) (database.Cart_List, string) {
+func Get_Cart_ID(c *gin.Context) database.Cart_List {
+	Cart_ID := Get_Cart_ID_from_UID(c)
 	Cart_List := new(database.Cart_List)
-	Cart_Session_Key := validation.Get_Cart_Session(c)
-	if Cart_Session_Key != "new" {
-		Cart_List.Session_Key = Cart_Session_Key
-		Cart_List.Refresh_Cart_List()
-	} else {
+	if Cart_ID == "new" {
+		log.Print("not login")
+		Cart_List.Session_Key = validation.Get_Cart_Session(c)
+		if Cart_List.Session_Key == "new" {
+			log.Print("don't have sessionKey")
+			Cart_List.Cart_ID = validation.GetUUID()
+		} else {
+			err := Cart_List.Get_Cart_ID_from_SessionKey()
+			if err != nil {
+				log.Fatal(err)
+			}
+			database.Delete_Cart_List(Cart_List.Cart_ID)
+		}
 		Cart_List.Session_Key = validation.GetUUID()
-		Cart_List.Cart_ID = validation.GetUUID()
 		Cart_List.Create_Cart_List()
+		validation.Set_Cart_Session(c, Cart_List.Session_Key)
+	} else {
+		log.Print("logined")
+		validation.CartSessionEnd(c)
+		Cart_List.Cart_ID = Cart_ID
+		Continue_LogIn(c)
 	}
-	validation.Set_Cart_Session(c, Cart_List.Session_Key)
+	return *Cart_List
+}
+func Get_Cart_ID_from_UID(c *gin.Context) string {
+	SessionKey := validation.Customer_Get_SessionKey(c)
+	UID, err := database.Get_UID(SessionKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Print(UID)
+	if UID != "" {
+		Cart_ID, err := database.Get_Cart_ID(UID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Print("Cart_ID:", Cart_ID)
+		if Cart_ID != "" {
+			return Cart_ID
+		} else {
+			if SessionKey != "new" {
+				Cart_List := new(database.Cart_List)
+				Cart_List.Session_Key = SessionKey
+				err := Cart_List.Get_Cart_ID_from_SessionKey()
+				if err != nil {
+					log.Fatal(err)
+				}
+				return Cart_List.Cart_ID
+			} else {
+				return "new"
+			}
+		}
+	} else {
+		return "new"
 
-	return *Cart_List, Cart_Session_Key
+	}
+
 }
 
 func Post_Cart(c *gin.Context) {
-	Cart_List, _ := Cart_List_Session_Start(c)
+	Cart_List := Get_Cart_ID(c)
 	NewCartReq := new(database.Cart_Request_Payload)
 	err := c.BindJSON(&NewCartReq)
 	if err != nil {
@@ -44,7 +90,7 @@ func Post_Cart(c *gin.Context) {
 }
 
 func Get_Cart(c *gin.Context) {
-	Cart_List, _ := Cart_List_Session_Start(c)
+	Cart_List := Get_Cart_ID(c)
 	Carts, err := database.Get_Cart_Info(Cart_List.Cart_ID)
 	if err != nil {
 		log.Fatal(err)
@@ -54,7 +100,7 @@ func Get_Cart(c *gin.Context) {
 }
 
 func Update_Cart(c *gin.Context) {
-	Cart_List, _ := Cart_List_Session_Start(c)
+	Cart_List := Get_Cart_ID(c)
 	NewCartReq := new(database.Cart_Request_Payload)
 	err := c.BindJSON(&NewCartReq)
 	if err != nil {

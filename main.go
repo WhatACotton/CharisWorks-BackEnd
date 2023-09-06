@@ -26,7 +26,9 @@ func main() {
 	// アカウントの削除
 	r.DELETE("/DeleteCustomer", handler.Delete_Customer)
 	// ログイン状態の継続
-	r.POST("/SessionStart", handler.Continue_LogIn)
+	r.POST("/SessionContinue", handler.Continue_LogIn)
+	// ログアウト cookie clear
+	r.POST("/SessionEnd", handler.LogOut)
 
 	// カート機能
 	// 商品の登録・修正・削除

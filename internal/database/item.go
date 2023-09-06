@@ -1,7 +1,5 @@
 package database
 
-import "log"
-
 // Item関連
 type Item_List struct {
 	Item_ID string `json:"id"`
@@ -28,6 +26,5 @@ func (Item_List *Item_List) Get_Item_List(Item_ID string) (err error) {
 			return err
 		}
 	}
-	log.Print(Item_List)
 	return nil
 }

@@ -1,9 +1,6 @@
 package database
 
 import (
-	"log"
-	"unify/validation"
-
 	"github.com/pkg/errors"
 )
 
@@ -12,16 +9,7 @@ type Cart_List struct {
 	Session_Key string `json:"Session_Key"`
 }
 
-// Cart_Listを更新する。実行する条件は、Session_Keyが存在すること。
-func (c *Cart_List) Refresh_Cart_List() {
-	log.Println("reflesh called")
-	c.Get_Cart_List()
-	c.Delete_Cart_List()
-	c.Session_Key = validation.GetUUID()
-	c.Create_Cart_List()
-}
-
-func (c *Cart_List) Get_Cart_List() error {
+func (c *Cart_List) Get_Cart_ID_from_SessionKey() error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -39,6 +27,7 @@ func (c *Cart_List) Get_Cart_List() error {
 			return errors.Wrap(err, "error in scanning Cart_ID /Get_Cart_List_2")
 		}
 	}
+
 	return nil
 }
 
@@ -61,7 +50,7 @@ func (c *Cart_List) Create_Cart_List() error {
 	return nil
 }
 
-func (c *Cart_List) Delete_Cart_List() error {
+func Delete_Cart_List(Cart_ID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -73,7 +62,7 @@ func (c *Cart_List) Delete_Cart_List() error {
 	defer del.Close()
 
 	// SQLの実行
-	_, err = del.Exec(c.Cart_ID)
+	_, err = del.Exec(Cart_ID)
 	if err != nil {
 		return errors.Wrap(err, "error in deleting Cart_List /Delete_Cart_List_2")
 	}
