@@ -91,7 +91,6 @@ participant DB
 Client ->> Server:Item_ID Quantity
 alt 未ログイン
 alt 初回
-Note right of DB:Cart_List
 else 2回目以降
 Client ->> Server:Cart_Session_Key
 Server ->> DB:Cart_Session_Key
@@ -103,12 +102,15 @@ Server ->> Client:newSession_Key
 Server ->> DB:newSession_Key
 else ログイン済み
 Client ->> Server: Session_Key
+rect rgba(255, 0, 255, 0.2)
 Note right of DB: loginlog
 Server ->> DB: Session_Key
 DB ->> Server: UID
+end
 Server ->> DB: UID
-alt Cart_IDが取得できた場合
 Note right of DB: Customer
+alt Cart_IDが取得できた場合
+
 
 DB ->> Server:Cart_ID
 else
@@ -117,17 +119,21 @@ alt Cart_Session_Keyが存在する場合
 
 Client ->> Server: Cart_Session_Key
 Server ->> Client: Delete Cart_Session_Key
+rect rgba(255, 0, 255, 0.2)
 Note right of DB: Cart_List
 Server ->> DB: Cart_Session_Key
-
 DB ->> Server:Cart_ID
+end
+
 else
 Note over Server: issue Cart_ID
 end
 end
 Note over Server: Session Reset
+rect rgba(255, 0, 255, 0.2)
 Note right of DB: loginlog,Customer
 Server ->> DB:newSession_Key,Cart_ID
+end
 Server ->> Client :newSession_Key
 end
 Server ->> DB:Cart_ID Item_ID Quantity
