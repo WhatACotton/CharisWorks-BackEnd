@@ -13,34 +13,54 @@ import (
 func Temporary_SignUp(c *gin.Context) {
 	//signup処理
 	//仮登録を行う。ここでの登録内容はUIDと作成日時だけ。
-	user := new(validation.User)
-	uid := c.Query("uid")
+	user := new(validation.UserReqPayload)
+	err := c.BindJSON(&user)
+	if err != nil {
+		log.Print(err)
+	}
 
-	if user.Verify(c, uid) { //認証
-		log.Printf(user.Userdata.Email)
-		_, NewSessionKey := validation.SessionStart(c)
-
-		log.Print(NewSessionKey)
+	if user.Verify(c) { //認証
+		log.Printf(user.Email)
 		//新しいアカウントの構造体を作成
 		newCustomer := new(models.CustomerRequestPayload)
 
-		newCustomer.UID = user.Userdata.UID
-		newCustomer.Email = user.Userdata.Email
+		newCustomer.UID = user.UID
+		newCustomer.Email = user.Email
 		log.Printf(newCustomer.UID, newCustomer.Email)
+		_, NewSessionKey := validation.SessionStart(c)
+		log.Print(NewSessionKey)
+
 		//アカウント登録
-		res := database.SignUp_Customer(*newCustomer, NewSessionKey)
+		Cart_List := new(database.Cart_List)
+		Cart_List.Session_Key = validation.Get_Cart_Session(c)
+		if Cart_List.Session_Key == "new" {
+			log.Print("don't have sessionKey")
+			Cart_List.Cart_ID = validation.GetUUID()
+		} else {
+			err := Cart_List.Get_Cart_ID_from_SessionKey()
+			if err != nil {
+				log.Fatal(err)
+			}
+			database.Delete_Cart_List(Cart_List.Cart_ID)
+		}
+		Cart_List.Session_Key = validation.GetUUID()
+		Cart_List.Create_Cart_List()
+		log.Print("Cart_ID: ", Cart_List.Cart_ID)
+		res := database.SignUp_Customer(*newCustomer, NewSessionKey, Cart_List.Cart_ID)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
 	}
 }
-
 func SignUp(c *gin.Context) {
 	//本登録処理
 	//本登録を行う。bodyにアカウントの詳細情報が入っている。
-	user := new(validation.User)
-	uid := c.Query("uid")
-	if user.Verify(c, uid) { //認証
+	user := new(validation.UserReqPayload)
+	err := c.BindJSON(&user)
+	if err != nil {
+		log.Print(err)
+	}
+	if user.Verify(c) { //認証
 		//アカウント本登録処理
 		//2回構造体を作るのは冗長かも知れないが、bindしている以上、
 		//インジェクションされて予期しない場所が変更される可能性がある。
@@ -56,21 +76,61 @@ func SignUp(c *gin.Context) {
 
 func LogIn(c *gin.Context) {
 	//LogIn処理
-	user := new(validation.User)
-	uid := c.Query("uid")
+	user := new(validation.UserReqPayload)
+	err := c.BindJSON(&user)
+	if err != nil {
+		log.Print(err)
+	}
 	Customer := new(database.Customer)
-	if user.Verify(c, uid) { //認証
-		log.Printf(user.Userdata.Email)
+	if user.Verify(c) { //認証
 		OldSessionKey, NewSessionKey := validation.SessionStart(c)
-		Customer.LogIn_Customer(user.Userdata.UID, NewSessionKey)
+		Customer.LogIn_Customer(user.UID, NewSessionKey)
 		if OldSessionKey == "new" {
 			c.JSON(http.StatusOK, "SuccessFully Logined!!")
+			Cart_ID, err := database.Get_Cart_ID(user.UID)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Print("Cart_ID:", Cart_ID)
+			if Cart_ID == "" {
+				Cart_List := new(database.Cart_List)
+				Cart_List.Session_Key = validation.Get_Cart_Session(c)
+				if Cart_List.Session_Key == "new" {
+					log.Print("don't have sessionKey")
+					Cart_List.Cart_ID = validation.GetUUID()
+				} else {
+					err := Cart_List.Get_Cart_ID_from_SessionKey()
+					if err != nil {
+						log.Fatal(err)
+					}
+					database.Delete_Cart_List(Cart_List.Cart_ID)
+				}
+				Cart_List.Session_Key = validation.GetUUID()
+				Cart_List.Create_Cart_List()
+				database.Set_Cart_ID(user.UID, Cart_List.Cart_ID)
+				validation.CartSessionEnd(c)
+				log.Print("Cart_ID: ", Cart_List.Cart_ID)
+			}
 		} else {
-			database.Invalid(OldSessionKey)
 			c.JSON(http.StatusOK, user)
+		}
+		if user.Email_Verified {
+			err := database.Email_Verified(user.UID)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		log.Print(OldSessionKey)
 		log.Print(NewSessionKey)
+		email, err := database.Get_Email(user.UID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Print(email)
+		if email != user.Email {
+			database.Change_Email(user.UID, user.Email)
+		}
+
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
@@ -79,30 +139,32 @@ func LogIn(c *gin.Context) {
 
 func Continue_LogIn(c *gin.Context) {
 	OldSessionKey, NewSessionKey := validation.SessionStart(c)
-	uid := c.Query("uid")
 	if OldSessionKey == "new" {
 		c.JSON(http.StatusOK, "未ログインです")
 	} else {
-		if database.Verify_Customer(uid, OldSessionKey) {
-			database.LogIn_Log(uid, NewSessionKey)
-			database.Invalid(OldSessionKey)
-			c.JSON(http.StatusOK, "SuccessFully Logined!!")
-		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "不正なアクセスです"})
-
+		UID, err := database.Get_UID(OldSessionKey)
+		if err != nil {
+			log.Fatal(err)
 		}
+		log.Print("UID : ", UID)
+		Customer := new(database.Customer)
+		Customer.LogIn_Customer(UID, NewSessionKey)
+
+		//c.JSON(http.StatusOK, "SuccessFully Logined!!")
 	}
-	log.Println(uid)
-	log.Print(OldSessionKey)
-	log.Print(NewSessionKey)
+	log.Print("OldSessionKey : ", OldSessionKey)
+	log.Print("NewSessionKey : ", NewSessionKey)
 }
 
 func Modify_Customer(c *gin.Context) {
 	//登録情報変更処理
 	//bodyにアカウントの詳細情報が入っている。
-	uid := c.Query("uid")
-	user := new(validation.User)
-	if user.Verify(c, uid) { //認証
+	user := new(validation.UserReqPayload)
+	err := c.BindJSON(&user)
+	if err != nil {
+		log.Print(err)
+	}
+	if user.Verify(c) { //認証
 		//アカウント修正処理
 		h := new(models.CustomerRegisterPayload)
 		if err := c.BindJSON(&h); err != nil {
@@ -114,27 +176,37 @@ func Modify_Customer(c *gin.Context) {
 	}
 }
 
+func LogOut(c *gin.Context) {
+	//ログアウト処理
+	OldSessionKey := validation.SessionEnd(c)
+	database.Invalid(OldSessionKey)
+	c.JSON(http.StatusOK, "SuccessFully Logouted!!")
+}
 func Delete_Customer(c *gin.Context) {
-	Log_Out(c)
 	//アカウントの削除
-	user := new(validation.User)
-	uid := c.Query("uid")
-	if user.Verify(c, uid) { //認証
-		user.DeleteCustomer(c, uid)
-		database.Delete_Customer(user.Userdata.UID)
+	user := new(validation.UserReqPayload)
+	err := c.BindJSON(&user)
+	if err != nil {
+		log.Print(err)
+	}
+	if user.Verify(c) { //認証
+		database.Delete_Customer(user.UID)
+		database.Delete_Session(user.UID)
+		c.JSON(http.StatusOK, gin.H{"message": "アカウントを削除しました。"})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
 }
-
-func Log_Out(c *gin.Context) {
-	//ログアウト
-	uid := c.Query("uid")
-	OldSessionKey := validation.SessionEnd(c)
-	database.Invalid(OldSessionKey)
-	if database.Verify_Customer(uid, OldSessionKey) {
-		c.JSON(http.StatusOK, "SuccessFully Loggedout!!")
+func Change_Email(c *gin.Context) {
+	//アカウントの変更
+	user := new(validation.UserReqPayload)
+	err := c.BindJSON(&user)
+	if err != nil {
+		log.Print(err)
+	}
+	if user.Verify(c) { //認証
+		database.Change_Email(user.UID, user.Email)
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "不正なアクセスです"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
 }

@@ -1,18 +1,14 @@
 package models
 
-
-
 type LogInLog struct {
 	UID       string
 	LoginId   string
 	LoginDate string
-	Available int
 }
 
 type CustomerRequestPayload struct {
-	UID         string `json:"UID"`
-	Email       string `json:"contact"`
-	CreatedDate string
+	UID   string `json:"UID"`
+	Email string `json:"contact"`
 }
 type CustomerRegisterPayload struct {
 	Name        string `json:"Name"`

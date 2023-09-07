@@ -17,7 +17,14 @@ func PostTransactionList(CartId string, UID string) error {
 	defer db.Close()
 
 	// SQLの準備
-	ins, err := db.Prepare("INSERT INTO transactionlist (Cart_ID,UID)VALUES(?,?,?)")
+	ins, err := db.Prepare(`
+	INSERT 
+		INTO 
+			transactionlist 
+			(Cart_ID,UID)
+			VALUES
+			(?,?)
+	`)
 	if err != nil {
 		return err
 	}
@@ -40,7 +47,14 @@ func PostTransaction(Carts []Cart, Cart_ID string) error {
 	defer db.Close()
 
 	// SQLの準備
-	ins, err := db.Prepare("INSERT INTO transactionlist VALUES(?,?,?)")
+	ins, err := db.Prepare(`
+	INSERT 
+		INTO 
+			transactionlist
+			(Cart_ID,Info_ID,Quantity)
+			VALUES
+			(?,?,?)
+	`)
 	if err != nil {
 		return err
 
