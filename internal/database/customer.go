@@ -28,7 +28,13 @@ func Get_Customer(UID string) (string, error) {
 	db := ConnectSQL()
 	Cart_ID := new(string)
 	// SQLの実行
-	rows, err := db.Query("SELECT Cart_ID FROM Customer WHERE UID = ?", UID)
+	rows, err := db.Query(`
+	SELECT 
+		Cart_ID 
+	FROM 
+		Customer 
+	WHERE 
+		UID = ?`, UID)
 	if err != nil {
 		return "new", errors.Wrap(err, "error in getting Customer /Get_Customer_1")
 	}
@@ -57,7 +63,13 @@ func SignUp_Customer(req models.CustomerRequestPayload, SessionID string, Cart_I
 	// SQLの準備
 	//UID,Name,Address,Email,PhoneNumber,Register,CreatedDate,ModifiedDate,RegisteredDate,LastLogInDate
 
-	ins, err := db.Prepare("INSERT INTO Customer (UID,Name,Address,Email,Phone_Number,Register,Last_Session_ID,Email_Verified,Cart_ID)VALUES(?,?,?,?,?,?,?,?,?)")
+	ins, err := db.Prepare(`
+	INSERT 
+	INTO 
+		Customer 
+		(UID,Name,Address,Email,Phone_Number,Register,Last_Session_ID,Email_Verified,Cart_ID)
+		VALUES
+		(?,?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /SignUp_Customer_1")
 	}
@@ -79,14 +91,18 @@ func Register_Customer(usr validation.UserReqPayload, customer models.CustomerRe
 
 	// SQLの準備
 	//UID,Name,Address,Email,PhoneNumber,Register,CreatedDate,ModifiedDate,RegisteredDate,LastLogInDate
-	ins, err := db.Prepare(
-		`UPDATE Customer SET 
+	ins, err := db.Prepare(`
+	UPDATE 
+		Customer 
+	SET 
 		Name = ?,
 		Address = ?,
 		PhoneNumber = ?,
 		Register = ?,
 		RegisteredDate = ?,
-		WHERE UID = ?`)
+
+	WHERE 
+		UID = ?`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /Register_Customer_1")
 	}
@@ -106,14 +122,19 @@ func Modify_Customer(usr validation.UserReqPayload, customer models.CustomerRegi
 
 	// SQLの準備
 	//UID,Name,Address,Email,PhoneNumber,Register,CreatedDate,ModifiedDate,RegisteredDate,LastLogInDate
-	ins, err := db.Prepare(
-		`UPDATE Customer SET 
+	ins, err := db.Prepare(`
+	UPDATE 
+		Customer 
+		
+	SET 
 		Name = ?,
 		Address = ?,
 		PhoneNumber = ?,
 		Register = ?,
 		ModifiedDate = ?,
-		WHERE UID = ?`)
+		
+	WHERE 
+		UID = ?`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /Modify_Customer_1")
 	}
@@ -132,7 +153,23 @@ func (c *Customer) LogIn_Customer(uid string, NewSessionKey string) error {
 	Update_Session_ID(uid, NewSessionKey)
 	db := ConnectSQL()
 	// SQLの実行
-	rows, err := db.Query("SELECT UID,Name,Address,Email,Phone_Number,Register,Created_Date,Last_Session_ID,Last_Session_Date FROM Customer WHERE UID = ?", uid)
+	rows, err := db.Query(`
+	SELECT 
+		UID,
+		Name,
+		Address,
+		Email,
+		Phone_Number,
+		Register,
+		Created_Date,
+		Last_Session_ID,
+		Last_Session_Date 
+
+	FROM 
+		Customer 
+
+	WHERE 
+		UID = ?`, uid)
 	if err != nil {
 		return errors.Wrap(err, "error in getting Customer /LogIn_Customer_1")
 	}
@@ -145,12 +182,21 @@ func (c *Customer) LogIn_Customer(uid string, NewSessionKey string) error {
 			return errors.Wrap(err, "error in scanning Customer /LogIn_Customer_2")
 		}
 	}
+
 	return nil
 }
 func Email_Verified(uid string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
-	ins, err := db.Prepare("UPDATE Customer SET Email_Verified = 1 WHERE UID = ?")
+	ins, err := db.Prepare(`
+	UPDATE 
+		Customer 
+	
+	SET 
+		Email_Verified = 1 
+	
+	WHERE 
+		UID = ?`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /Email_Verified_1")
 	}
@@ -166,7 +212,15 @@ func Email_Verified(uid string) error {
 func Update_Session_ID(uid string, NewSessionKey string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
-	ins, err := db.Prepare("UPDATE Customer SET Last_Session_ID = ? WHERE UID = ?")
+	ins, err := db.Prepare(`
+	UPDATE 
+		Customer 
+	
+	SET 
+		Last_Session_ID = ? 
+	
+	WHERE 
+		UID = ?`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /Update_Session_ID_1")
 	}
@@ -185,7 +239,13 @@ func LogIn_Log(uid string, NewSessionKey string) error {
 
 	// SQLの準備
 	//UID SessionKey LoginedDate Available
-	ins, err := db.Prepare("INSERT INTO LogIn (UID , Session_Key)VALUES(?,?)")
+	ins, err := db.Prepare(`
+	INSERT 
+	INTO 
+		LogIn 
+		(UID , Session_Key)
+		VALUES
+		(?,?)`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /LogIn_Log_1")
 	}
@@ -203,7 +263,15 @@ func Invalid(SessionKey string) error {
 	log.Println("Invalid called")
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
-	ins, err := db.Prepare("UPDATE LogIn SET Available = 0 WHERE Session_Key = ?")
+	ins, err := db.Prepare(`
+	UPDATE 
+		LogIn 
+	
+	SET 
+		Available = 0 
+		
+	WHERE 
+		Session_Key = ?`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /Invalid_1")
 	}
@@ -221,7 +289,15 @@ func Get_UID(SessionKey string) (uid string, err error) {
 	db := ConnectSQL()
 	// SQLの実行
 
-	rows, err := db.Query("SELECT UID FROM LogIn WHERE Session_Key = ?", SessionKey)
+	rows, err := db.Query(`
+	SELECT 
+		UID
+
+	FROM 
+		LogIn
+
+	WHERE 
+		Session_Key = ?`, SessionKey)
 	if err != nil {
 		return "error", errors.Wrap(err, "error in getting UID /Get_UID_1")
 	}
@@ -241,7 +317,12 @@ func Get_UID(SessionKey string) (uid string, err error) {
 func Delete_Customer(uid string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
-	ins, err := db.Prepare("DELETE FROM Customer WHERE UID = ?")
+	ins, err := db.Prepare(`
+	DELETE 
+	FROM 
+		Customer 
+	WHERE 
+		UID = ?`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /Delete_Customer_1")
 	}
@@ -256,7 +337,13 @@ func Delete_Customer(uid string) error {
 func Delete_Session(uid string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
-	ins, err := db.Prepare("DELETE FROM LogIn WHERE UID = ?")
+	ins, err := db.Prepare(`
+	DELETE 
+	FROM 
+		LogIn 
+	
+	WHERE 
+		UID = ?`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /Delete_Customer_1")
 	}
@@ -273,7 +360,15 @@ func Get_Email(UID string) (Email string, err error) {
 	db := ConnectSQL()
 	// SQLの実行
 
-	rows, err := db.Query("SELECT Email FROM Customer WHERE UID = ?", UID)
+	rows, err := db.Query(`
+	SELECT 
+		Email 
+	
+	FROM 
+		Customer 
+	
+	WHERE 
+		UID = ?`, UID)
 	if err != nil {
 		return "error", errors.Wrap(err, "error in getting Email /Get_Email_1")
 	}
@@ -292,7 +387,15 @@ func Get_Email(UID string) (Email string, err error) {
 func Change_Email(uid string, email string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
-	ins, err := db.Prepare("UPDATE Customer SET Email = ? WHERE UID = ?")
+	ins, err := db.Prepare(`
+	UPDATE 
+		Customer 
+	
+	SET 
+		Email = ? 
+	
+	WHERE 
+		UID = ?`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /Change_Email_1")
 	}
@@ -307,7 +410,15 @@ func Change_Email(uid string, email string) error {
 func Set_Cart_ID(uid string, Cart_ID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
-	ins, err := db.Prepare("UPDATE Customer SET Cart_ID = ? WHERE UID = ?")
+	ins, err := db.Prepare(`
+	UPDATE 
+		Customer 
+	
+	SET 
+		Cart_ID = ? 
+	
+	WHERE 
+		UID = ?`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /Change_Email_1")
 	}

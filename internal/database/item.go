@@ -14,7 +14,25 @@ func (Item_List *Item_List) Get_Item_List(Item_ID string) (err error) {
 	defer db.Close()
 
 	// SQLの実行
-	rows, err := db.Query("SELECT Item_List.Item_ID,Item_List.Info_ID,Item_List.Status,Item_Info.Stock FROM Item_List JOIN Item_Info ON Item_List.Info_ID = Item_Info.Info_ID WHERE Item_ID = ?", Item_ID)
+	rows, err := db.Query(`
+	SELECT 
+		Item_List.Item_ID,
+		Item_List.Info_ID,
+		Item_List.Status,
+		
+		Item_Info.Stock 
+	
+	FROM 
+		Item_List 
+	
+	JOIN 
+		Item_Info 
+		
+	ON 
+		Item_List.Info_ID = Item_Info.Info_ID 
+	
+	WHERE 
+		Item_ID = ?`, Item_ID)
 	if err != nil {
 		return err
 	}

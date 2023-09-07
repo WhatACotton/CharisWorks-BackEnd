@@ -14,7 +14,15 @@ func (c *Cart_List) Get_Cart_ID_from_SessionKey() error {
 	db := ConnectSQL()
 
 	// SQLの実行
-	rows, err := db.Query("SELECT Cart_ID FROM Cart_List WHERE Session_Key = ?", c.Session_Key)
+	rows, err := db.Query(`
+	SELECT 
+		Cart_ID 
+		
+	FROM 
+		Cart_List 
+	
+	WHERE 
+		Session_Key = ?`, c.Session_Key)
 	if err != nil {
 		return errors.Wrap(err, "error in getting Cart_ID /Get_Cart_List_1")
 	}
@@ -36,7 +44,15 @@ func (c *Cart_List) Create_Cart_List() error {
 	db := ConnectSQL()
 
 	// SQLの準備
-	ins, err := db.Prepare("INSERT INTO Cart_List (Cart_ID,Session_Key)VALUES(?,?)")
+	ins, err := db.Prepare(`
+	INSERT 
+	INTO 
+		Cart_List
+
+	(Cart_ID,Session_Key)
+	VALUES
+	(?,?)
+	`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Cart_List /Create_Cart_List_1")
 	}
@@ -55,7 +71,13 @@ func Delete_Cart_List(Cart_ID string) error {
 	db := ConnectSQL()
 
 	// SQLの準備
-	del, err := db.Prepare("DELETE FROM Cart_List WHERE Cart_ID = ?")
+	del, err := db.Prepare(`
+	DELETE 
+	FROM 
+		Cart_List 
+	WHERE 
+		Cart_ID = ?
+	`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing to delete Cart_List /Delete_Cart_List_1")
 	}
