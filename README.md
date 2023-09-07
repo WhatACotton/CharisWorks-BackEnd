@@ -7,18 +7,16 @@
 ## 構成
 
 ```mermaid
-graph TD
+graph LR
 client --- Nginx
 subgraph  [Server]
 Nginx --- FrontEndServer
-FrontEndServer --- APIServer
-APIServer --- DB
 FrontEndServer --- BackEndServer
 FireBaseAuth --- BackEndServer
 BackEndServer --- DB
-BackEndServer --- CashServer
-CashServer --- Stripe
+BackEndServer --- Stripe
 FrontEndServer --- FireBaseAuth
+Stripe --> FrontEndServer
 end
 
 ```
@@ -34,12 +32,14 @@ participant Client
 participant Server
 participant DB
 
-Client ->> Server:SessionKey
+Client ->> Server:Session_Key
+Note right of DB: loginlog
 Server ->> DB:Session_Key
 DB ->> Server:UID
 Note over Server: newSession_Key
+Note right of DB: loginlog,Customer
 Server ->> DB:NewSession_Key UID
-Server ->> Client:newSessionKey
+Server ->> Client:NewSession_Key
 
 
 ```
@@ -50,9 +50,8 @@ Server ->> Client:newSessionKey
 sequenceDiagram
 participant Client
 participant firebase
-
 participant Server
-
+participant DB
 
 Client ->> firebase:email password
 firebase ->> Client: userCredential
@@ -63,7 +62,8 @@ Server ->> firebase:IdToken(JWT)
 firebase ->>Server:Token
 Note over Server:issue Session_Key
 Server ->> Client:Sesison_Key
-
+Note right of DB: loginlog,Customer
+Server ->> DB: Token.UID,Session_Key
 ```
 
 ### カート管理
@@ -71,7 +71,7 @@ Server ->> Client:Sesison_Key
 #### カート ID 取得フロー
 
 ```mermaid
-graph TB
+graph LR
 A([start])-->B{login}
     B--Yes-->C([get CartID from Customer])
     B--No-->D([get CartID from Session])
@@ -113,6 +113,11 @@ alt Cart_IDが取得できた場合
 
 
 DB ->> Server:Cart_ID
+opt Cart_Session_Keyが存在する場合
+
+Client ->> Server: Cart_Session_Key
+Server ->> Client: Delete Cart_Session_Key
+end
 else
 
 alt Cart_Session_Keyが存在する場合
@@ -123,13 +128,14 @@ rect rgba(255, 0, 255, 0.2)
 Note right of DB: Cart_List
 Server ->> DB: Cart_Session_Key
 DB ->> Server:Cart_ID
+
 end
 
 else
 Note over Server: issue Cart_ID
 end
 end
-Note over Server: Session Reset
+Note over Server: Session Reflesh
 rect rgba(255, 0, 255, 0.2)
 Note right of DB: loginlog,Customer
 Server ->> DB:newSession_Key,Cart_ID
@@ -147,28 +153,39 @@ Server ->> Client:Carts
 
 ```mermaid
 erDiagram
-Transactionlist ||--||Cartlist:"取引とカートは1対1"
-Transactionlist ||--|{Transaction:""
-Cartlist}o--|{Cart:""
-Cart}o--||ItemList:"一つのカートに同じItem_Idが複数存在することはない"
-ItemList||--o{ItemInfo:""
+Customer||--o{Cart:""
+Cart}o--o|Item_List:"一つのカートに同じItem_Idが複数存在することはない"
+Item_List|o--o|ItemInfo:""
 Transaction}o--||ItemInfo:"ここでInfo_Idにしているので変更があっても旧Idに遡れる"
+Transaction_List }o--||Customer:""
+Transaction_List ||--|{Transaction:""
 
-Transactionlist{
+Customer{
+ string UID
+ string Address
+ string Name
+ string Phone_Number
  string Cart_Id
+ string Last_Session_Key
+}
+
+Transaction_List{
+ string Cart_ID
  timestamp TransactionTime
  string UID
+ int TotalPrice
+ string Address
+ string Name
+ string Phone_Number
 }
+
 Transaction{
  string Cart_Id
  string Info_Id
  int quantity
 }
 
-Cartlist{
- string Cart_Id
- string SessionKey
-}
+
 
 Cart{
  int order "Auto Inctriment: 商品の登録した順番を管理"
@@ -177,20 +194,19 @@ Cart{
  int quantity
 }
 
-ItemList{
+Item_List{
  string Item_Id
  string Info_Id "マイナーチェンジはItem_Idに紐付ける"
  string status "購入可能かどうか"
- int stock
 }
 ItemInfo{
  string Info_Id
  int Price
  string Name
- int Stone_Size
- int Min_length
- int Max_length
+ int stock
+ string Color
+ string Key_Words
  string Description
- string Keyword
+ bool Top "Topに表示するかどうか"
 }
 ```
