@@ -11,6 +11,26 @@ import (
 )
 
 func BuyItem(c *gin.Context) {
+	//ログイン状態の確認
+	//email認証・本登録の確認
+
+	//商品・価格の取得・購入までの処理
+	//UIDからCart_ID,Name,Address,Email,Phone_Numberを取得
+	//カート処理
+	//Cart_IDからCartを取得
+	//CartからItem_IDを取得
+	//Item_IDからInfo_IDを取得
+	//Info_IDからPriceを取得
+	//Priceを合計し、stripeに渡す
+
+	//購入履歴処理
+	//Cart_IDとInfo_IDを紐付け、Transactionに追加
+	//Cart_ID,UID,TransactionDate,TotalPrice,Address,Name,Phone_NumberをTransaction_Listに追加
+
+	//購入後処理
+	//UIDに紐付けられたCart_IDを更新
+	//Cart.dbからCart_IDに紐付けられたCartを削除
+	//Cart_List.dbからCart_IDを削除
 	user := new(validation.UserReqPayload)
 	Cart_List := new(database.Cart_List)
 	OldSessionKey, NewSessionKey := validation.SessionStart(c)
