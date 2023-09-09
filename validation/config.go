@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -55,4 +57,10 @@ func GenerateRandomKey() (sessionKey string) {
 func GetUUID() string {
 	uuidObj, _ := uuid.NewUUID()
 	return uuidObj.String()
+}
+
+func SessionConfig(r *gin.Engine) {
+	store := cookie.NewStore([]byte(GenerateRandomKey()))
+	cookies := []string{"CartSessionKey", "SessionKey"}
+	r.Use(sessions.SessionsMany(cookies, store))
 }

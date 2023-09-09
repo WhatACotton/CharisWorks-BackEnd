@@ -4,192 +4,192 @@ import (
 	"github.com/pkg/errors"
 )
 
-type API_Top_Item struct {
-	Item_Name string `json:"Item_Name"`
-	Stock     int    `json:"Stock"`
-	Order     int    `json:"Order"`
+type APITopItem struct {
+	ItemName string `json:"ItemName"`
+	Stock    int    `json:"Stock"`
+	Order    int    `json:"Order"`
 }
-type API_Top_Item_List []API_Top_Item
+type APITopItems []APITopItem
 
-func Get_Top() (API_Top_Item_List, error) {
+func GetTop() (APITopItems, error) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
-			Item_Info.Name,
-			Item_Info.Stock,
-			Item_List.Item_Order 
+			ItemDetails.Name,
+			ItemDetails.Stock,
+			Item.ItemOrder 
 
 		FROM 
-			Item_Info
+			ItemDetails
 
 		JOIN 
-			Item_List 
+			Item 
 
 		ON 
-			Item_List.Info_ID = Item_Info.Info_ID 
+			Item.InfoID = ItemDetails.InfoID 
 
 		WHERE 
-			Item_Info.Top = 1 
+			ItemDetails.Top = 1 
 
 		AND 
-			Item_List.Status = 'Available'
+			Item.Status = 'Available'
 
 		ORDER BY 
-			Item_List.Item_Order`)
+			Item.ItemOrder`)
 	if err != nil {
-		return nil, errors.Wrap(err, "error in getting Top_Item /Get_Top_1")
+		return nil, errors.Wrap(err, "error in getting TopItem /GetTop1")
 	}
-	var return_Item []API_Top_Item
+	var returnItem []APITopItem
 	for rows.Next() {
-		Top_Item := new(API_Top_Item)
-		err := rows.Scan(&Top_Item.Item_Name, &Top_Item.Stock, &Top_Item.Order)
+		TopItem := new(APITopItem)
+		err := rows.Scan(&TopItem.ItemName, &TopItem.Stock, &TopItem.Order)
 		if err != nil {
-			return nil, errors.Wrap(err, "error in scanning Cart_ID /Get_Top_2")
+			return nil, errors.Wrap(err, "error in scanning CartID /GetTop2")
 		}
-		return_Item = append(return_Item, *Top_Item)
+		returnItem = append(returnItem, *TopItem)
 	}
-	return return_Item, nil
+	return returnItem, nil
 }
 
-type API_Item struct {
-	Item_ID   string `json:"Item_ID"`
-	Item_Name string `json:"Item_Name"`
-	Stock     int    `json:"Stock"`
-	Price     int    `json:"Price"`
-	Status    string `json:"Status"`
-	Order     int    `json:"Order"`
+type APIItem struct {
+	ItemID   string `json:"ItemID"`
+	ItemName string `json:"ItemName"`
+	Stock    int    `json:"Stock"`
+	Price    int    `json:"Price"`
+	Status   string `json:"Status"`
+	Order    int    `json:"Order"`
 }
-type API_Item_List []API_Item
+type APIItems []APIItem
 
-func Get_ALL() (API_Item_List, error) {
+func GetALL() (APIItems, error) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
-			Item_List.Item_ID,
-			Item_List.Item_Order,
-			Item_Info.Name,
-			Item_Info.Stock,
-			Item_Info.Price,
-			Item_List.Status 
+			Item.ItemID,
+			Item.ItemOrder,
+			ItemDetails.Name,
+			ItemDetails.Stock,
+			ItemDetails.Price,
+			Item.Status 
 
 		FROM 
-			Item_List 
+			Item 
 
 		JOIN 
-			Item_Info 
+			ItemDetails 
 
 		ON 
-			Item_List.Info_ID = Item_Info.Info_ID 
+			Item.InfoID = ItemDetails.InfoID 
 
 		WHERE 
-			Item_List.Status = 'Available'`)
+			Item.Status = 'Available'`)
 	if err != nil {
-		return nil, errors.Wrap(err, "error in getting Top_Item /Get_ALL_1")
+		return nil, errors.Wrap(err, "error in getting TopItem /GetALL1")
 	}
-	var return_Item []API_Item
+	var returnItem []APIItem
 	for rows.Next() {
-		Item := new(API_Item)
-		err := rows.Scan(&Item.Item_ID, &Item.Order, &Item.Item_Name, &Item.Stock, &Item.Price, &Item.Status)
+		Item := new(APIItem)
+		err := rows.Scan(&Item.ItemID, &Item.Order, &Item.ItemName, &Item.Stock, &Item.Price, &Item.Status)
 		if err != nil {
-			return nil, errors.Wrap(err, "error in scanning Cart_ID /Get_ALL_2")
+			return nil, errors.Wrap(err, "error in scanning CartID /GetALL2")
 		}
-		return_Item = append(return_Item, *Item)
+		returnItem = append(returnItem, *Item)
 	}
-	return return_Item, nil
+	return returnItem, nil
 }
 
-func Get_Item_Category(Category string) (API_Item_List, error) {
+func GetItemCategory(Category string) (APIItems, error) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
-			Item_List.Item_Order,
-			Item_Info.Name,
-			Item_Info.Stock,
-			Item_Info.Price,
-			Item_List.Status 
+			Item.ItemOrder,
+			ItemDetails.Name,
+			ItemDetails.Stock,
+			ItemDetails.Price,
+			Item.Status 
 
 		FROM 
-			Item_List 
+			Item
 
 		JOIN 
-			Item_Info 
+			ItemDetails
 
 		ON 
-			Item_List.Info_ID = Item_Info.Info_ID 
+			Item.InfoID = ItemDetails.InfoID 
 
 		WHERE 
-			Item_List.Status = 'Available' 
+			Item.Status = 'Available' 
 
 		AND 
-			Item_Info.Category = ?`,
+			ItemDetails.Category = ?`,
 		Category)
 	if err != nil {
-		return nil, errors.Wrap(err, "error in getting Top_Item /Get_Item_Category_1")
+		return nil, errors.Wrap(err, "error in getting TopItem /GetItemCategory1")
 	}
-	var return_Item []API_Item
+	var returnItem []APIItem
 	for rows.Next() {
-		Item := new(API_Item)
-		err := rows.Scan(&Item.Order, &Item.Item_Name, &Item.Stock, &Item.Price, &Item.Status)
+		Item := new(APIItem)
+		err := rows.Scan(&Item.Order, &Item.ItemName, &Item.Stock, &Item.Price, &Item.Status)
 		if err != nil {
-			return nil, errors.Wrap(err, "error in scanning Cart_ID /Get_Item_Category_2")
+			return nil, errors.Wrap(err, "error in scanning CartID /GetItemCategory2")
 		}
-		return_Item = append(return_Item, *Item)
+		returnItem = append(returnItem, *Item)
 	}
-	return return_Item, nil
+	return returnItem, nil
 }
 
-func Get_Info_Id(Item_ID string) (Info_ID string, err error) {
+func GetInfoId(ItemID string) (InfoID string, err error) {
 	db := ConnectSQL()
 	defer db.Close()
 	Status := new(string)
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
-			Info_ID,
+			InfoID,
 			Status
 
 		FROM 
-			Item_List 
+			Item 
 		
 		WHERE 
-			Item_ID = ?`,
-		Item_ID)
+			ItemID = ?`,
+		ItemID)
 	if err != nil {
-		return "error", errors.Wrap(err, "error in getting Top_Item /Get_Info_ID_1")
+		return "error", errors.Wrap(err, "error in getting TopItem /GetInfoID1")
 	}
 	for rows.Next() {
-		err := rows.Scan(&Info_ID, &Status)
+		err := rows.Scan(&InfoID, &Status)
 		if err != nil {
-			return "error", errors.Wrap(err, "error in scanning Cart_ID /Get_Info_ID_2")
+			return "error", errors.Wrap(err, "error in scanning CartID /GetInfoID2")
 		}
 	}
 	if *Status == `Available` {
-		return Info_ID, nil
+		return InfoID, nil
 	} else {
 		return "Couldn't get", nil
 	}
 }
 
-type API_Item_Details struct {
-	Info_ID     string `json:"Info_ID"`
-	Item_Name   string `json:"Item_Name"`
+type APIItemDetails struct {
+	InfoID      string `json:"InfoID"`
+	ItemName    string `json:"ItemName"`
 	Stock       int    `json:"Stock"`
 	Price       int    `json:"Price"`
 	Color       string `json:"Color"`
 	Description string `json:"Description"`
 	Category    string `json:"category"`
-	Key_Words   string `json:"Key_Words"`
+	KeyWords    string `json:"KeyWords"`
 }
 
-func Get_Item_Details(Info_ID string) (API_Item_Details, error) {
-	Item_Details := new(API_Item_Details)
-	Item_Details.Info_ID = Info_ID
+func GetItemDetails(InfoID string) (APIItemDetails, error) {
+	ItemDetails := new(APIItemDetails)
+	ItemDetails.InfoID = InfoID
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
@@ -200,64 +200,64 @@ func Get_Item_Details(Info_ID string) (API_Item_Details, error) {
 			Stock,
 			Color,
 			Category,
-			Key_Words,
+			KeyWords,
 			Description 
 
 		From 
-			Item_Info
+			ItemDetails
 
 		WHERE 
-			Info_ID = ?`,
-		Info_ID)
+			InfoID = ?`,
+		InfoID)
 	if err != nil {
-		return *Item_Details, errors.Wrap(err, "error in getting Top_Item /Get_Item_Details_1")
+		return *ItemDetails, errors.Wrap(err, "error in getting TopItem /GetItemDetails1")
 	}
 	for rows.Next() {
-		err := rows.Scan(&Item_Details.Item_Name, &Item_Details.Price, &Item_Details.Stock, &Item_Details.Color, &Item_Details.Category, &Item_Details.Key_Words, &Item_Details.Description)
+		err := rows.Scan(&ItemDetails.ItemName, &ItemDetails.Price, &ItemDetails.Stock, &ItemDetails.Color, &ItemDetails.Category, &ItemDetails.KeyWords, &ItemDetails.Description)
 		if err != nil {
-			return *Item_Details, errors.Wrap(err, "error in scanning Cart_ID /Get_Item_Details_2")
+			return *ItemDetails, errors.Wrap(err, "error in scanning CartID /GetItemDetails2")
 		}
 	}
-	return *Item_Details, nil
+	return *ItemDetails, nil
 }
-func Get_Item_Color(Color string) (API_Item_List, error) {
+func GetItemColor(Color string) (APIItems, error) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
-			Item_List.Item_Order,
-			Item_Info.Name,
-			Item_Info.Stock,
-			Item_Info.Price,
-			Item_List.Status 
+			Item.ItemOrder,
+			ItemDetails.Name,
+			ItemDetails.Sstock,
+			ItemDetails.Price,
+			Item.Status 
 		
 		FROM 
-			Item_List 
+			Item 
 		
 		JOIN 
-			Item_Info 
+			ItemDetails 
 		
 		ON 
-			Item_List.Info_ID = Item_Info.Info_ID 
+			Item.InfoID = ItemDetails.InfoID 
 		
 		WHERE 
-			Item_List.Status = 'Available' 
+			Item.Status = 'Available' 
 		
 		AND 
-			Item_Info.Color = ?`,
+			ItemDetails.Color = ?`,
 		Color)
 	if err != nil {
-		return nil, errors.Wrap(err, "error in getting Top_Item /Get_Item_Color_1")
+		return nil, errors.Wrap(err, "error in getting TopItem /GetItemColor1")
 	}
-	var return_Item []API_Item
+	var returnItem []APIItem
 	for rows.Next() {
-		Item := new(API_Item)
-		err := rows.Scan(&Item.Order, &Item.Item_Name, &Item.Stock, &Item.Price, &Item.Status)
+		Item := new(APIItem)
+		err := rows.Scan(&Item.Order, &Item.ItemName, &Item.Stock, &Item.Price, &Item.Status)
 		if err != nil {
-			return nil, errors.Wrap(err, "error in scanning Cart_ID /Get_Item_Color_2")
+			return nil, errors.Wrap(err, "error in scanning CartID /GetItemColor2")
 		}
-		return_Item = append(return_Item, *Item)
+		returnItem = append(returnItem, *Item)
 	}
-	return return_Item, nil
+	return returnItem, nil
 }

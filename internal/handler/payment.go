@@ -10,32 +10,43 @@ import (
 )
 
 func Webhook(c *gin.Context) {
-	ID, err := cashing.Payment_complete(c.Writer, c.Request)
+	ID, err := cashing.PaymentComplete(c.Writer, c.Request)
 	if err != nil {
 		c.JSON(400, gin.H{"message": "error"})
 	}
-
-	Complete_Payment(ID)
+	CompletePayment(ID)
 
 }
-func Complete_Payment(ID string) {
-	log.Print("ID: ", ID)
-	database.Change_Transaction_Status("決済完了", ID)
-	UID, err := database.Get_UID_from_Stripe_ID(ID)
+func CompletePayment(ID string) {
+	database.ChangeTransactionStatus("決済完了", ID)
+	UID, err := database.GetUIDfromStripeID(ID)
 	if err != nil {
 		panic(err)
 	}
-	Cart_ID, err := database.Get_Cart_ID(UID)
+	Transaction := new(database.Transaction)
+	Transaction.TransactionID, err = database.GetTransactionID(ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	TransactionContents, err := Transaction.GetTransactionContents()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, TransactionContent := range TransactionContents {
+		log.Print("TransactionContent: ", TransactionContent)
+		database.Purchased(TransactionContent)
+	}
+	CartID, err := database.GetCartID(UID)
 	if err != nil {
 		panic(err)
 	}
-	err = database.Delete_Cart_List(Cart_ID)
+	err = database.DeleteCartList(CartID)
 	if err != nil {
 		panic(err)
 	}
-	err = database.Delete_Cart_for_Transaction(Cart_ID)
+	err = database.DeleteCartforTransaction(CartID)
 	if err != nil {
 		panic(err)
 	}
-	database.Set_Cart_ID(UID, validation.GetUUID())
+	database.SetCartID(UID, validation.GetUUID())
 }

@@ -8,48 +8,48 @@ import (
 )
 
 func Top(c *gin.Context) {
-	Top_Item_List, err := database.Get_Top()
+	TopItemList, err := database.GetTop()
 	if err != nil {
 		log.Print(err)
 	}
-	c.JSON(200, Top_Item_List)
+	c.JSON(200, TopItemList)
 }
 func ALL(c *gin.Context) {
-	Item_List, err := database.Get_ALL()
+	ItemList, err := database.GetALL()
 	if err != nil {
 		log.Print(err)
 	}
-	c.JSON(200, Item_List)
+	c.JSON(200, ItemList)
 }
-func Item_Details(c *gin.Context) {
-	Item_ID := c.Query("Item_ID")
-	Info_ID, err := database.Get_Info_Id(Item_ID)
+func ItemDetails(c *gin.Context) {
+	ItemID := c.Query("ItemID")
+	InfoID, err := database.GetInfoId(ItemID)
 	if err != nil {
 		log.Print(err)
 	}
-	if Info_ID != "Couldn't get" {
-		Item_Details, err := database.Get_Item_Details(Info_ID)
+	if InfoID != "Couldn't get" {
+		ItemDetails, err := database.GetItemDetails(InfoID)
 		if err != nil {
 			log.Print(err)
 		}
-		c.JSON(200, Item_Details)
+		c.JSON(200, ItemDetails)
 	} else {
 		c.JSON(404, "{Not Found}")
 	}
 }
 func Category(c *gin.Context) {
 	Category := c.Param("category")
-	Item_List, err := database.Get_Item_Category(Category)
+	ItemList, err := database.GetItemCategory(Category)
 	if err != nil {
 		log.Print(err)
 	}
-	c.JSON(200, Item_List)
+	c.JSON(200, ItemList)
 }
 func Color(c *gin.Context) {
 	Color := c.Param("color")
-	Item_List, err := database.Get_Item_Color(Color)
+	ItemList, err := database.GetItemColor(Color)
 	if err != nil {
 		log.Print(err)
 	}
-	c.JSON(200, Item_List)
+	c.JSON(200, ItemList)
 }

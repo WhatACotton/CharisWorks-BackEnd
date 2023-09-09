@@ -9,88 +9,96 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Post_Cart(c *gin.Context) {
-	Cart_List, _ := Get_Cart_ID(c)
-	NewCartReq := new(database.Cart_Request_Payload)
+func PostCart(c *gin.Context) {
+	Cart, _ := GetCartID(c)
+	NewCartReq := new(database.CartRequestPayload)
 	err := c.BindJSON(&NewCartReq)
 	if err != nil {
 		log.Print(err)
 	}
-	err = NewCartReq.Cart(Cart_List.Cart_ID)
+	err = NewCartReq.Cart(Cart.CartID)
 	if err != nil {
 		log.Print(err)
 	}
-	Carts, err := database.Get_Cart_Info(Cart_List.Cart_ID)
+	Carts, err := database.GetCartInfo(Cart.CartID)
 	if err != nil {
 		log.Print(err)
 	}
 	c.JSON(http.StatusOK, Carts)
 }
 
-func Get_Cart(c *gin.Context) {
-	Cart_List, _ := Get_Cart_ID(c)
-	Carts, err := database.Get_Cart_Info(Cart_List.Cart_ID)
-	if err != nil {
-		log.Fatal(err)
+func GetCart(c *gin.Context) {
+	Cart, _ := GetCartID(c)
+	log.Print(Cart.CartID)
+	if Cart.SessionKey != "new" {
+		Carts, err := database.GetCartInfo(Cart.CartID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if Carts == nil {
+			c.JSON(http.StatusOK, "There is no Cart")
+		} else {
+			c.JSON(http.StatusOK, Carts)
+		}
+		log.Print(Carts)
+	} else {
+		c.JSON(http.StatusOK, "未ログインです")
 	}
-	c.JSON(http.StatusOK, Carts)
-	log.Print(Carts)
 }
 
-func Get_Cart_ID(c *gin.Context) (Cart_List database.Cart_List, UID string) {
-	Cart_ID := new(string)
-	Customer_SessionKey := new(string)
-	*Customer_SessionKey = validation.Customer_Get_SessionKey(c)
-	UID, err := database.Get_UID(*Customer_SessionKey)
+func GetCartID(c *gin.Context) (Cart database.Cart, UID string) {
+	CartID := new(string)
+	CustomerSessionKey := new(string)
+	*CustomerSessionKey = validation.GetCustomerSessionKey(c)
+	UID, err := database.GetUID(*CustomerSessionKey)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Print(UID)
 	if UID != "" {
-		*Cart_ID, err = database.Get_Cart_ID(UID)
+		*CartID, err = database.GetCartID(UID)
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Print("Cart_ID:", *Cart_ID)
-		if *Cart_ID == "" {
-			if *Customer_SessionKey != "new" {
-				Cart_List := new(database.Cart_List)
-				Cart_List.Session_Key = *Customer_SessionKey
-				err := Cart_List.Get_Cart_ID_from_SessionKey()
+		log.Print("CartID:", *CartID)
+		if *CartID == "" {
+			if *CustomerSessionKey != "new" {
+				Cart := new(database.Cart)
+				Cart.SessionKey = *CustomerSessionKey
+				err := Cart.GetCartIDfromSessionKey()
 				if err != nil {
 					log.Fatal(err)
 				}
-				*Cart_ID = Cart_List.Cart_ID
+				*CartID = Cart.CartID
 			} else {
-				*Cart_ID = "new"
+				*CartID = "new"
 			}
 		}
 	} else {
-		*Cart_ID = "new"
+		*CartID = "new"
 	}
 
-	if *Cart_ID == "new" {
+	if *CartID == "new" {
 		log.Print("not login")
-		Cart_List.Session_Key = validation.Get_Cart_Session(c)
-		if Cart_List.Session_Key == "new" {
+		Cart.SessionKey = validation.GetCartSessionKey(c)
+		if Cart.SessionKey == "new" {
 			log.Print("don't have sessionKey")
-			Cart_List.Cart_ID = validation.GetUUID()
+			Cart.CartID = validation.GetUUID()
 		} else {
-			err := Cart_List.Get_Cart_ID_from_SessionKey()
+			err := Cart.GetCartIDfromSessionKey()
 			if err != nil {
 				log.Fatal(err)
 			}
-			database.Delete_Cart_List(Cart_List.Cart_ID)
+			database.DeleteCartList(Cart.CartID)
 		}
-		Cart_List.Session_Key = validation.GetUUID()
-		Cart_List.Create_Cart_List()
-		validation.Set_Cart_Session(c, Cart_List.Session_Key)
+		Cart.SessionKey = validation.GetUUID()
+		Cart.CreateCartList()
+		validation.SetCartSessionKey(c, Cart.SessionKey)
 	} else {
 		log.Print("logined")
 		validation.CartSessionEnd(c)
-		Cart_List.Cart_ID = *Cart_ID
-		Continue_LogIn(c)
-
+		Cart.CartID = *CartID
+		LogInToDB(c)
 	}
-	return Cart_List, UID
+	return Cart, UID
 }

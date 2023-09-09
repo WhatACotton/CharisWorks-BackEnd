@@ -18,24 +18,24 @@ func main() {
 	//ログイン
 	r.POST("/Login", handler.LogIn)
 	// 仮登録
-	r.POST("/SignUp", handler.Temporary_SignUp)
+	r.POST("/SignUp", handler.TemporarySignUp)
 	// 本登録
 	r.POST("/Registration", handler.SignUp)
 	// 登録内容の修正
-	r.POST("/Modify", handler.Modify_Customer)
+	r.POST("/Modify", handler.ModifyCustomer)
 	// アカウントの削除
-	r.DELETE("/DeleteCustomer", handler.Delete_Customer)
-	// ログイン状態の継続
-	r.POST("/SessionContinue", handler.Continue_LogIn)
+	r.DELETE("/DeleteCustomer", handler.DeleteCustomer)
 	// ログアウト cookie clear
 	r.POST("/SessionEnd", handler.LogOut)
-
-	r.GET("/GetTransactions", handler.Get_Transaction)
+	// アカウント情報の取得
+	r.GET("/GetCustomer", handler.GetCustomer)
+	// 購入履歴の取得
+	r.GET("/GetTransactions", handler.GetTransaction)
 	// カート機能
 	// 商品の登録・修正・削除
-	r.POST("/PostCart", handler.Post_Cart)
+	r.POST("/PostCart", handler.PostCart)
 	// カートの取得
-	r.GET("/GetCart", handler.Get_Cart)
+	r.GET("/GetCart", handler.GetCart)
 
 	// 購入処理
 	r.POST("/Transaction", handler.BuyItem)
@@ -43,7 +43,7 @@ func main() {
 	//商品API
 	r.GET("/item/top", handler.Top)
 	r.GET("/item/all", handler.ALL)
-	r.GET("/item/details", handler.Item_Details)
+	r.GET("/item/details", handler.ItemDetails)
 	r.GET("/item/category/:category", handler.Category)
 	r.GET("/item/color/:color", handler.Color)
 

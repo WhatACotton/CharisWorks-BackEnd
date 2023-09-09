@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *Customer) Get_Customer(UID string) error {
+func (c *Customer) GetCustomer(UID string) error {
 	db := ConnectSQL()
 	// SQLの実行
 	rows, err := db.Query(`
@@ -15,11 +15,13 @@ func (c *Customer) Get_Customer(UID string) error {
 		Name,
 		Address,
 		Email,
-		Phone_Number,
+		PhoneNumber,
 		Register,
-		Created_Date,
-		Last_Session_Date 
-
+		CreatedDate,
+		LastSessionDate,
+		EmailVerified,
+		CartID,
+		LastSessionKey
 	FROM 
 		Customer 
 
@@ -27,34 +29,36 @@ func (c *Customer) Get_Customer(UID string) error {
 		UID= ?`, UID)
 	if err != nil {
 		log.Fatal(err)
-		return errors.Wrap(err, "error in getting Customer /LogIn_Customer_1")
+		return errors.Wrap(err, "error in getting Customer /LogInCustomer1")
 	}
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
 		//err := rows.Scan(&Customer)
-		err := rows.Scan(&c.UID, &c.Name, &c.Address, &c.Email, &c.Phone_Number, &c.Register, &c.CreatedDate, &c.LastSessionDate)
+		err := rows.Scan(&c.UID, &c.Name, &c.Address, &c.Email, &c.PhoneNumber, &c.Register, &c.CreatedDate, &c.LastSessionDate, &c.EmailVerified, &c.CartID, &c.LastSessionKey)
 		if err != nil {
 			log.Fatal(err)
-			return errors.Wrap(err, "error in scanning Customer /LogIn_Customer_2")
+			return errors.Wrap(err, "error in scanning Customer /LogInCustomer2")
 		}
 	}
-
 	return nil
 }
-func Get_Transaction_Lists(UID string) (Transaction_Lists []Transaction_List, err error) {
+func GetTransactions(UID string) (Transactions Transactions, err error) {
 	db := ConnectSQL()
 	// SQLの実行
 	rows, err := db.Query(`
 	SELECT 
-		Transaction_ID,
-		Stripe_ID,
-		Total_Amount,
+		UID,
+		Name,
+		TransactionID,
+		StripeID,
+		TotalAmount,
 		Status,
-		Transaction_Time,
-		Address
+		TransactionTime,
+		Address,
+		PhoneNumber
 	FROM 
-		Transaction_List 
+		Transaction 
 	WHERE 
 		UID= ?
 	AND
@@ -62,42 +66,68 @@ func Get_Transaction_Lists(UID string) (Transaction_Lists []Transaction_List, er
 		`, UID)
 	if err != nil {
 		log.Fatal(err)
-		return Transaction_Lists, errors.Wrap(err, "error in getting Customer /LogIn_Customer_1")
+		return Transactions, errors.Wrap(err, "error in getting Customer /LogInCustomer1")
 	}
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
-		Transaction_List := new(Transaction_List)
+		Transaction := new(Transaction)
 		//err := rows.Scan(&Customer)
-		err := rows.Scan(&Transaction_List.Transaction_ID, &Transaction_List.Stripe_ID, &Transaction_List.Total_Amount, &Transaction_List.Status, &Transaction_List.Transaction_Time, &Transaction_List.Address)
+		err := rows.Scan(&Transaction.UID, &Transaction.Name, &Transaction.TransactionID, &Transaction.StripeID, &Transaction.TotalAmount, &Transaction.Status, &Transaction.TransactionTime, &Transaction.Address, &Transaction.PhoneNumber)
 		if err != nil {
 			log.Fatal(err)
-			return Transaction_Lists, errors.Wrap(err, "error in scanning Customer /LogIn_Customer_2")
+			return Transactions, errors.Wrap(err, "error in scanning Customer /LogInCustomer2")
 		}
-		Transaction_Lists = append(Transaction_Lists, *Transaction_List)
+		Transactions = append(Transactions, *Transaction)
 	}
-	return Transaction_Lists, nil
+	return Transactions, nil
 }
-func (t *Transaction_List) Get_Transactions() (Transacitons []Transaction, err error) {
+func GetTransactionID(StripeID string) (TransactionID string, err error) {
+	db := ConnectSQL()
+	// SQLの実行
+	rows, err := db.Query(`
+	SELECT 
+		TransactionID
+	FROM 
+		Transaction 
+	WHERE 
+		StripeID = ?
+		`, StripeID)
+	if err != nil {
+		log.Fatal(err)
+		return TransactionID, errors.Wrap(err, "error in getting Customer /LogInCustomer1")
+	}
+	defer rows.Close()
+	// SQLの実行
+	for rows.Next() {
+		//err := rows.Scan(&Customer)
+		err := rows.Scan(&TransactionID)
+		if err != nil {
+			log.Fatal(err)
+			return TransactionID, errors.Wrap(err, "error in scanning Customer /LogInCustomer2")
+		}
+	}
+	return TransactionID, nil
+}
+func (t *Transaction) GetTransactionContents() (TransacitonContents TransactionContents, err error) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
-	Transaciton := new(Transaction)
+	TransactionContent := new(TransactionContent)
 	// SQLの実行
 	rows, err := db.Query(`
-		SELECT * FROM Transaction WHERE Transaction_ID = ?`, t.Transaction_ID)
+		SELECT * FROM TransactionContent WHERE TransactionID = ?`, t.TransactionID)
 	if err != nil {
-		return nil, errors.Wrap(err, "error in getting prepare Cart_ID /Get_Cart_Info_1")
+		return nil, errors.Wrap(err, "error in getting prepare CartID /GetCartInfo1")
 	}
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
-		Transaciton = new(Transaction)
-		err := rows.Scan(&Transaciton.Order, &Transaciton.Info_ID, &Transaciton.Transaction_ID, &Transaciton.Quantity)
+		err := rows.Scan(&TransactionContent.Order, &TransactionContent.InfoID, &TransactionContent.TransactionID, &TransactionContent.Quantity)
 		if err != nil {
-			return nil, errors.Wrap(err, "error in scanning Cart_ID /Get_Cart_Info_2")
+			return nil, errors.Wrap(err, "error in scanning CartID /GetCartInfo2")
 		}
-		Transacitons = append(Transacitons, *Transaciton)
+		TransacitonContents = append(TransacitonContents, *TransactionContent)
 	}
-	return Transacitons, nil
+	return TransacitonContents, nil
 }

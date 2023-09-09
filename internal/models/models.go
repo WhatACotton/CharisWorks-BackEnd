@@ -6,10 +6,6 @@ type LogInLog struct {
 	LoginDate string
 }
 
-type CustomerRequestPayload struct {
-	UID   string `json:"UID"`
-	Email string `json:"contact"`
-}
 type CustomerRegisterPayload struct {
 	Name        string `json:"Name"`
 	Address     string `json:"address"`

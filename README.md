@@ -1,4 +1,4 @@
-# gin-server
+# go-backend-server
 
 **これは golang ベースで作られた開発中のバックエンドサーバです。**
 
@@ -90,8 +90,7 @@ participant Server
 participant DB
 Client ->> Server:Item_ID Quantity
 alt 未ログイン
-alt 初回
-else 2回目以降
+opt 2回目以降
 Client ->> Server:Cart_Session_Key
 Server ->> DB:Cart_Session_Key
 DB ->> Server:Cart_ID　
@@ -109,19 +108,11 @@ DB ->> Server: UID
 end
 Server ->> DB: UID
 Note right of DB: Customer
-alt Cart_IDが取得できた場合
-
-
 DB ->> Server:Cart_ID
-opt Cart_Session_Keyが存在する場合
+DB ->> Server:Carts from Cart_ID
 
-Client ->> Server: Cart_Session_Key
-Server ->> Client: Delete Cart_Session_Key
-end
-else
 
-alt Cart_Session_Keyが存在する場合
-
+opt Cartに商品が入っていなかったとき
 Client ->> Server: Cart_Session_Key
 Server ->> Client: Delete Cart_Session_Key
 rect rgba(255, 0, 255, 0.2)
@@ -129,10 +120,6 @@ Note right of DB: Cart_List
 Server ->> DB: Cart_Session_Key
 DB ->> Server:Cart_ID
 
-end
-
-else
-Note over Server: issue Cart_ID
 end
 end
 Note over Server: Session Reflesh
@@ -154,34 +141,34 @@ Server ->> Client:Carts
 ```mermaid
 erDiagram
 Customer||--o{Cart:""
-Cart}o--o|Item_List:"一つのカートに同じItem_Idが複数存在することはない"
-Item_List|o--o|ItemInfo:""
+Cart}o--o|ItemList:"一つのカートに同じItem_Idが複数存在することはない"
+ItemList|o--o|ItemInfo:""
 Transaction}o--||ItemInfo:"ここでInfo_Idにしているので変更があっても旧Idに遡れる"
-Transaction_List }o--||Customer:""
-Transaction_List ||--|{Transaction:""
+TransactionList }o--||Customer:""
+TransactionList ||--|{Transaction:""
 
 Customer{
  string UID
  string Address
  string Name
- string Phone_Number
- string Cart_Id
- string Last_Session_Key
+ string PhoneNumber
+ string CartId
+ string LastSession_Key
 }
 
-Transaction_List{
- string Cart_ID
+TransactionList{
+ string CartID
  timestamp TransactionTime
  string UID
  int TotalPrice
  string Address
  string Name
- string Phone_Number
+ string PhoneNumber
 }
 
 Transaction{
- string Cart_Id
- string Info_Id
+ string CartId
+ string InfoId
  int quantity
 }
 
@@ -194,13 +181,13 @@ Cart{
  int quantity
 }
 
-Item_List{
- string Item_Id
- string Info_Id "マイナーチェンジはItem_Idに紐付ける"
+ItemList{
+ string ItemId
+ string InfoId "マイナーチェンジはItem_Idに紐付ける"
  string status "購入可能かどうか"
 }
 ItemInfo{
- string Info_Id
+ string InfoId
  int Price
  string Name
  int stock

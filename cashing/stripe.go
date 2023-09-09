@@ -15,20 +15,20 @@ import (
 )
 
 // (第一引数).urlが飛んでほしいリンク先
-func Purchase(amount int) (Stripe_info, error) {
+func Purchase(amount int) (StripeInfo, error) {
 	amount_str := strconv.Itoa(amount)
 	amount_int, _ := strconv.ParseInt(amount_str, 0, 0)
 	log.Printf("amount: %v\n", amount_int)
 	return createCheckoutSession(amount_int)
 }
 
-type Stripe_info struct {
+type StripeInfo struct {
 	URL         string
 	AmountTotal int64
 	ID          string
 }
 
-func createCheckoutSession(amount int64) (Stripe_info, error) {
+func createCheckoutSession(amount int64) (StripeInfo, error) {
 	stripe.Key = "sk_test_51Nj1urA3bJzqElthx8UK5v9CdaucJOZj3FwkOHZ8KjDt25IAvplosSab4uybQOyE2Ne6xxxI4Rnh8pWEbYUwPoPG00wvseAHzl"
 	params := &stripe.CheckoutSessionParams{
 		Mode: stripe.String(string(stripe.CheckoutSessionModePayment)),
@@ -45,13 +45,13 @@ func createCheckoutSession(amount int64) (Stripe_info, error) {
 			},
 		},
 
-		SuccessURL: stripe.String("https://localhost:3000/Success"),
-		CancelURL:  stripe.String("http://localhost:3000/Cancel"),
+		SuccessURL: stripe.String("http://localhost:3000/mypage"),
+		CancelURL:  stripe.String("http://localhost:3000/signin"),
 	}
 	s, _ := session.New(params)
 	log.Print(s.ID)
 
-	stripe_info := Stripe_info{
+	stripe_info := StripeInfo{
 		URL:         s.URL,
 		AmountTotal: s.AmountTotal,
 		ID:          s.ID,
@@ -59,7 +59,7 @@ func createCheckoutSession(amount int64) (Stripe_info, error) {
 	return stripe_info, nil
 }
 
-func Payment_complete(w http.ResponseWriter, req *http.Request) (string, error) {
+func PaymentComplete(w http.ResponseWriter, req *http.Request) (string, error) {
 	const MaxBodyBytes = int64(65536)
 	req.Body = http.MaxBytesReader(w, req.Body, MaxBodyBytes)
 
