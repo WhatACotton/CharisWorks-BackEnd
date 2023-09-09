@@ -242,7 +242,30 @@ func Delete_Cart(Cart_ID string, Item_ID string) error {
 	defer ins.Close()
 	return nil
 }
+func Delete_Cart_for_Transaction(Cart_ID string) error {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
 
+	// SQLの実行
+	ins, err := db.Prepare(`
+	DELETE 
+	FROM
+		Cart
+
+	WHERE 
+		Cart_ID = ? 
+		`)
+	if err != nil {
+		return errors.Wrap(err, "error in getting Cart_ID /Delete_Cart_1")
+	}
+	// SQLの実行
+	_, err = ins.Exec(Cart_ID)
+	if err != nil {
+		return errors.Wrap(err, "error in getting Cart_ID /Delete_Cart_2")
+	}
+	defer ins.Close()
+	return nil
+}
 func Delete_Item_From_Cart(Item_ID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()

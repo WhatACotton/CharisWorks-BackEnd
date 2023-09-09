@@ -30,6 +30,7 @@ func main() {
 	// ログアウト cookie clear
 	r.POST("/SessionEnd", handler.LogOut)
 
+	r.GET("/GetTransactions", handler.Get_Transaction)
 	// カート機能
 	// 商品の登録・修正・削除
 	r.POST("/PostCart", handler.Post_Cart)
@@ -38,7 +39,7 @@ func main() {
 
 	// 購入処理
 	r.POST("/Transaction", handler.BuyItem)
-
+	r.POST("/stripe", handler.Webhook)
 	//商品API
 	r.GET("/item/top", handler.Top)
 	r.GET("/item/all", handler.ALL)
@@ -48,3 +49,6 @@ func main() {
 
 	r.Run(":8080") // 0.0.0.0:8080 でサーバーを立てます。
 }
+
+//TODO
+//購入履歴APIの実装。Transaction_Listも複数のレコードを持つことを考慮しないといけない。

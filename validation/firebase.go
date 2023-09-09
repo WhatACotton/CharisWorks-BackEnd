@@ -11,10 +11,10 @@ import (
 )
 
 type UserReqPayload struct {
-	Email          string `json:"contact"`
-	UID            string `json:"uid"`
 	IdToken        string `json:"idToken"`
-	Email_Verified bool   `json:"email_verified"`
+	Email          string
+	UID            string
+	Email_Verified bool
 	Cart_ID        string
 }
 

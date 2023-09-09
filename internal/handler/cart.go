@@ -10,7 +10,7 @@ import (
 )
 
 func Post_Cart(c *gin.Context) {
-	Cart_List := Get_Cart_ID(c)
+	Cart_List, _ := Get_Cart_ID(c)
 	NewCartReq := new(database.Cart_Request_Payload)
 	err := c.BindJSON(&NewCartReq)
 	if err != nil {
@@ -28,7 +28,7 @@ func Post_Cart(c *gin.Context) {
 }
 
 func Get_Cart(c *gin.Context) {
-	Cart_List := Get_Cart_ID(c)
+	Cart_List, _ := Get_Cart_ID(c)
 	Carts, err := database.Get_Cart_Info(Cart_List.Cart_ID)
 	if err != nil {
 		log.Fatal(err)
@@ -37,10 +37,11 @@ func Get_Cart(c *gin.Context) {
 	log.Print(Carts)
 }
 
-func Get_Cart_ID(c *gin.Context) database.Cart_List {
+func Get_Cart_ID(c *gin.Context) (Cart_List database.Cart_List, UID string) {
 	Cart_ID := new(string)
-	SessionKey := validation.Customer_Get_SessionKey(c)
-	UID, err := database.Get_UID(SessionKey)
+	Customer_SessionKey := new(string)
+	*Customer_SessionKey = validation.Customer_Get_SessionKey(c)
+	UID, err := database.Get_UID(*Customer_SessionKey)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,11 +51,11 @@ func Get_Cart_ID(c *gin.Context) database.Cart_List {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Print("Cart_ID:", Cart_ID)
+		log.Print("Cart_ID:", *Cart_ID)
 		if *Cart_ID == "" {
-			if SessionKey != "new" {
+			if *Customer_SessionKey != "new" {
 				Cart_List := new(database.Cart_List)
-				Cart_List.Session_Key = SessionKey
+				Cart_List.Session_Key = *Customer_SessionKey
 				err := Cart_List.Get_Cart_ID_from_SessionKey()
 				if err != nil {
 					log.Fatal(err)
@@ -68,7 +69,6 @@ func Get_Cart_ID(c *gin.Context) database.Cart_List {
 		*Cart_ID = "new"
 	}
 
-	Cart_List := new(database.Cart_List)
 	if *Cart_ID == "new" {
 		log.Print("not login")
 		Cart_List.Session_Key = validation.Get_Cart_Session(c)
@@ -90,6 +90,7 @@ func Get_Cart_ID(c *gin.Context) database.Cart_List {
 		validation.CartSessionEnd(c)
 		Cart_List.Cart_ID = *Cart_ID
 		Continue_LogIn(c)
+
 	}
-	return *Cart_List
+	return Cart_List, UID
 }

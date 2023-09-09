@@ -110,6 +110,31 @@ func LogIn(c *gin.Context) {
 				database.Set_Cart_ID(user.UID, Cart_List.Cart_ID)
 				validation.CartSessionEnd(c)
 				log.Print("Cart_ID: ", Cart_List.Cart_ID)
+			} else {
+				Cart_List := new(database.Cart_List)
+				Carts, err := database.Get_Cart_Info(Cart_List.Cart_ID)
+				if err != nil {
+					log.Fatal(err)
+				}
+				log.Print(Carts)
+				if Carts == nil {
+					Cart_List.Session_Key = validation.Get_Cart_Session(c)
+					if Cart_List.Session_Key == "new" {
+						log.Print("don't have sessionKey")
+						Cart_List.Cart_ID = validation.GetUUID()
+					} else {
+						log.Print("have sessionKey")
+						err := Cart_List.Get_Cart_ID_from_SessionKey()
+						if err != nil {
+							log.Fatal(err)
+						}
+						database.Delete_Cart_List(Cart_List.Cart_ID)
+						validation.CartSessionEnd(c)
+					}
+				}
+				database.Set_Cart_ID(user.UID, Cart_List.Cart_ID)
+				validation.CartSessionEnd(c)
+				log.Print("Cart_ID: ", Cart_List.Cart_ID)
 			}
 		} else {
 			c.JSON(http.StatusOK, user)
@@ -140,8 +165,10 @@ func LogIn(c *gin.Context) {
 func Continue_LogIn(c *gin.Context) {
 	OldSessionKey, NewSessionKey := validation.SessionStart(c)
 	if OldSessionKey == "new" {
+		validation.SessionEnd(c)
 		c.JSON(http.StatusOK, "未ログインです")
 	} else {
+
 		UID, err := database.Get_UID(OldSessionKey)
 		if err != nil {
 			log.Fatal(err)
@@ -149,6 +176,7 @@ func Continue_LogIn(c *gin.Context) {
 		log.Print("UID : ", UID)
 		Customer := new(database.Customer)
 		Customer.LogIn_Customer(UID, NewSessionKey)
+		c.JSON(http.StatusOK, Customer)
 
 		//c.JSON(http.StatusOK, "SuccessFully Logined!!")
 	}

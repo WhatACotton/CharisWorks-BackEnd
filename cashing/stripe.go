@@ -1,0 +1,106 @@
+package cashing
+
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"strconv"
+
+	"github.com/stripe/stripe-go/v75"
+	"github.com/stripe/stripe-go/v75/checkout/session"
+	"github.com/stripe/stripe-go/v75/webhook"
+)
+
+// (第一引数).urlが飛んでほしいリンク先
+func Purchase(amount int) (Stripe_info, error) {
+	amount_str := strconv.Itoa(amount)
+	amount_int, _ := strconv.ParseInt(amount_str, 0, 0)
+	log.Printf("amount: %v\n", amount_int)
+	return createCheckoutSession(amount_int)
+}
+
+type Stripe_info struct {
+	URL         string
+	AmountTotal int64
+	ID          string
+}
+
+func createCheckoutSession(amount int64) (Stripe_info, error) {
+	stripe.Key = "sk_test_51Nj1urA3bJzqElthx8UK5v9CdaucJOZj3FwkOHZ8KjDt25IAvplosSab4uybQOyE2Ne6xxxI4Rnh8pWEbYUwPoPG00wvseAHzl"
+	params := &stripe.CheckoutSessionParams{
+		Mode: stripe.String(string(stripe.CheckoutSessionModePayment)),
+		LineItems: []*stripe.CheckoutSessionLineItemParams{
+			{
+				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+					Currency: stripe.String("jpy"),
+					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+						Name: stripe.String("購入金額"),
+					},
+					UnitAmount: stripe.Int64(amount),
+				},
+				Quantity: stripe.Int64(1),
+			},
+		},
+
+		SuccessURL: stripe.String("https://localhost:3000/Success"),
+		CancelURL:  stripe.String("http://localhost:3000/Cancel"),
+	}
+	s, _ := session.New(params)
+	log.Print(s.ID)
+
+	stripe_info := Stripe_info{
+		URL:         s.URL,
+		AmountTotal: s.AmountTotal,
+		ID:          s.ID,
+	}
+	return stripe_info, nil
+}
+
+func Payment_complete(w http.ResponseWriter, req *http.Request) (string, error) {
+	const MaxBodyBytes = int64(65536)
+	req.Body = http.MaxBytesReader(w, req.Body, MaxBodyBytes)
+
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading request body: %v\n", err)
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return "", err
+	}
+
+	// Pass the request body and Stripe-Signature header to ConstructEvent, along with the webhook signing key
+	// You can find your endpoint's secret in your webhook settings
+	endpointSecret := os.Getenv("STRIPE_KEY")
+	event, err := webhook.ConstructEvent(body, req.Header.Get("Stripe-Signature"), endpointSecret)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error verifying webhook signature: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+		return "", err
+	}
+
+	// Handle the checkout.session.completed event
+	if event.Type == "checkout.session.completed" {
+		var sessions stripe.CheckoutSession
+		err := json.Unmarshal(event.Data.Raw, &sessions)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return "", err
+		}
+
+		params := &stripe.CheckoutSessionParams{}
+		params.AddExpand("line_items")
+		log.Print(sessions.ID)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return "", err
+		}
+		return sessions.ID, nil
+	}
+
+	w.WriteHeader(http.StatusOK)
+	return "", nil
+}

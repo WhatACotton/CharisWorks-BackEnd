@@ -13,14 +13,14 @@ type Customer struct {
 	Name            string `json:"Name"`
 	Address         string `json:"address"`
 	Email           string `json:"Contact"`
-	PhoneNumber     string `json:"PhoneNumber"`
-	Register        bool
-	CreatedDate     string
-	RegisteredDate  string
+	Phone_Number    string `json:"PhoneNumber"`
+	Register        bool   `json:"Register"`
+	CreatedDate     string `json:"CreatedDate"`
+	RegisteredDate  string `json:"RegisteredDate"`
 	LastSessionId   string
-	LastSessionDate string
-	Email_Verified  bool
-	Cart_ID         string
+	LastSessionDate string `json:"LastSessionDate"`
+	Email_Verified  bool   `json:"Email_Verified"`
+	Cart_ID         string `json:"Cart_ID"`
 }
 
 func Get_Customer(UID string) (string, error) {
@@ -148,43 +148,16 @@ func Modify_Customer(usr validation.UserReqPayload, customer models.CustomerRegi
 	return nil
 }
 
-func (c *Customer) LogIn_Customer(uid string, NewSessionKey string) error {
-	LogIn_Log(uid, NewSessionKey)
-	Update_Session_ID(uid, NewSessionKey)
-	db := ConnectSQL()
-	// SQLの実行
-	rows, err := db.Query(`
-	SELECT 
-		UID,
-		Name,
-		Address,
-		Email,
-		Phone_Number,
-		Register,
-		Created_Date,
-		Last_Session_ID,
-		Last_Session_Date 
-
-	FROM 
-		Customer 
-
-	WHERE 
-		UID = ?`, uid)
+func (c *Customer) LogIn_Customer(UID string, NewSessionKey string) error {
+	LogIn_Log(UID, NewSessionKey)
+	Update_Session_ID(UID, NewSessionKey)
+	err := c.Get_Customer(UID)
 	if err != nil {
 		return errors.Wrap(err, "error in getting Customer /LogIn_Customer_1")
 	}
-	defer rows.Close()
-	// SQLの実行
-	for rows.Next() {
-		//err := rows.Scan(&Customer)
-		err := rows.Scan(&c.UID, &c.Name, &c.Address, &c.Email, &c.PhoneNumber, &c.Register, &c.CreatedDate, &c.LastSessionId, &c.LastSessionDate)
-		if err != nil {
-			return errors.Wrap(err, "error in scanning Customer /LogIn_Customer_2")
-		}
-	}
-
 	return nil
 }
+
 func Email_Verified(uid string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
