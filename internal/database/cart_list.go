@@ -11,7 +11,7 @@ type Cart struct {
 	SessionKey string `json:"SessionKey"`
 }
 
-func (c *Cart) GetCartIDfromSessionKey() error {
+func (c *Cart) GetCartIDfromCartSessionKey() error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -49,8 +49,7 @@ func (c *Cart) CreateCartList() error {
 	ins, err := db.Prepare(`
 	INSERT 
 	INTO 
-		Cart
-
+		Cart 
 	(CartID,SessionKey)
 	VALUES
 	(?,?)
@@ -97,7 +96,7 @@ func (c *Cart) SessionGet() bool {
 		log.Print("don't have sessionKey")
 		return false
 	} else {
-		err := c.GetCartIDfromSessionKey()
+		err := c.GetCartIDfromCartSessionKey()
 		if err != nil {
 			log.Fatal(err)
 		}

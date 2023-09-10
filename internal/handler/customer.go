@@ -50,40 +50,6 @@ func LogIn(c *gin.Context) {
 	UserReqPayload := new(validation.CustomerReqPayload)
 	if UserReqPayload.VerifyCustomer(c) {
 		log.Print("UID : ", UserReqPayload.UID)
-		CartID, err := database.GetCartID(UserReqPayload.UID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if CartID == "" {
-			Cart := new(database.Cart)
-			Cart.SessionKey = validation.GetCartSessionKey(c)
-			if Cart.SessionGet() {
-				database.SetCartID(UserReqPayload.UID, Cart.CartID)
-			} else {
-				Cart.CartID = validation.GetUUID()
-			}
-
-			log.Print("CartID: ", Cart.CartID)
-		} else {
-			Cart := new(database.Cart)
-			CartContents, err := database.GetCartInfo(Cart.CartID)
-			if err != nil {
-				log.Fatal(err)
-			}
-			if CartContents == nil {
-				Cart := new(database.Cart)
-				Cart.SessionKey = validation.GetCartSessionKey(c)
-				if Cart.SessionGet() {
-					database.SetCartID(UserReqPayload.UID, Cart.CartID)
-				} else {
-					Cart.CartID = validation.GetUUID()
-				}
-			}
-			database.SetCartID(UserReqPayload.UID, Cart.CartID)
-			validation.CartSessionEnd(c)
-			log.Print("CartID: ", Cart.CartID)
-		}
-
 		if UserReqPayload.EmailVerified {
 			err := database.EmailVerified(UserReqPayload.UID)
 			if err != nil {
@@ -99,6 +65,7 @@ func LogIn(c *gin.Context) {
 			database.ChangeEmail(UserReqPayload.UID, UserReqPayload.Email)
 		}
 		_ = signUpToDB(c, UserReqPayload.UID)
+		GetCartID(c)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
@@ -134,7 +101,8 @@ func LogOut(c *gin.Context) {
 	//ログアウト処理
 	OldSessionKey := validation.CustomerSessionEnd(c)
 	database.Invalid(OldSessionKey)
-	c.JSON(http.StatusOK, "SuccessFully Logouted!!")
+	log.Print("SessionKey was :", OldSessionKey)
+	//c.JSON(http.StatusOK, "SuccessFully Logouted!!")
 }
 
 func DeleteCustomer(c *gin.Context) {

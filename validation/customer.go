@@ -26,17 +26,6 @@ func CustomerSessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey s
 	}
 }
 
-func CustomerSessionEnd(c *gin.Context) (OldSessionKey string) {
-	session := sessions.DefaultMany(c, "SessionKey")
-	if session.Get("SessionKey") != nil {
-		session.Options(sessions.Options{MaxAge: -1})
-		OldSessionKey = session.Get("SessionKey").(string)
-		session.Clear()
-		session.Save()
-	}
-	return OldSessionKey
-}
-
 func GetCustomerSessionKey(c *gin.Context) string {
 	session := sessions.DefaultMany(c, "SessionKey")
 	if session.Get("SessionKey") != nil {
@@ -46,4 +35,14 @@ func GetCustomerSessionKey(c *gin.Context) string {
 	} else {
 		return "new"
 	}
+}
+func CustomerSessionEnd(c *gin.Context) (OldSessionKey string) {
+	session := sessions.DefaultMany(c, "SessionKey")
+	if session.Get("SessionKey") != nil {
+		OldSessionKey = session.Get("SessionKey").(string)
+
+		session.Delete("SessionKey")
+		session.Save()
+	}
+	return OldSessionKey
 }

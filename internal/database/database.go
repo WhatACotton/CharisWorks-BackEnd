@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -14,16 +13,6 @@ func GetDate() string {
 	t := time.Now()
 	ft := t.Format("2006-01-02 15:04:05")
 	return ft
-}
-
-// []uint8型の値をtime.Time型に変換する
-func ConvertBytesToTime(b []uint8) time.Time {
-	str := string(b)
-	i, err := strconv.ParseInt(str, 10, 64)
-	if err != nil {
-		return time.Time{}
-	}
-	return time.Unix(i, 0)
 }
 
 type PatchRequestPayload struct {

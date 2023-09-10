@@ -16,36 +16,36 @@ func main() {
 	database.TestSQL()
 	// アカウント管理
 	//ログイン
-	r.POST("/Login", handler.LogIn)
+	r.POST("/go/Login", handler.LogIn)
 	// 仮登録
-	r.POST("/SignUp", handler.TemporarySignUp)
+	r.POST("/go/SignUp", handler.TemporarySignUp)
 	// 本登録
-	r.POST("/Registration", handler.SignUp)
+	r.POST("/go/Registration", handler.SignUp)
 	// 登録内容の修正
-	r.POST("/Modify", handler.ModifyCustomer)
+	r.POST("/go/Modify", handler.ModifyCustomer)
 	// アカウントの削除
-	r.DELETE("/DeleteCustomer", handler.DeleteCustomer)
+	r.DELETE("/go/DeleteCustomer", handler.DeleteCustomer)
 	// ログアウト cookie clear
-	r.POST("/SessionEnd", handler.LogOut)
+	r.POST("/go/SessionEnd", handler.LogOut)
 	// アカウント情報の取得
-	r.GET("/GetCustomer", handler.GetCustomer)
+	r.GET("/go/GetCustomer", handler.GetCustomer)
 	// 購入履歴の取得
-	r.GET("/GetTransactions", handler.GetTransaction)
+	r.GET("/go/GetTransactions", handler.GetTransaction)
 	// カート機能
 	// 商品の登録・修正・削除
-	r.POST("/PostCart", handler.PostCart)
+	r.POST("/go/PostCart", handler.PostCart)
 	// カートの取得
-	r.GET("/GetCart", handler.GetCart)
+	r.GET("/go/GetCart", handler.GetCart)
 
 	// 購入処理
-	r.POST("/Transaction", handler.BuyItem)
-	r.POST("/stripe", handler.Webhook)
+	r.POST("/go/Transaction", handler.BuyItem)
+	r.POST("/go/stripe", handler.Webhook)
 	//商品API
-	r.GET("/item/top", handler.Top)
-	r.GET("/item/all", handler.ALL)
-	r.GET("/item/details", handler.ItemDetails)
-	r.GET("/item/category/:category", handler.Category)
-	r.GET("/item/color/:color", handler.Color)
+	r.GET("/go/item/top", handler.Top)
+	r.GET("/go/item/all", handler.ALL)
+	r.GET("/go/item/details", handler.ItemDetails)
+	r.GET("/go/item/category/:category", handler.Category)
+	r.GET("/go/item/color/:color", handler.Color)
 
 	r.Run(":8080") // 0.0.0.0:8080 でサーバーを立てます。
 }

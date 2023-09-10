@@ -31,74 +31,63 @@ func GetCart(c *gin.Context) {
 	Cart, _ := GetCartID(c)
 	log.Print(Cart.CartID)
 	if Cart.SessionKey != "new" {
-		Carts, err := database.GetCartInfo(Cart.CartID)
+		CartContents, err := database.GetCartInfo(Cart.CartID)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if Carts == nil {
+		if CartContents == nil {
 			c.JSON(http.StatusOK, "There is no Cart")
 		} else {
-			c.JSON(http.StatusOK, Carts)
+			c.JSON(http.StatusOK, CartContents)
 		}
-		log.Print(Carts)
+		log.Print(CartContents)
 	} else {
 		c.JSON(http.StatusOK, "未ログインです")
 	}
 }
 
 func GetCartID(c *gin.Context) (Cart database.Cart, UID string) {
-	CartID := new(string)
-	CustomerSessionKey := new(string)
-	*CustomerSessionKey = validation.GetCustomerSessionKey(c)
-	UID, err := database.GetUID(*CustomerSessionKey)
-	if err != nil {
-		log.Fatal(err)
+	log.Print("Getting CartID...")
+	CustomerSessionKey := validation.GetCustomerSessionKey(c)
+	CartSessionKey := validation.GetCartSessionKey(c)
+	if CartSessionKey != "new" {
+		log.Print("have CartSessionKey")
+		Cart.SessionKey = CartSessionKey
+		Cart.GetCartIDfromCartSessionKey()
 	}
-	log.Print(UID)
-	if UID != "" {
-		*CartID, err = database.GetCartID(UID)
+	if CustomerSessionKey != "new" {
+		log.Print("logined")
+		UID, _ = database.GetUID(CustomerSessionKey)
+		CartIDfromCustomer, err := database.GetCartID(UID)
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Print("CartID:", *CartID)
-		if *CartID == "" {
-			if *CustomerSessionKey != "new" {
-				Cart := new(database.Cart)
-				Cart.SessionKey = *CustomerSessionKey
-				err := Cart.GetCartIDfromSessionKey()
-				if err != nil {
-					log.Fatal(err)
-				}
-				*CartID = Cart.CartID
-			} else {
-				*CartID = "new"
-			}
+		CartContents, err := database.GetCartInfo(CartIDfromCustomer)
+		if err != nil {
+			log.Fatal(err)
 		}
-	} else {
-		*CartID = "new"
-	}
-
-	if *CartID == "new" {
-		log.Print("not login")
-		Cart.SessionKey = validation.GetCartSessionKey(c)
-		if Cart.SessionKey == "new" {
-			log.Print("don't have sessionKey")
+		if CartContents != nil {
+			log.Print("have CartContents from CustomerData")
+			Cart.CartID = CartIDfromCustomer
+		}
+		if Cart.CartID == "" {
+			log.Print("don't have CartID in any place")
 			Cart.CartID = validation.GetUUID()
-		} else {
-			err := Cart.GetCartIDfromSessionKey()
-			if err != nil {
-				log.Fatal(err)
-			}
-			database.DeleteCartList(Cart.CartID)
+		}
+		validation.CartSessionEnd(c)
+		LogInToDB(c)
+		database.SetCartID(UID, Cart.CartID)
+	} else {
+		log.Print("not logined")
+		if Cart.CartID == "" {
+			log.Print("don't have CartID in any place")
+			Cart.CartID = validation.GetUUID()
 		}
 		Cart.SessionKey = validation.GetUUID()
 		Cart.CreateCartList()
+		log.Print("Cart with sesssion. SessionKey : ", Cart.SessionKey, " CartID : ", Cart.CartID)
 		validation.SetCartSessionKey(c, Cart.SessionKey)
-	} else {
-		log.Print("logined")
-		validation.CartSessionEnd(c)
-		Cart.CartID = *CartID
-		LogInToDB(c)
 	}
+	log.Print("CartID:", Cart.CartID)
 	return Cart, UID
 }

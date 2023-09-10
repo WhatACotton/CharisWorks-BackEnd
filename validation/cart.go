@@ -23,9 +23,8 @@ func GetCartSessionKey(c *gin.Context) (CartSessionKey string) {
 func CartSessionEnd(c *gin.Context) (OldSessionKey string) {
 	session := sessions.DefaultMany(c, "CartSessionKey")
 	if session.Get("CartSessionKey") != nil {
-		session.Options(sessions.Options{MaxAge: -1})
 		OldSessionKey = session.Get("CartSessionKey").(string)
-		session.Clear()
+		session.Delete("CartSessionKey")
 		session.Save()
 	}
 	return OldSessionKey

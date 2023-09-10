@@ -45,8 +45,8 @@ func createCheckoutSession(amount int64) (StripeInfo, error) {
 			},
 		},
 
-		SuccessURL: stripe.String("http://localhost:3000/mypage"),
-		CancelURL:  stripe.String("http://localhost:3000/signin"),
+		SuccessURL: stripe.String("http://192.168.175.196:80/mypage"),
+		CancelURL:  stripe.String("http://192.168.175.196:80/signin"),
 	}
 	s, _ := session.New(params)
 	log.Print(s.ID)
