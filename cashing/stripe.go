@@ -28,6 +28,8 @@ type StripeInfo struct {
 	ID          string
 }
 
+var IPAddress = "192.168.102.196"
+
 func createCheckoutSession(amount int64) (StripeInfo, error) {
 	stripe.Key = "sk_test_51Nj1urA3bJzqElthx8UK5v9CdaucJOZj3FwkOHZ8KjDt25IAvplosSab4uybQOyE2Ne6xxxI4Rnh8pWEbYUwPoPG00wvseAHzl"
 	params := &stripe.CheckoutSessionParams{
@@ -44,9 +46,8 @@ func createCheckoutSession(amount int64) (StripeInfo, error) {
 				Quantity: stripe.Int64(1),
 			},
 		},
-
-		SuccessURL: stripe.String("http://192.168.175.196:80/mypage"),
-		CancelURL:  stripe.String("http://192.168.175.196:80/signin"),
+		SuccessURL: stripe.String("http://" + IPAddress + ":80/mypage"),
+		CancelURL:  stripe.String("http://" + IPAddress + ":80/signin"),
 	}
 	s, _ := session.New(params)
 	log.Print(s.ID)

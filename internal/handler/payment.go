@@ -40,7 +40,14 @@ func CompletePayment(ID string) {
 	if err != nil {
 		panic(err)
 	}
-	err = database.DeleteCartList(CartID)
+	CartContents, err := database.GetCartContents(CartID)
+	if err != nil {
+		panic(err)
+	}
+	for _, CartContent := range CartContents {
+		database.DeleteCartContent(CartID, CartContent.ItemID)
+	}
+	err = database.DeleteCart(CartID)
 	if err != nil {
 		panic(err)
 	}

@@ -11,13 +11,13 @@ import (
 )
 
 func BuyItem(c *gin.Context) {
-	Cart, UID := GetCartID(c)
+	Cart, UID := GetDatafromSessionKey(c)
 	if UID != "" {
 		Customer := new(database.Customer)
 		Customer.GetCustomer(UID)
 		log.Print("Customer:", Customer)
 		if Customer.Register {
-			CartContents, err := database.GetCartInfo(Cart.CartID)
+			CartContents, err := database.GetCartContents(Cart.CartID)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -57,7 +57,7 @@ func inspectCart(carts database.CartContents) bool {
 
 func totalPrice(Carts database.CartContents) (TotalPrice int) {
 	for _, Cart := range Carts {
-		TotalPrice += Cart.Price
+		TotalPrice += Cart.Price * Cart.Quantity
 	}
 	return TotalPrice
 }

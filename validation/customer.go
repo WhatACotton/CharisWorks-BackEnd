@@ -1,7 +1,9 @@
 package validation
 
 import (
+	"fmt"
 	"log"
+	"regexp"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -45,4 +47,33 @@ func CustomerSessionEnd(c *gin.Context) (OldSessionKey string) {
 		session.Save()
 	}
 	return OldSessionKey
+}
+
+type CustomerRegisterPayload struct {
+	Name        string `json:"Name"`
+	ZipCode     string `json:"ZipCode"`
+	Address     string `json:"Address"`
+	PhoneNumber string `json:"PhoneNumber"`
+}
+
+func (c *CustomerRegisterPayload) InspectCusromerRegisterPayload() bool {
+	if c.Name == "" || c.Address == "" || c.PhoneNumber == "" || c.ZipCode == "" {
+		return false
+	}
+	phonePattern := regexp.MustCompile(`^0\d{9,10}$`)
+	phoneNumber := c.PhoneNumber
+	matched := phonePattern.MatchString(phoneNumber)
+	if matched {
+	} else {
+		fmt.Println("電話番号の形式が正しくありません")
+		return false
+	}
+	zipCodePattern := regexp.MustCompile(`\d{3}-\d{4}`)
+	matched = zipCodePattern.MatchString(c.ZipCode)
+	if matched {
+	} else {
+		fmt.Println("郵便番号の形式が正しくありません")
+		return false
+	}
+	return true
 }

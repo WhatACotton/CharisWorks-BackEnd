@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"unify/internal/database"
-	"unify/internal/models"
 	"unify/validation"
 
 	"github.com/gin-gonic/gin"
@@ -29,20 +28,17 @@ func TemporarySignUp(c *gin.Context) {
 }
 
 func SignUp(c *gin.Context) {
-	//本登録処理
-	//本登録を行う。bodyにアカウントの詳細情報が入っている。
-	CustomerReqPayload := new(validation.CustomerReqPayload)
-	if CustomerReqPayload.VerifyCustomer(c) { //認証
-		//アカウント本登録処理
-		//2回構造体を作るのは冗長かも知れないが、bindしている以上、
-		//インジェクションされて予期しない場所が変更される可能性がある。
-		h := new(models.CustomerRegisterPayload)
-		if err := c.BindJSON(&h); err != nil {
-			return
-		}
-		database.RegisterCustomer(*CustomerReqPayload, *h)
+	//登録情報変更処理
+	//bodyにアカウントの詳細情報が入っている。
+	_, UID := GetDatafromSessionKey(c)
+	h := new(validation.CustomerRegisterPayload)
+	if err := c.BindJSON(&h); err != nil {
+		return
+	}
+	if h.InspectCusromerRegisterPayload() {
+		database.RegisterCustomer(UID, *h)
 	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "変更できませんでした。"})
 	}
 }
 
@@ -65,7 +61,7 @@ func LogIn(c *gin.Context) {
 			database.ChangeEmail(UserReqPayload.UID, UserReqPayload.Email)
 		}
 		_ = signUpToDB(c, UserReqPayload.UID)
-		GetCartID(c)
+		GetDatafromSessionKey(c)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
@@ -84,16 +80,19 @@ func GetCustomer(c *gin.Context) {
 func ModifyCustomer(c *gin.Context) {
 	//登録情報変更処理
 	//bodyにアカウントの詳細情報が入っている。
-	user := new(validation.CustomerReqPayload)
-	if user.VerifyCustomer(c) { //認証
-		//アカウント修正処理
-		h := new(models.CustomerRegisterPayload)
-		if err := c.BindJSON(&h); err != nil {
-			return
+	_, UID := GetDatafromSessionKey(c)
+	h := new(validation.CustomerRegisterPayload)
+	if err := c.BindJSON(&h); err != nil {
+		return
+	}
+	if h.InspectCusromerRegisterPayload() {
+		err := database.RegisterCustomer(UID, *h)
+		if err != nil {
+			log.Fatal(err)
 		}
-		database.ModifyCustomer(*user, *h)
+		log.Print("CustomerData was modified")
 	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "変更できませんでした。"})
 	}
 }
 
@@ -107,14 +106,11 @@ func LogOut(c *gin.Context) {
 
 func DeleteCustomer(c *gin.Context) {
 	//アカウントの削除
-	user := new(validation.CustomerReqPayload)
-	if user.VerifyCustomer(c) { //認証
-		database.DeleteCustomer(user.UID)
-		database.DeleteSession(user.UID)
-		c.JSON(http.StatusOK, gin.H{"message": "アカウントを削除しました。"})
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
-	}
+	_, UID := GetDatafromSessionKey(c)
+	database.DeleteCustomer(UID)
+	database.DeleteSession(UID)
+	c.JSON(http.StatusOK, gin.H{"message": "アカウントを削除しました。"})
+
 }
 
 func LogInToDB(c *gin.Context) (UID string) {

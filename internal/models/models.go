@@ -6,13 +6,6 @@ type LogInLog struct {
 	LoginDate string
 }
 
-type CustomerRegisterPayload struct {
-	Name        string `json:"Name"`
-	Address     string `json:"address"`
-	Email       string `json:"Contact"`
-	PhoneNumber int    `json:"PhoneNumber"`
-}
-
 // Transaction関連
 type TransactionRequestPayload struct {
 	UID    string `json:"UID"`

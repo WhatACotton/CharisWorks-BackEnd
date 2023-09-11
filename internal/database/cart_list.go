@@ -41,7 +41,7 @@ func (c *Cart) GetCartIDfromCartSessionKey() error {
 	return nil
 }
 
-func (c *Cart) CreateCartList() error {
+func (c *Cart) CreateCart() error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -67,7 +67,7 @@ func (c *Cart) CreateCartList() error {
 	return nil
 }
 
-func DeleteCartList(CartID string) error {
+func DeleteCart(CartID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -91,6 +91,7 @@ func DeleteCartList(CartID string) error {
 	}
 	return nil
 }
+
 func (c *Cart) SessionGet() bool {
 	if c.SessionKey == "new" {
 		log.Print("don't have sessionKey")
@@ -100,7 +101,7 @@ func (c *Cart) SessionGet() bool {
 		if err != nil {
 			log.Fatal(err)
 		}
-		DeleteCartList(c.CartID)
+		DeleteCart(c.CartID)
 		return true
 	}
 }

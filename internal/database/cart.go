@@ -23,7 +23,7 @@ type CartContent struct {
 }
 type CartContents []CartContent
 
-func GetCartInfo(CartID string) (CartContents CartContents, err error) {
+func GetCartContents(CartID string) (CartContents CartContents, err error) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -88,14 +88,14 @@ func (c *CartRequestPayload) Cart(CartID string) error {
 	//リクエストされた商品が登録可能か判定
 	log.Println("ItemStatus : " + ItemList.Status)
 	if ItemList.Status == "Available" {
-		Carts, err := GetCartInfo(CartID)
+		Carts, err := GetCartContents(CartID)
 		if err != nil {
 			return errors.Wrap(err, "error in getting CartID /Cart2")
 		}
 		//リクエストされた商品がカートに存在するか確認
 		if SearchCart(Carts, c.ItemID) {
 			if c.Quantity == 0 {
-				err := DeleteCart(CartID, c.ItemID)
+				err := DeleteCartContent(CartID, c.ItemID)
 				if err != nil {
 					return errors.Wrap(err, "error in getting CartID /Cart3")
 				}
@@ -198,7 +198,7 @@ func (c CartRequestPayload) UpdateCart(CartID string) error {
 	// SQLの実行
 	ins, err := db.Prepare(`
 	UPDATE 
-		CartCotent 
+		CartContent 
 	SET 
 		Quantity = ? 
 	WHERE 
@@ -217,7 +217,7 @@ func (c CartRequestPayload) UpdateCart(CartID string) error {
 	return nil
 }
 
-func DeleteCart(CartID string, ItemID string) error {
+func DeleteCartContent(CartID string, ItemID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 

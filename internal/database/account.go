@@ -3,7 +3,6 @@ package database
 import (
 	"html"
 	"log"
-	"unify/internal/models"
 	"unify/validation"
 
 	"github.com/pkg/errors"
@@ -11,7 +10,8 @@ import (
 type Customer struct {
 	UID             string `json:"UID"`
 	Name            string `json:"Name"`
-	Address         string `json:"address"`
+	ZipCode         string `json:"ZipCode"`
+	Address         string `json:"Address"`
 	Email           string `json:"Contact"`
 	PhoneNumber     string `json:"PhoneNumber"`
 	Register        bool   `json:"Register"`
@@ -34,22 +34,22 @@ func SignUpCustomer(req validation.CustomerReqPayload, SessionID string, CartID 
 	db := ConnectSQL()
 
 	// SQLの準備
-	//UID,Name,Address,Email,PhoneNumber,Register,CreatedDate,ModifiedDate,RegisteredDate,LastLogInDate
+	//UID,Name,Address,Email,PhoneNumber,Register,CreatedDate,ModifiedDate,LastLogInDate
 
 	ins, err := db.Prepare(`
 	INSERT 
 	INTO 
 		Customer 
-		(UID,Name,Address,Email,PhoneNumber,Register,LastSessionKey,EmailVerified,CartID)
+		(UID,Name,Address,ZipCode,Email,PhoneNumber,Register,LastSessionKey,EmailVerified,CartID)
 		VALUES
-		(?,?,?,?,?,?,?,?,?)`)
+		(?,?,?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		return errors.Wrap(err, "error in preparing Customer /SignUpCustomer1")
 	}
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(req.UID, "default", "default", req.Email, "00000000000", false, SessionID, false, CartID)
+	_, err = ins.Exec(req.UID, "default", "default", "default", req.Email, "00000000000", false, SessionID, false, CartID)
 	if err != nil {
 		return errors.Wrap(err, "error in inserting Customer /SignUpCustomer2")
 	}
@@ -58,21 +58,21 @@ func SignUpCustomer(req validation.CustomerReqPayload, SessionID string, CartID 
 	return nil
 }
 
-func RegisterCustomer(usr validation.CustomerReqPayload, customer models.CustomerRegisterPayload) error {
+func RegisterCustomer(UID string, customer validation.CustomerRegisterPayload) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
 	// SQLの準備
-	//UID,Name,Address,Email,PhoneNumber,Register,CreatedDate,ModifiedDate,RegisteredDate,LastLogInDate
+	//UID,Name,Address,Email,PhoneNumber,Register,CreatedDate,ModifiedDate,LastLogInDate
 	ins, err := db.Prepare(`
 	UPDATE 
 		Customer 
 	SET 
 		Name = ?,
+		ZipCode = ?,
 		Address = ?,
 		PhoneNumber = ?,
-		Register = ?,
-		RegisteredDate = ?,
+		Register = ?
 
 	WHERE 
 		UID = ?`)
@@ -82,14 +82,14 @@ func RegisterCustomer(usr validation.CustomerReqPayload, customer models.Custome
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.Address), customer.PhoneNumber, true, GetDate(), usr.UID)
+	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.ZipCode), html.EscapeString(customer.Address), customer.PhoneNumber, true, UID)
 	if err != nil {
 		return errors.Wrap(err, "error in inserting Customer /RegisterCustomer2")
 	}
 	return nil
 }
 
-func ModifyCustomer(usr validation.CustomerReqPayload, customer models.CustomerRegisterPayload) error {
+func ModifyCustomer(usr validation.CustomerReqPayload, customer validation.CustomerRegisterPayload) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 

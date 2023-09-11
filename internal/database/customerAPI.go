@@ -13,6 +13,7 @@ func (c *Customer) GetCustomer(UID string) error {
 	SELECT 
 		UID,
 		Name,
+		ZipCode,
 		Address,
 		Email,
 		PhoneNumber,
@@ -35,7 +36,7 @@ func (c *Customer) GetCustomer(UID string) error {
 	// SQLの実行
 	for rows.Next() {
 		//err := rows.Scan(&Customer)
-		err := rows.Scan(&c.UID, &c.Name, &c.Address, &c.Email, &c.PhoneNumber, &c.Register, &c.CreatedDate, &c.LastSessionDate, &c.EmailVerified, &c.CartID, &c.LastSessionKey)
+		err := rows.Scan(&c.UID, &c.Name, &c.ZipCode, &c.Address, &c.Email, &c.PhoneNumber, &c.Register, &c.CreatedDate, &c.LastSessionDate, &c.EmailVerified, &c.CartID, &c.LastSessionKey)
 		if err != nil {
 			log.Fatal(err)
 			return errors.Wrap(err, "error in scanning Customer /LogInCustomer2")
