@@ -127,7 +127,7 @@ func LogIn(UID string, NewSessionKey string) error {
 	return nil
 }
 
-func EmailVerified(uid string) error {
+func EmailVerified(verify int, uid string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	ins, err := db.Prepare(`
@@ -135,7 +135,7 @@ func EmailVerified(uid string) error {
 		Customer 
 	
 	SET 
-		EmailVerified = 1 
+		EmailVerified = ? 
 	
 	WHERE 
 		UID = ?`)
@@ -143,7 +143,7 @@ func EmailVerified(uid string) error {
 		return errors.Wrap(err, "error in preparing Customer /EmailVerified1")
 	}
 	// SQLの実行
-	_, err = ins.Exec(uid)
+	_, err = ins.Exec(verify, uid)
 	if err != nil {
 		return errors.Wrap(err, "error in inserting Customer /EmailVerified2")
 	}

@@ -47,7 +47,12 @@ func LogIn(c *gin.Context) {
 	if UserReqPayload.VerifyCustomer(c) {
 		log.Print("UID : ", UserReqPayload.UID)
 		if UserReqPayload.EmailVerified {
-			err := database.EmailVerified(UserReqPayload.UID)
+			err := database.EmailVerified(1, UserReqPayload.UID)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			err := database.EmailVerified(0, UserReqPayload.UID)
 			if err != nil {
 				log.Fatal(err)
 			}
