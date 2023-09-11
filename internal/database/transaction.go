@@ -171,7 +171,7 @@ func Purchased(TransactionContent TransactionContent) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの準備
-	ins, err := db.Prepare(`UPDATE ItemDetails SET Stock = Stock-? WHERE InfoID = ?`)
+	ins, err := db.Prepare(`UPDATE ItemDetails SET Stock = Stock - ? WHERE InfoID = ?`)
 	if err != nil {
 		panic(err)
 	}
