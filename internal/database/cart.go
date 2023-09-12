@@ -72,12 +72,12 @@ func GetCartContents(CartID string) (CartContents CartContents, err error) {
 	return CartContents, nil
 }
 
-type CartRequestPayload struct {
+type CartContentRequestPayload struct {
 	ItemID   string `json:"ItemId"`
 	Quantity int    `json:"Quantity"`
 }
 
-func (c *CartRequestPayload) Cart(CartID string) error {
+func (c *CartContentRequestPayload) Cart(CartID string) error {
 	log.Println("CartID : " + CartID)
 	log.Print("ItemID : "+c.ItemID, " Quantity : ", c.Quantity)
 	ItemList := new(ItemList)
@@ -93,7 +93,7 @@ func (c *CartRequestPayload) Cart(CartID string) error {
 			return errors.Wrap(err, "error in getting CartID /Cart2")
 		}
 		//リクエストされた商品がカートに存在するか確認
-		if SearchCart(Carts, c.ItemID) {
+		if SearchCartContents(Carts, c.ItemID) {
 			if c.Quantity == 0 {
 				err := DeleteCartContent(CartID, c.ItemID)
 				if err != nil {
@@ -102,7 +102,7 @@ func (c *CartRequestPayload) Cart(CartID string) error {
 			} else {
 
 				if ItemList.Stock >= c.Quantity {
-					err := c.UpdateCart(CartID)
+					err := c.UpdateCartContent(CartID)
 					if err != nil {
 						return errors.Wrap(err, "error in getting CartID /Cart4")
 					}
@@ -113,7 +113,7 @@ func (c *CartRequestPayload) Cart(CartID string) error {
 		} else {
 			if c.Quantity != 0 {
 				if ItemList.Stock >= c.Quantity {
-					err := c.PostCart(CartID)
+					err := c.PostCartContent(CartID)
 					if err != nil {
 						return errors.Wrap(err, "error in getting CartID /Cart5")
 					}
@@ -129,7 +129,7 @@ func (c *CartRequestPayload) Cart(CartID string) error {
 	return nil
 }
 
-func (c CartRequestPayload) PostCart(CartID string) error {
+func (c CartContentRequestPayload) PostCartContent(CartID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの準備
@@ -153,7 +153,7 @@ func (c CartRequestPayload) PostCart(CartID string) error {
 	return nil
 }
 
-func SearchCart(CartContents CartContents, ItemID string) bool {
+func SearchCartContents(CartContents CartContents, ItemID string) bool {
 	for _, CartContent := range CartContents {
 		if CartContent.ItemID == ItemID {
 			return true
@@ -191,7 +191,7 @@ func GetCartID(UID string) (string, error) {
 	return *CartID, nil
 }
 
-func (c CartRequestPayload) UpdateCart(CartID string) error {
+func (c CartContentRequestPayload) UpdateCartContent(CartID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -244,7 +244,7 @@ func DeleteCartContent(CartID string, ItemID string) error {
 	return nil
 }
 
-func DeleteCartforTransaction(CartID string) error {
+func DeleteCartContentforTransaction(CartID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -269,7 +269,7 @@ func DeleteCartforTransaction(CartID string) error {
 	return nil
 }
 
-func DeleteItemFromCart(ItemID string) error {
+func DeleteItemFromCartContent(ItemID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()

@@ -10,13 +10,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 商品の購入リクエストを作成。
 func BuyItem(c *gin.Context) {
+	log.Print("Creating PaymentIntent...")
 	Cart, UID := GetDatafromSessionKey(c)
 	if UID != "" {
 		Customer := new(database.Customer)
 		Customer.GetCustomer(UID)
-		log.Print("Customer:", Customer)
-		if Customer.Register {
+		log.Print("Customer:", Customer.Name)
+		if Customer.Register && Customer.EmailVerified {
 			CartContents, err := database.GetCartContents(Cart.CartID)
 			if err != nil {
 				log.Fatal(err)
@@ -35,14 +37,15 @@ func BuyItem(c *gin.Context) {
 				c.JSON(http.StatusUnauthorized, gin.H{"message": "カートの中身に購入不可能な商品が含まれています。"})
 			}
 		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "本登録が完了していません。"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "本登録・またはEmail認証が完了していません。", "errcode": "401"})
 		}
 	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "未ログインです。"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインが完了していません。", "errcode": "401"})
 	}
 
 }
 
+// カートの中身を確認し、購入可能かどうかを判定する。
 func inspectCart(carts database.CartContents) bool {
 	if len(carts) == 0 {
 		return false
@@ -55,6 +58,7 @@ func inspectCart(carts database.CartContents) bool {
 	return true
 }
 
+// カートの合計金額を計算する。
 func totalPrice(Carts database.CartContents) (TotalPrice int) {
 	for _, Cart := range Carts {
 		TotalPrice += Cart.Price * Cart.Quantity
@@ -62,6 +66,7 @@ func totalPrice(Carts database.CartContents) (TotalPrice int) {
 	return TotalPrice
 }
 
+// 購入履歴を取得する。
 func GetTransaction(c *gin.Context) {
 	CustomerSessionKey := new(string)
 	*CustomerSessionKey = validation.GetCustomerSessionKey(c)
@@ -85,23 +90,70 @@ func GetTransaction(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"TransactionLists": Transactions, "Transactions": *TransactionContentsList})
 }
 
-//ログイン状態の確認
-//email認証・本登録の確認
+func Webhook(c *gin.Context) {
+	ID, err := cashing.PaymentComplete(c.Writer, c.Request)
+	if err != nil {
+		c.JSON(400, gin.H{"message": "error"})
+	}
+	if ID != "" {
+		completePayment(ID)
+	}
+}
 
-//商品・価格の取得・購入までの処理
-//UIDからCartID,Name,Address,Email,PhoneNumberを取得
-//カート処理
-//CartIDからCartを取得
-//CartからItemIDを取得
-//ItemIDからInfoIDを取得
-//InfoIDからPriceを取得
-//Priceを合計し、stripeに渡す
+func completePayment(ID string) (err error) {
+	database.SetTransactionStatus("決済完了", ID)
+	Transaction := new(database.Transaction)
+	Transaction.TransactionID, err = database.GetTransactionID(ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	TransactionContents, err := Transaction.GetTransactionContents()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, TransactionContent := range TransactionContents {
+		log.Print("TransactionContent: ", TransactionContent)
+		database.Purchased(TransactionContent)
+		Itemdetails, err := database.GetItemDetails(TransactionContent.InfoID)
+		if err != nil {
+			panic(err)
+		}
+		amount := float64(Itemdetails.Price) * float64(TransactionContent.Quantity) * 0.97 * 0.964
+		cashing.Transfer(amount, Itemdetails.Madeby, Itemdetails.ItemName)
+	}
+	UID, err := database.GetUIDfromStripeID(ID)
+	if err != nil {
+		panic(err)
+	}
+	CartID, err := database.GetCartID(UID)
+	if err != nil {
+		panic(err)
+	}
+	database.DeleteCartContentforTransaction(CartID)
+	err = database.DeleteCart(CartID)
+	if err != nil {
+		panic(err)
+	}
+	err = database.DeleteCartContentforTransaction(CartID)
+	if err != nil {
+		panic(err)
+	}
+	database.SetCartID(UID, validation.GetUUID())
+	return nil
+}
 
-//購入履歴処理
-//CartIDとInfoIDを紐付け、Transactionに追加
-//CartID,UID,TransactionDate,TotalPrice,Address,Name,PhoneNumberをTransactionListに追加
+func CreateStripeAccount(c *gin.Context) {
+	_, UID := GetDatafromSessionKey(c)
+	email, err := database.GetEmail(UID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	AccountID, URL := cashing.CreateStripeAccount(email)
+	err = database.CreateStripeAccount(UID, AccountID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "アカウントが作成されました。", "URL": URL})
+}
 
-//購入後処理
-//UIDに紐付けられたCartIDを更新
-//Cart.dbからCartIDに紐付けられたCartを削除
-//CartList.dbからCartIDを削除
+//返金処理

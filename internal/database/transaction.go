@@ -42,7 +42,7 @@ func PostTransaction(Cart Cart, Customer Customer, StripeInfo cashing.StripeInfo
 	TransactionContents := new(TransactionContent)
 	for _, CartContent := range CartContents {
 		TransactionContents.ConstructTransaction(CartContent, Cart, TransactionID)
-		TransactionContents.PostTransactionContent()
+		TransactionContents.postTransactionContent()
 	}
 }
 func (t *TransactionContent) ConstructTransaction(CartContent CartContent, Cart Cart, TransactionID string) {
@@ -87,8 +87,30 @@ func (t *Transaction) postTransaction() error {
 	}
 	return nil
 }
-
-func ChangeTransactionStatus(status string, stripeID string) {
+func GetTransactionStatus(stripeID string) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	// SQLの実行
+	rows, err := db.Query(`
+	SELECT 
+		Status 
+	FROM 
+		Transaction
+	WHERE 
+		StripeID = ?`, stripeID)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	// SQLの実行
+	for rows.Next() {
+		err := rows.Scan(&stripeID)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+func SetTransactionStatus(status string, stripeID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -136,7 +158,7 @@ func GetUIDfromStripeID(ID string) (string, error) {
 	}
 	return ID, nil
 }
-func (t *TransactionContent) PostTransactionContent() error {
+func (t *TransactionContent) postTransactionContent() error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()

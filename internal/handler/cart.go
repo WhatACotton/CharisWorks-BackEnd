@@ -11,7 +11,7 @@ import (
 
 func PostCart(c *gin.Context) {
 	Cart, _ := GetDatafromSessionKey(c)
-	NewCartReq := new(database.CartRequestPayload)
+	NewCartReq := new(database.CartContentRequestPayload)
 	err := c.BindJSON(&NewCartReq)
 	if err != nil {
 		log.Print(err)

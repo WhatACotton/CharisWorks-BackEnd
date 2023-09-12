@@ -31,6 +31,8 @@ func main() {
 	r.GET("/go/GetCustomer", handler.GetCustomer)
 	// 購入履歴の取得
 	r.GET("/go/GetTransactions", handler.GetTransaction)
+
+	r.GET("/go/CreateStripeAccount", handler.CreateStripeAccount)
 	// カート機能
 	// 商品の登録・修正・削除
 	r.POST("/go/PostCart", handler.PostCart)

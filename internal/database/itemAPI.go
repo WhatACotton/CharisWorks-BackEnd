@@ -185,6 +185,7 @@ type APIItemDetails struct {
 	Description string `json:"Description"`
 	Category    string `json:"category"`
 	KeyWords    string `json:"KeyWords"`
+	Madeby      string `json:"Madeby"`
 }
 
 func GetItemDetails(InfoID string) (APIItemDetails, error) {
@@ -201,8 +202,8 @@ func GetItemDetails(InfoID string) (APIItemDetails, error) {
 			Color,
 			Category,
 			KeyWords,
-			Description 
-
+			Description,
+			Madeby
 		From 
 			ItemDetails
 
@@ -213,7 +214,7 @@ func GetItemDetails(InfoID string) (APIItemDetails, error) {
 		return *ItemDetails, errors.Wrap(err, "error in getting TopItem /GetItemDetails1")
 	}
 	for rows.Next() {
-		err := rows.Scan(&ItemDetails.ItemName, &ItemDetails.Price, &ItemDetails.Stock, &ItemDetails.Color, &ItemDetails.Category, &ItemDetails.KeyWords, &ItemDetails.Description)
+		err := rows.Scan(&ItemDetails.ItemName, &ItemDetails.Price, &ItemDetails.Stock, &ItemDetails.Color, &ItemDetails.Category, &ItemDetails.KeyWords, &ItemDetails.Description, &ItemDetails.Madeby)
 		if err != nil {
 			return *ItemDetails, errors.Wrap(err, "error in scanning CartID /GetItemDetails2")
 		}
@@ -261,3 +262,4 @@ func GetItemColor(Color string) (APIItems, error) {
 	}
 	return returnItem, nil
 }
+

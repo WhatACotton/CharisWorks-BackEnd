@@ -10,9 +10,20 @@ import (
 	"strconv"
 
 	"github.com/stripe/stripe-go/v75"
+	"github.com/stripe/stripe-go/v75/account"
+	"github.com/stripe/stripe-go/v75/accountlink"
 	"github.com/stripe/stripe-go/v75/checkout/session"
+	"github.com/stripe/stripe-go/v75/transfer"
 	"github.com/stripe/stripe-go/v75/webhook"
 )
+
+const IPAddress = "192.168.102.196"
+
+type StripeInfo struct {
+	URL         string
+	AmountTotal int64
+	ID          string
+}
 
 // (第一引数).urlが飛んでほしいリンク先
 func Purchase(amount int) (StripeInfo, error) {
@@ -21,17 +32,9 @@ func Purchase(amount int) (StripeInfo, error) {
 	log.Printf("amount: %v\n", amount_int)
 	return createCheckoutSession(amount_int)
 }
-
-type StripeInfo struct {
-	URL         string
-	AmountTotal int64
-	ID          string
-}
-
-var IPAddress = "192.168.102.196"
-
 func createCheckoutSession(amount int64) (StripeInfo, error) {
 	stripe.Key = "sk_test_51Nj1urA3bJzqElthx8UK5v9CdaucJOZj3FwkOHZ8KjDt25IAvplosSab4uybQOyE2Ne6xxxI4Rnh8pWEbYUwPoPG00wvseAHzl"
+
 	params := &stripe.CheckoutSessionParams{
 		Mode: stripe.String(string(stripe.CheckoutSessionModePayment)),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
@@ -59,7 +62,6 @@ func createCheckoutSession(amount int64) (StripeInfo, error) {
 	}
 	return stripe_info, nil
 }
-
 func PaymentComplete(w http.ResponseWriter, req *http.Request) (string, error) {
 	const MaxBodyBytes = int64(65536)
 	req.Body = http.MaxBytesReader(w, req.Body, MaxBodyBytes)
@@ -104,4 +106,56 @@ func PaymentComplete(w http.ResponseWriter, req *http.Request) (string, error) {
 
 	w.WriteHeader(http.StatusOK)
 	return "", nil
+}
+func CreateStripeAccount(email string) (stripeID string, URL string) {
+	stripe.Key = "sk_test_51Nj1urA3bJzqElthx8UK5v9CdaucJOZj3FwkOHZ8KjDt25IAvplosSab4uybQOyE2Ne6xxxI4Rnh8pWEbYUwPoPG00wvseAHzl"
+
+	params := &stripe.AccountParams{
+		Capabilities: &stripe.AccountCapabilitiesParams{
+			CardPayments: &stripe.AccountCapabilitiesCardPaymentsParams{
+				Requested: stripe.Bool(true),
+			},
+			Transfers: &stripe.AccountCapabilitiesTransfersParams{
+				Requested: stripe.Bool(true),
+			},
+		},
+		Country: stripe.String("JP"),
+		Email:   stripe.String(email),
+		Type:    stripe.String("express"),
+	}
+
+	a, _ := account.New(params)
+	log.Print("CreatedStripeAccount. ID : ", a.ID)
+	URL = createAccountLink(a.ID)
+	return a.ID, URL
+}
+func createAccountLink(ID string) string {
+	params := &stripe.AccountLinkParams{
+		Account:    stripe.String(ID),
+		RefreshURL: stripe.String("http://" + IPAddress + "/reauth"),
+		ReturnURL:  stripe.String("http://" + IPAddress + "/return"),
+		Type:       stripe.String("account_onboarding"),
+		Collect:    stripe.String("eventually_due"),
+	}
+	result, err := accountlink.New(params)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Print(result.URL)
+	return result.URL
+}
+func Transfer(amount float64, stripeID string, ItemName string) {
+	stripe.Key = "sk_test_51Nj1urA3bJzqElthx8UK5v9CdaucJOZj3FwkOHZ8KjDt25IAvplosSab4uybQOyE2Ne6xxxI4Rnh8pWEbYUwPoPG00wvseAHzl"
+	log.Print("Transfering... \n amount: ", amount, "\n stripeID: ", stripeID, "\n ItemName: ", ItemName)
+	params := &stripe.TransferParams{
+		Amount:      stripe.Int64(int64(amount)),
+		Currency:    stripe.String(string(stripe.CurrencyJPY)),
+		Destination: stripe.String(stripeID),
+		Description: stripe.String(ItemName),
+	}
+	tr, _ := transfer.New(params)
+	log.Print(tr.ID)
+}
+func Refund(ID string){
+	
 }

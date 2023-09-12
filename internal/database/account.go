@@ -20,6 +20,7 @@ type Customer struct {
 	LastSessionDate string `json:"LastSessionDate"`
 	EmailVerified   bool   `json:"EmailVerified"`
 	CartID          string `json:"CartID"`
+	StripeAccountID string `json:"StripeAccountID,omitempty"`
 }
 
 func SignUpCustomer(req validation.CustomerReqPayload, SessionID string, CartID string) error {
@@ -57,7 +58,6 @@ func SignUpCustomer(req validation.CustomerReqPayload, SessionID string, CartID 
 
 	return nil
 }
-
 func RegisterCustomer(UID string, customer validation.CustomerRegisterPayload) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -88,7 +88,6 @@ func RegisterCustomer(UID string, customer validation.CustomerRegisterPayload) e
 	}
 	return nil
 }
-
 func ModifyCustomer(usr validation.CustomerReqPayload, customer validation.CustomerRegisterPayload) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -120,13 +119,11 @@ func ModifyCustomer(usr validation.CustomerReqPayload, customer validation.Custo
 	}
 	return nil
 }
-
 func LogIn(UID string, NewSessionKey string) error {
 	LogInLog(UID, NewSessionKey)
 	UpdateSessionID(UID, NewSessionKey)
 	return nil
 }
-
 func EmailVerified(verify int, uid string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -150,7 +147,6 @@ func EmailVerified(verify int, uid string) error {
 	defer ins.Close()
 	return nil
 }
-
 func UpdateSessionID(uid string, NewSessionKey string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -174,7 +170,6 @@ func UpdateSessionID(uid string, NewSessionKey string) error {
 	defer ins.Close()
 	return nil
 }
-
 func LogInLog(uid string, NewSessionKey string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -200,7 +195,6 @@ func LogInLog(uid string, NewSessionKey string) error {
 	defer ins.Close()
 	return nil
 }
-
 func Invalid(SessionKey string) error {
 	log.Println("Invalid called")
 	// データベースのハンドルを取得する
@@ -225,8 +219,7 @@ func Invalid(SessionKey string) error {
 	defer ins.Close()
 	return nil
 }
-
-func GetUID(SessionKey string) (uid string, err error) {
+func GetUID(SessionKey string) (UID string, err error) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの実行
@@ -244,7 +237,6 @@ func GetUID(SessionKey string) (uid string, err error) {
 		return "error", errors.Wrap(err, "error in getting UID /GetUID1")
 	}
 	defer rows.Close()
-	var UID string
 	// SQLの実行
 	for rows.Next() {
 		err := rows.Scan(&UID)
@@ -255,7 +247,6 @@ func GetUID(SessionKey string) (uid string, err error) {
 	}
 	return UID, nil
 }
-
 func DeleteCustomer(uid string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -368,6 +359,30 @@ func SetCartID(uid string, CartID string) error {
 	_, err = ins.Exec(CartID, uid)
 	if err != nil {
 		return errors.Wrap(err, "error in inserting Customer /ChangeEmail2")
+	}
+	defer ins.Close()
+	return nil
+}
+
+func CreateStripeAccount(uid string, StripeAccountID string) error {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	ins, err := db.Prepare(`
+	UPDATE 
+		Customer 
+	
+	SET 
+		StripeAccountID = ? 
+	
+	WHERE 
+		UID = ?`)
+	if err != nil {
+		return errors.Wrap(err, "error in preparing Customer /CreateStripeAccount1")
+	}
+	// SQLの実行
+	_, err = ins.Exec(StripeAccountID, uid)
+	if err != nil {
+		return errors.Wrap(err, "error in inserting Customer /CreateStripeAccount2")
 	}
 	defer ins.Close()
 	return nil
