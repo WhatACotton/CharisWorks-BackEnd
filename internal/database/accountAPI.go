@@ -110,25 +110,90 @@ func GetTransactionID(StripeID string) (TransactionID string, err error) {
 	}
 	return TransactionID, nil
 }
-func (t *Transaction) GetTransactionContents() (TransacitonContents TransactionContents, err error) {
-	// データベースのハンドルを取得する
+func GetStripeAccountID(UID string) (StripeAccountID string, srr error) {
 	db := ConnectSQL()
-	defer db.Close()
-	TransactionContent := new(TransactionContent)
 	// SQLの実行
 	rows, err := db.Query(`
-		SELECT * FROM TransactionContent WHERE TransactionID = ?`, t.TransactionID)
+	SELECT 
+		StripeAccountID
+	FROM 
+		Maker 
+	WHERE 
+		UID= ?`, UID)
 	if err != nil {
-		return nil, errors.Wrap(err, "error in getting prepare CartID /GetCartInfo1")
+		log.Fatal(err)
+		return StripeAccountID, errors.Wrap(err, "error in getting Customer /AllowCreateMaker1")
 	}
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&TransactionContent.Order, &TransactionContent.InfoID, &TransactionContent.TransactionID, &TransactionContent.Quantity)
+		//err := rows.Scan(&Customer)
+		var UID string
+		err := rows.Scan(&StripeAccountID)
 		if err != nil {
-			return nil, errors.Wrap(err, "error in scanning CartID /GetCartInfo2")
+			log.Fatal(err)
+			return StripeAccountID, errors.Wrap(err, "error in scanning Customer /AllowCreateMaker2")
 		}
-		TransacitonContents = append(TransacitonContents, *TransactionContent)
+		if UID == "" {
+			return StripeAccountID, nil
+		}
 	}
-	return TransacitonContents, nil
+	return StripeAccountID, nil
+}
+func GetUID(SessionKey string) (UID string, err error) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	// SQLの実行
+
+	rows, err := db.Query(`
+	SELECT 
+		UID
+
+	FROM 
+		LogIn
+
+	WHERE 
+		SessionKey = ?`, SessionKey)
+	if err != nil {
+		return "error", errors.Wrap(err, "error in getting UID /GetUID1")
+	}
+	defer rows.Close()
+	// SQLの実行
+	for rows.Next() {
+		err := rows.Scan(&UID)
+
+		if err != nil {
+			return "error", errors.Wrap(err, "error in scanning UID /GetUID2")
+		}
+	}
+	return UID, nil
+}
+func GetEmail(UID string) (Email string, err error) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	// SQLの実行
+
+	rows, err := db.Query(`
+	SELECT 
+		Email 
+	
+	FROM 
+		Customer 
+	
+	WHERE 
+		UID = ?`, UID)
+	if err != nil {
+		return "error", errors.Wrap(err, "error in getting Email /GetEmail1")
+	}
+	defer rows.Close()
+	// SQLの実行
+	for rows.Next() {
+
+		err := rows.Scan(&Email)
+
+		if err != nil {
+			return "error", errors.Wrap(err, "error in scanning Email /GetEmail2")
+		}
+	}
+	return Email, nil
 }

@@ -13,11 +13,12 @@ import (
 	"github.com/stripe/stripe-go/v75/account"
 	"github.com/stripe/stripe-go/v75/accountlink"
 	"github.com/stripe/stripe-go/v75/checkout/session"
+	"github.com/stripe/stripe-go/v75/refund"
 	"github.com/stripe/stripe-go/v75/transfer"
 	"github.com/stripe/stripe-go/v75/webhook"
 )
 
-const IPAddress = "192.168.102.196"
+const IPAddress = "192.168.10.175"
 
 type StripeInfo struct {
 	URL         string
@@ -156,6 +157,13 @@ func Transfer(amount float64, stripeID string, ItemName string) {
 	tr, _ := transfer.New(params)
 	log.Print(tr.ID)
 }
-func Refund(ID string){
-	
+func Refund(ID string) {
+	stripe.Key = "sk_test_51Nj1urA3bJzqElthx8UK5v9CdaucJOZj3FwkOHZ8KjDt25IAvplosSab4uybQOyE2Ne6xxxI4Rnh8pWEbYUwPoPG00wvseAHzl"
+
+	params := &stripe.RefundParams{PaymentIntent: stripe.String("ID")}
+	result, err := refund.New(params)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Print(result)
 }

@@ -142,18 +142,14 @@ func completePayment(ID string) (err error) {
 	return nil
 }
 
-func CreateStripeAccount(c *gin.Context) {
-	_, UID := GetDatafromSessionKey(c)
-	email, err := database.GetEmail(UID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	AccountID, URL := cashing.CreateStripeAccount(email)
-	err = database.CreateStripeAccount(UID, AccountID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "アカウントが作成されました。", "URL": URL})
+// 返金処理
+func Refund(c *gin.Context) {
+	ID := c.Query("ID")
+	refund(ID)
 }
-
-//返金処理
+func refund(ID string) {
+	status := database.GetTransactionStatus(ID)
+	if status == "返金待ち" {
+		cashing.Refund(ID)
+	}
+}

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"io"
+	"os"
 	"unify/internal/database"
 	"unify/internal/handler"
 	"unify/validation"
@@ -10,6 +12,13 @@ import (
 
 func main() {
 
+	// Logging to a file.
+	f, _ := os.Create("gin" + database.GetDate() + ".log")
+	gin.DefaultWriter = io.MultiWriter(f)
+
+	// Use the following code if you need to write the logs to file and console at the same time.
+	// gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+	// ログの出力
 	r := gin.Default()
 	validation.CORS(r)
 	validation.SessionConfig(r)

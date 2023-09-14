@@ -87,7 +87,7 @@ func (t *Transaction) postTransaction() error {
 	}
 	return nil
 }
-func GetTransactionStatus(stripeID string) {
+func GetTransactionStatus(stripeID string) (status string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの実行
@@ -104,11 +104,12 @@ func GetTransactionStatus(stripeID string) {
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&stripeID)
+		err := rows.Scan(&status)
 		if err != nil {
 			panic(err)
 		}
 	}
+	return status
 }
 func SetTransactionStatus(status string, stripeID string) {
 	// データベースのハンドルを取得する
@@ -207,4 +208,26 @@ func Purchased(TransactionContent TransactionContent) {
 	if err != nil {
 		panic(err)
 	}
+}
+func (t *Transaction) GetTransactionContents() (TransacitonContents TransactionContents, err error) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	defer db.Close()
+	TransactionContent := new(TransactionContent)
+	// SQLの実行
+	rows, err := db.Query(`
+		SELECT * FROM TransactionContent WHERE TransactionID = ?`, t.TransactionID)
+	if err != nil {
+		return nil, errors.Wrap(err, "error in getting prepare CartID /GetCartInfo1")
+	}
+	defer rows.Close()
+	// SQLの実行
+	for rows.Next() {
+		err := rows.Scan(&TransactionContent.Order, &TransactionContent.InfoID, &TransactionContent.TransactionID, &TransactionContent.Quantity)
+		if err != nil {
+			return nil, errors.Wrap(err, "error in scanning CartID /GetCartInfo2")
+		}
+		TransacitonContents = append(TransacitonContents, *TransactionContent)
+	}
+	return TransacitonContents, nil
 }

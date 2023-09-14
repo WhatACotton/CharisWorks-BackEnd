@@ -219,34 +219,6 @@ func Invalid(SessionKey string) error {
 	defer ins.Close()
 	return nil
 }
-func GetUID(SessionKey string) (UID string, err error) {
-	// データベースのハンドルを取得する
-	db := ConnectSQL()
-	// SQLの実行
-
-	rows, err := db.Query(`
-	SELECT 
-		UID
-
-	FROM 
-		LogIn
-
-	WHERE 
-		SessionKey = ?`, SessionKey)
-	if err != nil {
-		return "error", errors.Wrap(err, "error in getting UID /GetUID1")
-	}
-	defer rows.Close()
-	// SQLの実行
-	for rows.Next() {
-		err := rows.Scan(&UID)
-
-		if err != nil {
-			return "error", errors.Wrap(err, "error in scanning UID /GetUID2")
-		}
-	}
-	return UID, nil
-}
 func DeleteCustomer(uid string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -287,35 +259,6 @@ func DeleteSession(uid string) error {
 	}
 	defer ins.Close()
 	return nil
-}
-func GetEmail(UID string) (Email string, err error) {
-	// データベースのハンドルを取得する
-	db := ConnectSQL()
-	// SQLの実行
-
-	rows, err := db.Query(`
-	SELECT 
-		Email 
-	
-	FROM 
-		Customer 
-	
-	WHERE 
-		UID = ?`, UID)
-	if err != nil {
-		return "error", errors.Wrap(err, "error in getting Email /GetEmail1")
-	}
-	defer rows.Close()
-	// SQLの実行
-	for rows.Next() {
-
-		err := rows.Scan(&Email)
-
-		if err != nil {
-			return "error", errors.Wrap(err, "error in scanning Email /GetEmail2")
-		}
-	}
-	return Email, nil
 }
 func ChangeEmail(uid string, email string) error {
 	// データベースのハンドルを取得する
@@ -363,7 +306,6 @@ func SetCartID(uid string, CartID string) error {
 	defer ins.Close()
 	return nil
 }
-
 func CreateStripeAccount(uid string, StripeAccountID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()

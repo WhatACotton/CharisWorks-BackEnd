@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"os"
 	"unify/internal/database"
 	"unify/validation"
 
@@ -21,6 +22,13 @@ func TemporarySignUp(c *gin.Context) {
 		}
 		log.Print("CartID: ", Cart.CartID)
 		res := database.SignUpCustomer(*CustomerReqPayload, signUpToDB(c, CustomerReqPayload.UID), Cart.CartID)
+		file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatal(err)
+		}
+		logger2 := log.New(file, "", log.Ldate|log.Ltime)
+		logger2.SetOutput(file)
+		logger2.Println("UID :", CustomerReqPayload.UID, " created.")
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
@@ -67,6 +75,13 @@ func LogIn(c *gin.Context) {
 		}
 		_ = signUpToDB(c, UserReqPayload.UID)
 		GetDatafromSessionKey(c)
+		file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatal(err)
+		}
+		logger2 := log.New(file, "", log.Ldate|log.Ltime)
+		logger2.SetOutput(file)
+		logger2.Println("UID :", UserReqPayload.UID, " logined.")
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
@@ -102,11 +117,20 @@ func ModifyCustomer(c *gin.Context) {
 }
 
 func LogOut(c *gin.Context) {
+	_, UID := GetDatafromSessionKey(c)
+	//c.JSON(http.StatusOK, "SuccessFully Logouted!!")
+	file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logger2 := log.New(file, "", log.Ldate|log.Ltime)
+	logger2.SetOutput(file)
+	logger2.Println("UID :", UID, " logouted.")
 	//ログアウト処理
 	OldSessionKey := validation.CustomerSessionEnd(c)
 	database.Invalid(OldSessionKey)
 	log.Print("SessionKey was :", OldSessionKey)
-	//c.JSON(http.StatusOK, "SuccessFully Logouted!!")
+
 }
 
 func DeleteCustomer(c *gin.Context) {
@@ -114,6 +138,13 @@ func DeleteCustomer(c *gin.Context) {
 	_, UID := GetDatafromSessionKey(c)
 	database.DeleteCustomer(UID)
 	database.DeleteSession(UID)
+	file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logger2 := log.New(file, "", log.Ldate|log.Ltime)
+	logger2.SetOutput(file)
+	logger2.Println("UID :", UID, " deleted.")
 	c.JSON(http.StatusOK, gin.H{"message": "アカウントを削除しました。"})
 
 }
