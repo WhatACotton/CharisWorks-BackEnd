@@ -13,7 +13,7 @@ import (
 
 type CustomerReqPayload struct {
 	Email         string
-	UID           string
+	UserID        string
 	EmailVerified bool
 	CartID        string
 }
@@ -31,9 +31,9 @@ func (user *CustomerReqPayload) VerifyCustomer(c *gin.Context) bool {
 	IdToken := get_IdToken(c.Request)
 	Token := verifyIDToken(c, app, IdToken)
 	user.Email = Token.Claims["email"].(string)
-	user.UID = Token.Claims["user_id"].(string)
+	user.UserID = Token.Claims["user_id"].(string)
 	user.EmailVerified = Token.Claims["email_verified"].(bool)
-	log.Printf("Successfully get \nemail: %v\nUID: %v\nEmail_Verified: %v\n", user.Email, user.UID, user.EmailVerified)
+	log.Printf("Successfully get \nemail: %v\nUserID: %v\nEmail_Verified: %v\n", user.Email, user.UserID, user.EmailVerified)
 	return true
 }
 

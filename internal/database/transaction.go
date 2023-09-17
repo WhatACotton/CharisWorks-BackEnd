@@ -2,92 +2,82 @@ package database
 
 import (
 	"unify/cashing"
-
-	"github.com/pkg/errors"
 )
 
 type Transaction struct {
-	UID             string `json:"UID"`
 	TransactionID   string `json:"TransactionID"`
+	UserID          string `json:"UserID"`
 	Name            string `json:"Name"`
 	TotalAmount     int    `json:"TotalAmount"`
+	ZipCode         string `json:"Zipcode"`
 	Address         string `json:"Address"`
-	PhoneNumber     string `json:"PhoneNumber"`
 	TransactionTime string `json:"TransactionTime"`
 	StripeID        string `json:"StripeID"`
 	Status          string `json:"status"`
 }
 type Transactions []Transaction
-type TransactionContent struct {
-	Order         int    `json:"Order"`
+type TransactionDetail struct {
+	ItemOrder     int    `json:"ItemOrder"`
 	TransactionID string `json:"TransactionID"`
-	InfoID        string `json:"InfoID"`
+	DetailsID     string `json:"DetailsID"`
 	Quantity      int    `json:"Quantity"`
 }
-type TransactionContents []TransactionContent
+type TransactionDetails []TransactionDetail
 
-func PostTransaction(Cart Cart, Customer Customer, StripeInfo cashing.StripeInfo, TransactionID string, CartContents CartContents) {
+func TransactionPost(Cart Cart, Customer Customer, StripeInfo cashing.StripeInfo, TransactionID string, CartContents CartContents) {
 	t := new(Transaction)
-	t.UID = Customer.UID
+	t.UserID = Customer.UserID
 	t.TransactionID = TransactionID
 	t.Name = Customer.Name
 	t.TotalAmount = int(StripeInfo.AmountTotal)
 	t.Address = Customer.Address
-	t.PhoneNumber = Customer.PhoneNumber
 	t.TransactionTime = GetDate()
 	t.StripeID = StripeInfo.ID
 	t.Status = "決済前"
-	t.postTransaction()
+	t.transactionPost()
 
-	TransactionContents := new(TransactionContent)
+	TransactionContents := new(TransactionDetail)
 	for _, CartContent := range CartContents {
-		TransactionContents.ConstructTransaction(CartContent, Cart, TransactionID)
-		TransactionContents.postTransactionContent()
+		TransactionContents.TransactionConstruct(CartContent, Cart, TransactionID)
+		TransactionContents.transactionPostDetails()
 	}
 }
-func (t *TransactionContent) ConstructTransaction(CartContent CartContent, Cart Cart, TransactionID string) {
+func (t *TransactionDetail) TransactionConstruct(CartContent CartContent, Cart Cart, TransactionID string) {
 	t.TransactionID = TransactionID
-	t.InfoID = CartContent.InfoID
+	t.DetailsID = CartContent.DetailsID
 	t.Quantity = CartContent.Quantity
 }
 
-func (t *Transaction) postTransaction() error {
+func (t *Transaction) transactionPost() {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの準備
-	ins, err := db.Prepare(`
+	ins, _ := db.Prepare(`
 	INSERT 
 		INTO 
 			Transaction
-			(UID,TransactionID,Name,TotalAmount,Address,PhoneNumber,TransactionTime,StripeID,Status)
+			(UserID,TransactionID,Name,TotalAmount,ZipCode,Address,TransactionTime,StripeID,Status)
 			VALUES
-			(?,?,?,?,?,?,?,?,?)
+			(?,?,?,?,?,?,?,?,?,?)
 	`)
-	if err != nil {
-		return err
-	}
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(
-		t.UID,
+	ins.Exec(
+		t.UserID,
 		t.TransactionID,
 		t.Name,
 		t.TotalAmount,
+		t.ZipCode,
 		t.Address,
-		t.PhoneNumber,
 		t.TransactionTime,
 		t.StripeID,
 		t.Status,
 	)
-	if err != nil {
-		return err
-	}
-	return nil
 }
-func GetTransactionStatus(stripeID string) (status string) {
+func TransactionGetStatus(stripeID string) (status string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの実行
@@ -95,7 +85,7 @@ func GetTransactionStatus(stripeID string) (status string) {
 	SELECT 
 		Status 
 	FROM 
-		Transaction
+		Transactions
 	WHERE 
 		StripeID = ?`, stripeID)
 	if err != nil {
@@ -111,13 +101,13 @@ func GetTransactionStatus(stripeID string) (status string) {
 	}
 	return status
 }
-func SetTransactionStatus(status string, stripeID string) {
+func TransactionSetStatus(status string, stripeID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの準備
-	ins, err := db.Prepare(`UPDATE Transaction SET Status = ? WHERE StripeID = ?`)
+	ins, err := db.Prepare(`UPDATE Transactions SET Status = ? WHERE StripeID = ?`)
 	if err != nil {
 		panic(err)
 	}
@@ -132,34 +122,29 @@ func SetTransactionStatus(status string, stripeID string) {
 		panic(err)
 	}
 }
-func GetUIDfromStripeID(ID string) (string, error) {
+func TransactionGetUserIDfromStripeID(ID string) (StripeID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの実行
 
-	rows, err := db.Query(`
+	rows, _ := db.Query(`
 	SELECT 
-		UID 
+		UserID 
 	FROM 
-		Transaction
+		Transactions
 	WHERE 
 		StripeID = ?`, ID)
-	if err != nil {
-		return "", errors.Wrap(err, "error in getting UID /Get_UID_1")
-	}
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
 
-		err := rows.Scan(&ID)
+		rows.Scan(&StripeID)
 
-		if err != nil {
-			return "", errors.Wrap(err, "error in scanning Email /Get_UID_2")
-		}
 	}
-	return ID, nil
+	return StripeID
 }
-func (t *TransactionContent) postTransactionContent() error {
+
+func (t *TransactionDetail) transactionPostDetails() error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -167,8 +152,8 @@ func (t *TransactionContent) postTransactionContent() error {
 	ins, err := db.Prepare(`
 	INSERT 
 		INTO 
-			TransactionContent
-			(InfoID,TransactionID,Quantity)
+			TransactionDetails
+			(DetailsID,TransactionID,Quantity)
 			VALUES
 			(?,?,?)
 	`)
@@ -179,7 +164,7 @@ func (t *TransactionContent) postTransactionContent() error {
 	defer ins.Close()
 	// SQLの実行
 	_, err = ins.Exec(
-		t.InfoID,
+		t.DetailsID,
 		t.TransactionID,
 		t.Quantity,
 	)
@@ -189,12 +174,12 @@ func (t *TransactionContent) postTransactionContent() error {
 	}
 	return nil
 }
-func Purchased(TransactionContent TransactionContent) {
+func Purchased(TransactionDetail TransactionDetail) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの準備
-	ins, err := db.Prepare(`UPDATE ItemDetails SET Stock = Stock - ? WHERE InfoID = ?`)
+	ins, err := db.Prepare(`UPDATE ItemDetails SET Stock = Stock - ? WHERE DetailsID = ?`)
 	if err != nil {
 		panic(err)
 	}
@@ -202,32 +187,26 @@ func Purchased(TransactionContent TransactionContent) {
 
 	// SQLの実行
 	_, err = ins.Exec(
-		TransactionContent.Quantity,
-		TransactionContent.InfoID,
+		TransactionDetail.Quantity,
+		TransactionDetail.DetailsID,
 	)
 	if err != nil {
 		panic(err)
 	}
 }
-func (t *Transaction) GetTransactionContents() (TransacitonContents TransactionContents, err error) {
+func (t *Transaction) TransactionGetContents() (TransacitonContents TransactionDetails) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
-	TransactionContent := new(TransactionContent)
+	TransactionContent := new(TransactionDetail)
 	// SQLの実行
-	rows, err := db.Query(`
+	rows, _ := db.Query(`
 		SELECT * FROM TransactionContent WHERE TransactionID = ?`, t.TransactionID)
-	if err != nil {
-		return nil, errors.Wrap(err, "error in getting prepare CartID /GetCartInfo1")
-	}
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&TransactionContent.Order, &TransactionContent.InfoID, &TransactionContent.TransactionID, &TransactionContent.Quantity)
-		if err != nil {
-			return nil, errors.Wrap(err, "error in scanning CartID /GetCartInfo2")
-		}
+		rows.Scan(&TransactionContent.ItemOrder, &TransactionContent.DetailsID, &TransactionContent.TransactionID, &TransactionContent.Quantity)
 		TransacitonContents = append(TransacitonContents, *TransactionContent)
 	}
-	return TransacitonContents, nil
+	return TransacitonContents
 }

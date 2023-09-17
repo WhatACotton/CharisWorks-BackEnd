@@ -25,15 +25,6 @@
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8080
-[GIN] 2023/09/14 - 20:08:05 | 200 |  143.274652ms |             ::1 | POST     "/go/Login"
-[GIN] 2023/09/14 - 20:08:05 | 200 |   18.383776ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/09/14 - 20:08:19 | 200 |   25.674606ms |             ::1 | POST     "/go/SessionEnd"
-[GIN] 2023/09/14 - 20:08:43 | 200 |   76.734432ms |       127.0.0.1 | POST     "/go/SignUp"
-[GIN] 2023/09/14 - 20:08:43 | 200 |   13.410498ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/09/14 - 20:08:49 | 200 |   37.118163ms |       127.0.0.1 | DELETE   "/go/DeleteCustomer"
-[GIN] 2023/09/14 - 20:09:50 | 200 |   90.761388ms |             ::1 | POST     "/go/Login"
-[GIN] 2023/09/14 - 20:09:50 | 200 |   18.386673ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/09/14 - 20:09:56 | 200 |   28.142709ms |             ::1 | POST     "/go/SessionEnd"
-[GIN] 2023/09/14 - 20:11:20 | 200 |   88.273964ms |       127.0.0.1 | POST     "/go/Login"
-[GIN] 2023/09/14 - 20:11:20 | 200 |   29.731417ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/09/14 - 20:11:28 | 200 |   27.317063ms |       127.0.0.1 | POST     "/go/SessionEnd"
+[GIN] 2023/09/15 - 04:30:08 | 204 |      45.275µs |             ::1 | OPTIONS  "/go/GetCustomer"
+[GIN] 2023/09/15 - 04:30:08 | 200 |     387.971µs |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/09/15 - 04:30:34 | 204 |      74.526µs |             ::1 | OPTIONS  "/go/Login"

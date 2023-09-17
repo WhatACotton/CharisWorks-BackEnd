@@ -10,26 +10,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 仮登録を行う。ここでの登録内容はUIDと作成日時だけ。
+// 仮登録を行う。ここでの登録内容はUserIDと作成日時だけ。
 func TemporarySignUp(c *gin.Context) {
 	CustomerReqPayload := new(validation.CustomerReqPayload)
 	if CustomerReqPayload.VerifyCustomer(c) {
 		Cart := new(database.Cart)
 		Cart.SessionKey = validation.GetCartSessionKey(c)
-		if !Cart.SessionGet() {
+		if Cart.SessionKey == "new" {
 			log.Print("don't have sessionKey")
 			Cart.CartID = validation.GetUUID()
 		}
 		log.Print("CartID: ", Cart.CartID)
-		res := database.SignUpCustomer(*CustomerReqPayload, signUpToDB(c, CustomerReqPayload.UID), Cart.CartID)
+		_, NewSessionKey := validation.CustomerSessionStart(c)
+		database.CustomerSignUp(*CustomerReqPayload, NewSessionKey, Cart.CartID)
 		file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			log.Fatal(err)
 		}
 		logger2 := log.New(file, "", log.Ldate|log.Ltime)
 		logger2.SetOutput(file)
-		logger2.Println("UID :", CustomerReqPayload.UID, " created.")
-		c.JSON(http.StatusOK, res)
+		logger2.Println("UserID :", CustomerReqPayload.UserID, " created.")
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
 	}
@@ -38,14 +38,19 @@ func TemporarySignUp(c *gin.Context) {
 func SignUp(c *gin.Context) {
 	//登録情報変更処理
 	//bodyにアカウントの詳細情報が入っている。
-	_, UID := GetDatafromSessionKey(c)
+	_, UserID := GetDatafromSessionKey(c)
 	h := new(validation.CustomerRegisterPayload)
 	if err := c.BindJSON(&h); err != nil {
 		return
 	}
 	if h.InspectCusromerRegisterPayload() {
-		database.RegisterCustomer(UID, *h)
+		if h.InspectFirstRegisterPayload() {
+			database.CustomerRegister(UserID, *h)
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "未入力欄があります。"})
+		}
 	} else {
+
 		c.JSON(http.StatusBadRequest, gin.H{"message": "変更できませんでした。"})
 	}
 }
@@ -53,27 +58,17 @@ func SignUp(c *gin.Context) {
 func LogIn(c *gin.Context) {
 	UserReqPayload := new(validation.CustomerReqPayload)
 	if UserReqPayload.VerifyCustomer(c) {
-		log.Print("UID : ", UserReqPayload.UID)
+		log.Print("UserID : ", UserReqPayload.UserID)
 		if UserReqPayload.EmailVerified {
-			err := database.EmailVerified(1, UserReqPayload.UID)
-			if err != nil {
-				log.Fatal(err)
-			}
+			database.CustomerEmailVerified(1, UserReqPayload.UserID)
 		} else {
-			err := database.EmailVerified(0, UserReqPayload.UID)
-			if err != nil {
-				log.Fatal(err)
-			}
+			database.CustomerEmailVerified(0, UserReqPayload.UserID)
 		}
-		email, err := database.GetEmail(UserReqPayload.UID)
-		if err != nil {
-			log.Fatal(err)
+		Email := database.GetEmail(UserReqPayload.UserID)
+		log.Print(Email)
+		if Email != UserReqPayload.Email {
+			database.CustomerChangeEmail(UserReqPayload.UserID, UserReqPayload.Email)
 		}
-		log.Print(email)
-		if email != UserReqPayload.Email {
-			database.ChangeEmail(UserReqPayload.UID, UserReqPayload.Email)
-		}
-		_ = signUpToDB(c, UserReqPayload.UID)
 		GetDatafromSessionKey(c)
 		file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
@@ -81,7 +76,7 @@ func LogIn(c *gin.Context) {
 		}
 		logger2 := log.New(file, "", log.Ldate|log.Ltime)
 		logger2.SetOutput(file)
-		logger2.Println("UID :", UserReqPayload.UID, " logined.")
+		logger2.Println("UserID :", UserReqPayload.UserID, " logined.")
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
@@ -89,10 +84,10 @@ func LogIn(c *gin.Context) {
 }
 
 func GetCustomer(c *gin.Context) {
-	UID := LogInToDB(c)
-	if UID != "" {
+	_, UserID := GetDatafromSessionKey(c)
+	if UserID != "" {
 		Customer := new(database.Customer)
-		Customer.GetCustomer(UID)
+		Customer.GetCustomer(UserID)
 		c.JSON(http.StatusOK, Customer)
 	}
 }
@@ -100,16 +95,13 @@ func GetCustomer(c *gin.Context) {
 func ModifyCustomer(c *gin.Context) {
 	//登録情報変更処理
 	//bodyにアカウントの詳細情報が入っている。
-	_, UID := GetDatafromSessionKey(c)
+	_, UserID := GetDatafromSessionKey(c)
 	h := new(validation.CustomerRegisterPayload)
 	if err := c.BindJSON(&h); err != nil {
 		return
 	}
 	if h.InspectCusromerRegisterPayload() {
-		err := database.RegisterCustomer(UID, *h)
-		if err != nil {
-			log.Fatal(err)
-		}
+		database.CustomerRegister(UserID, *h)
 		log.Print("CustomerData was modified")
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "変更できませんでした。"})
@@ -117,7 +109,7 @@ func ModifyCustomer(c *gin.Context) {
 }
 
 func LogOut(c *gin.Context) {
-	_, UID := GetDatafromSessionKey(c)
+	_, UserID := GetDatafromSessionKey(c)
 	//c.JSON(http.StatusOK, "SuccessFully Logouted!!")
 	file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
@@ -125,49 +117,26 @@ func LogOut(c *gin.Context) {
 	}
 	logger2 := log.New(file, "", log.Ldate|log.Ltime)
 	logger2.SetOutput(file)
-	logger2.Println("UID :", UID, " logouted.")
+	logger2.Println("UserID :", UserID, " logouted.")
 	//ログアウト処理
 	OldSessionKey := validation.CustomerSessionEnd(c)
-	database.Invalid(OldSessionKey)
+
 	log.Print("SessionKey was :", OldSessionKey)
 
 }
 
 func DeleteCustomer(c *gin.Context) {
 	//アカウントの削除
-	_, UID := GetDatafromSessionKey(c)
-	database.DeleteCustomer(UID)
-	database.DeleteSession(UID)
+	_, UserID := GetDatafromSessionKey(c)
+	database.CustomerDelete(UserID)
+	database.CustomerDeleteSession(UserID)
 	file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
 	logger2 := log.New(file, "", log.Ldate|log.Ltime)
 	logger2.SetOutput(file)
-	logger2.Println("UID :", UID, " deleted.")
+	logger2.Println("UserID :", UserID, " deleted.")
 	c.JSON(http.StatusOK, gin.H{"message": "アカウントを削除しました。"})
 
-}
-
-func LogInToDB(c *gin.Context) (UID string) {
-	OldSessionKey, NewSessionKey := validation.CustomerSessionStart(c)
-	if OldSessionKey == "new" {
-		validation.CustomerSessionEnd(c)
-		c.JSON(http.StatusOK, "未ログインです")
-		return ""
-	} else {
-		UID, err := database.GetUID(OldSessionKey)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Print("UID : ", UID)
-		database.LogIn(UID, NewSessionKey)
-		return UID
-	}
-}
-func signUpToDB(c *gin.Context, UID string) (SessionKey string) {
-	_, SessionKey = validation.CustomerSessionStart(c)
-	log.Print("UID : ", UID)
-	database.LogInLog(UID, SessionKey)
-	return UID
 }

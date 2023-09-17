@@ -13,16 +13,13 @@ import (
 // 商品の購入リクエストを作成。
 func BuyItem(c *gin.Context) {
 	log.Print("Creating PaymentIntent...")
-	Cart, UID := GetDatafromSessionKey(c)
-	if UID != "" {
+	Cart, UserID := GetDatafromSessionKey(c)
+	if UserID != "" {
 		Customer := new(database.Customer)
-		Customer.GetCustomer(UID)
+		Customer.GetCustomer(UserID)
 		log.Print("Customer:", Customer.Name)
-		if Customer.Register && Customer.EmailVerified {
-			CartContents, err := database.GetCartContents(Cart.CartID)
-			if err != nil {
-				log.Fatal(err)
-			}
+		if Customer.IsRegistered && Customer.IsEmailVerified {
+			CartContents := database.GetCartContents(Cart.CartID)
 			if inspectCart(CartContents) {
 				TotalPrice := totalPrice(CartContents)
 				stripeInfo, err := cashing.Purchase(TotalPrice)
@@ -30,7 +27,7 @@ func BuyItem(c *gin.Context) {
 					log.Fatal(err)
 				}
 				TransactionID := validation.GetUUID()
-				database.PostTransaction(Cart, *Customer, stripeInfo, TransactionID, CartContents)
+				database.TransactionPost(Cart, *Customer, stripeInfo, TransactionID, CartContents)
 
 				c.JSON(http.StatusOK, gin.H{"message": "購入リンクが発行されました。", "url": stripeInfo.URL})
 			} else {
@@ -70,21 +67,12 @@ func totalPrice(Carts database.CartContents) (TotalPrice int) {
 func GetTransaction(c *gin.Context) {
 	CustomerSessionKey := new(string)
 	*CustomerSessionKey = validation.GetCustomerSessionKey(c)
-	TransactionContentsList := new([]database.TransactionContents)
-	UID, err := database.GetUID(*CustomerSessionKey)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Print("UID:", UID)
-	Transactions, err := database.GetTransactions(UID)
-	if err != nil {
-		log.Fatal(err)
-	}
+	TransactionContentsList := new([]database.TransactionDetails)
+	UserID := database.GetUserID(*CustomerSessionKey)
+	log.Print("UserID:", UserID)
+	Transactions := database.GetTransactions(UserID)
 	for _, Transaction := range Transactions {
-		TransactionContents, err := Transaction.GetTransactionContents()
-		if err != nil {
-			log.Fatal(err)
-		}
+		TransactionContents := Transaction.TransactionGetContents()
 		*TransactionContentsList = append(*TransactionContentsList, TransactionContents)
 	}
 	c.JSON(http.StatusOK, gin.H{"TransactionLists": Transactions, "Transactions": *TransactionContentsList})
@@ -101,44 +89,37 @@ func Webhook(c *gin.Context) {
 }
 
 func completePayment(ID string) (err error) {
-	database.SetTransactionStatus("決済完了", ID)
+	database.TransactionSetStatus("決済完了", ID)
 	Transaction := new(database.Transaction)
-	Transaction.TransactionID, err = database.GetTransactionID(ID)
+	Transaction.TransactionID = database.GetTransactionID(ID)
 	if err != nil {
 		log.Fatal(err)
 	}
-	TransactionContents, err := Transaction.GetTransactionContents()
+	TransactionContents := Transaction.TransactionGetContents()
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, TransactionContent := range TransactionContents {
 		log.Print("TransactionContent: ", TransactionContent)
 		database.Purchased(TransactionContent)
-		Itemdetails, err := database.GetItemDetails(TransactionContent.InfoID)
+		Itemdetails, err := database.ItemDetailsGet(TransactionContent.DetailsID)
 		if err != nil {
 			panic(err)
 		}
 		amount := float64(Itemdetails.Price) * float64(TransactionContent.Quantity) * 0.97 * 0.964
 		cashing.Transfer(amount, Itemdetails.Madeby, Itemdetails.ItemName)
 	}
-	UID, err := database.GetUIDfromStripeID(ID)
+	UserID := database.TransactionGetUserIDfromStripeID(ID)
 	if err != nil {
 		panic(err)
 	}
-	CartID, err := database.GetCartID(UID)
+	CartID := database.GetCartID(UserID)
 	if err != nil {
 		panic(err)
 	}
 	database.DeleteCartContentforTransaction(CartID)
-	err = database.DeleteCart(CartID)
-	if err != nil {
-		panic(err)
-	}
-	err = database.DeleteCartContentforTransaction(CartID)
-	if err != nil {
-		panic(err)
-	}
-	database.SetCartID(UID, validation.GetUUID())
+	database.DeleteCart(CartID)
+	database.CustomerSetCartID(UserID, validation.GetUUID())
 	return nil
 }
 
@@ -148,7 +129,7 @@ func Refund(c *gin.Context) {
 	refund(ID)
 }
 func refund(ID string) {
-	status := database.GetTransactionStatus(ID)
+	status := database.TransactionGetStatus(ID)
 	if status == "返金待ち" {
 		cashing.Refund(ID)
 	}

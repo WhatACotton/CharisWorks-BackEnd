@@ -11,7 +11,7 @@ type APITopItem struct {
 }
 type APITopItems []APITopItem
 
-func GetTop() (APITopItems, error) {
+func ItemGetTop() (APITopItems, error) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
@@ -63,7 +63,7 @@ type APIItem struct {
 }
 type APIItems []APIItem
 
-func GetALL() (APIItems, error) {
+func ItemGetALL() (APIItems, error) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
@@ -102,7 +102,7 @@ func GetALL() (APIItems, error) {
 	return returnItem, nil
 }
 
-func GetItemCategory(Category string) (APIItems, error) {
+func ItemCategoryGet(Category string) (APIItems, error) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
@@ -144,84 +144,18 @@ func GetItemCategory(Category string) (APIItems, error) {
 	return returnItem, nil
 }
 
-func GetInfoId(ItemID string) (InfoID string, err error) {
-	db := ConnectSQL()
-	defer db.Close()
-	Status := new(string)
-	// SQLの実行
-	rows, err := db.Query(
-		`SELECT 
-			InfoID,
-			Status
-
-		FROM 
-			Item 
-		
-		WHERE 
-			ItemID = ?`,
-		ItemID)
-	if err != nil {
-		return "error", errors.Wrap(err, "error in getting TopItem /GetInfoID1")
-	}
-	for rows.Next() {
-		err := rows.Scan(&InfoID, &Status)
-		if err != nil {
-			return "error", errors.Wrap(err, "error in scanning CartID /GetInfoID2")
-		}
-	}
-	if *Status == `Available` {
-		return InfoID, nil
-	} else {
-		return "Couldn't get", nil
-	}
-}
-
-type APIItemDetails struct {
-	InfoID      string `json:"InfoID"`
-	ItemName    string `json:"ItemName"`
+type ItemDetails struct {
+	DetailsID   string `json:"DetailsID"`
 	Stock       int    `json:"Stock"`
 	Price       int    `json:"Price"`
-	Color       string `json:"Color"`
+	ItemName    string `json:"ItemName"`
 	Description string `json:"Description"`
-	Category    string `json:"category"`
-	KeyWords    string `json:"KeyWords"`
-	Madeby      string `json:"Madeby"`
+	MadeBy      string `json:"MadeBy"`
+	Color       string `json:"Color"`
+	Series      string `json:"Series"`
 }
 
-func GetItemDetails(InfoID string) (APIItemDetails, error) {
-	ItemDetails := new(APIItemDetails)
-	ItemDetails.InfoID = InfoID
-	db := ConnectSQL()
-	defer db.Close()
-	// SQLの実行
-	rows, err := db.Query(
-		`SELECT 
-			Name,
-			Price,
-			Stock,
-			Color,
-			Category,
-			KeyWords,
-			Description,
-			Madeby
-		From 
-			ItemDetails
-
-		WHERE 
-			InfoID = ?`,
-		InfoID)
-	if err != nil {
-		return *ItemDetails, errors.Wrap(err, "error in getting TopItem /GetItemDetails1")
-	}
-	for rows.Next() {
-		err := rows.Scan(&ItemDetails.ItemName, &ItemDetails.Price, &ItemDetails.Stock, &ItemDetails.Color, &ItemDetails.Category, &ItemDetails.KeyWords, &ItemDetails.Description, &ItemDetails.Madeby)
-		if err != nil {
-			return *ItemDetails, errors.Wrap(err, "error in scanning CartID /GetItemDetails2")
-		}
-	}
-	return *ItemDetails, nil
-}
-func GetItemColor(Color string) (APIItems, error) {
+func ItemColorGet(Color string) (APIItems, error) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
@@ -262,4 +196,3 @@ func GetItemColor(Color string) (APIItems, error) {
 	}
 	return returnItem, nil
 }
-

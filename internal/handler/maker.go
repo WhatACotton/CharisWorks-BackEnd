@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 	"unify/cashing"
 	"unify/internal/database"
@@ -10,21 +9,13 @@ import (
 )
 
 func CreateStripeAccount(c *gin.Context) {
-	_, UID := GetDatafromSessionKey(c)
-	StripeAccountID, err := database.GetStripeAccountID(UID)
-	if err != nil {
-		log.Fatal(err)
-	}
+	_, UserID := GetDatafromSessionKey(c)
+	StripeAccountID := database.GetStripeAccountID(UserID)
 	if StripeAccountID != "allow" {
-		email, err := database.GetEmail(UID)
-		if err != nil {
-			log.Fatal(err)
-		}
+		email := database.GetEmail(UserID)
 		AccountID, URL := cashing.CreateStripeAccount(email)
-		err = database.CreateStripeAccount(UID, AccountID)
-		if err != nil {
-			log.Fatal(err)
-		}
+		database.CustomerCreateStripeAccount(UserID, AccountID)
+
 		c.JSON(http.StatusOK, gin.H{"message": "アカウントが作成されました。", "URL": URL})
 	} else {
 		if StripeAccountID == "" {
@@ -35,11 +26,8 @@ func CreateStripeAccount(c *gin.Context) {
 }
 
 func isMaker(c *gin.Context) bool {
-	_, UID := GetDatafromSessionKey(c)
-	StripeAccountID, err := database.GetStripeAccountID(UID)
-	if err != nil {
-		log.Fatal(err)
-	}
+	_, UserID := GetDatafromSessionKey(c)
+	StripeAccountID := database.GetStripeAccountID(UserID)
 	if StripeAccountID != "allow" && StripeAccountID != "" {
 		return true
 	}
@@ -47,7 +35,11 @@ func isMaker(c *gin.Context) bool {
 }
 func PostItem(c *gin.Context) {
 	if isMaker(c) {
+		postItem(c)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "出品者登録が完了していません。", "errcode": "401"})
 	}
+}
+func postItem(c *gin.Context) {
+
 }

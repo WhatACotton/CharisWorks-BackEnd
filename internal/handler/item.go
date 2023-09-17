@@ -8,14 +8,14 @@ import (
 )
 
 func Top(c *gin.Context) {
-	TopItemList, err := database.GetTop()
+	TopItemList, err := database.ItemGetTop()
 	if err != nil {
 		log.Print(err)
 	}
 	c.JSON(200, TopItemList)
 }
 func ALL(c *gin.Context) {
-	ItemList, err := database.GetALL()
+	ItemList, err := database.ItemGetALL()
 	if err != nil {
 		log.Print(err)
 	}
@@ -23,12 +23,12 @@ func ALL(c *gin.Context) {
 }
 func ItemDetails(c *gin.Context) {
 	ItemID := c.Query("ItemID")
-	InfoID, err := database.GetInfoId(ItemID)
+	InfoID, err := database.ItemDetailsIDGet(ItemID)
 	if err != nil {
 		log.Print(err)
 	}
 	if InfoID != "Couldn't get" {
-		ItemDetails, err := database.GetItemDetails(InfoID)
+		ItemDetails, err := database.ItemDetailsGet(InfoID)
 		if err != nil {
 			log.Print(err)
 		}
@@ -39,7 +39,7 @@ func ItemDetails(c *gin.Context) {
 }
 func Category(c *gin.Context) {
 	Category := c.Param("category")
-	ItemList, err := database.GetItemCategory(Category)
+	ItemList, err := database.ItemCategoryGet(Category)
 	if err != nil {
 		log.Print(err)
 	}
@@ -47,7 +47,7 @@ func Category(c *gin.Context) {
 }
 func Color(c *gin.Context) {
 	Color := c.Param("color")
-	ItemList, err := database.GetItemColor(Color)
+	ItemList, err := database.ItemColorGet(Color)
 	if err != nil {
 		log.Print(err)
 	}
