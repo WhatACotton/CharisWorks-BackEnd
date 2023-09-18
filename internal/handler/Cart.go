@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// カートの追加・変更・削除
 func PostCart(c *gin.Context) {
 	Cart, _ := GetDatafromSessionKey(c)
 	NewCartReq := new(database.CartContentRequestPayload)
@@ -21,6 +22,7 @@ func PostCart(c *gin.Context) {
 	c.JSON(http.StatusOK, Carts)
 }
 
+// カートの取得
 func GetCart(c *gin.Context) {
 	Cart, _ := GetDatafromSessionKey(c)
 	log.Print(Cart.CartID)
@@ -37,6 +39,7 @@ func GetCart(c *gin.Context) {
 	}
 }
 
+// セッションキーから、UserIDとCartIDを取得
 func GetDatafromSessionKey(c *gin.Context) (Cart database.Cart, UserID string) {
 	log.Print("Getting CartID...")
 	CustomerSessionKey := validation.GetCustomerSessionKey(c)
