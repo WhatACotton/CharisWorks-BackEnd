@@ -13,7 +13,7 @@ import (
 
 func CreateStripeAccount(c *gin.Context) {
 	_, UserID := GetDatafromSessionKey(c)
-	StripeAccountID := database.GetStripeAccountID(UserID)
+	StripeAccountID := database.CustomerGetStripeAccountID(UserID)
 	if StripeAccountID != "allow" {
 		email := database.GetEmail(UserID)
 		AccountID, URL := cashing.CreateStripeAccount(email)
@@ -30,7 +30,7 @@ func CreateStripeAccount(c *gin.Context) {
 
 func isMaker(c *gin.Context) bool {
 	_, UserID := GetDatafromSessionKey(c)
-	StripeAccountID := database.GetStripeAccountID(UserID)
+	StripeAccountID := database.CustomerGetStripeAccountID(UserID)
 	if StripeAccountID != "allow" && StripeAccountID != "" {
 		return true
 	}

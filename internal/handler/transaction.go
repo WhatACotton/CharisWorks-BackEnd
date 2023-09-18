@@ -16,7 +16,7 @@ func BuyItem(c *gin.Context) {
 	Cart, UserID := GetDatafromSessionKey(c)
 	if UserID != "" {
 		Customer := new(database.Customer)
-		Customer.GetCustomer(UserID)
+		Customer.CustomerGet(UserID)
 		log.Print("Customer:", Customer.Name)
 		if Customer.IsRegistered && Customer.IsEmailVerified {
 			CartContents := database.GetCartContents(Cart.CartID)
@@ -77,6 +77,7 @@ func GetTransaction(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"TransactionLists": Transactions, "Transactions": *TransactionContentsList})
 }
 
+// stripeからのwebhookを受け取る
 func Webhook(c *gin.Context) {
 	ID, err := cashing.PaymentComplete(c.Writer, c.Request)
 	if err != nil {
@@ -87,35 +88,23 @@ func Webhook(c *gin.Context) {
 	}
 }
 
+// 購入を完了させる
 func completePayment(ID string) (err error) {
 	database.TransactionSetStatus("決済完了", ID)
 	Transaction := new(database.Transaction)
 	Transaction.TransactionID = database.TransactionGetID(ID)
-	if err != nil {
-		log.Fatal(err)
-	}
 	TransactionContents := Transaction.TransactionGetContents()
-	if err != nil {
-		log.Fatal(err)
-	}
 	for _, TransactionContent := range TransactionContents {
 		log.Print("TransactionContent: ", TransactionContent)
 		database.Purchased(TransactionContent)
 		Item := new(database.Item)
 		Item.ItemGet(TransactionContent.ItemID)
 		amount := float64(Item.Price) * float64(TransactionContent.Quantity) * 0.97 * 0.964
-		cashing.Transfer(amount, Item.MadeBy, Item.ItemName)
+		cashing.Transfer(amount, database.MakerGetStripeID(Item.MadeBy), Item.ItemName)
 	}
 	UserID := database.TransactionGetUserIDfromStripeID(ID)
-	if err != nil {
-		panic(err)
-	}
 	CartID := database.GetCartID(UserID)
-	if err != nil {
-		panic(err)
-	}
-	database.DeleteCartContentforTransaction(CartID)
-	database.DeleteCart(CartID)
+	database.CartDelete(CartID)
 	database.CustomerSetCartID(UserID, validation.GetUUID())
 	return nil
 }
@@ -123,9 +112,6 @@ func completePayment(ID string) (err error) {
 // 返金処理
 func Refund(c *gin.Context) {
 	ID := c.Query("ID")
-	refund(ID)
-}
-func refund(ID string) {
 	status := database.TransactionGetStatus(ID)
 	if status == "返金待ち" {
 		cashing.Refund(ID)

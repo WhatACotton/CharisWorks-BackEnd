@@ -213,7 +213,7 @@ func CustomerCreateStripeAccount(UserId string, StripeAccountID string) {
 }
 
 // 顧客の基本情報を取得
-func (c *Customer) GetCustomer(UserID string) {
+func (c *Customer) CustomerGet(UserID string) {
 	db := ConnectSQL()
 	c.UserID = UserID
 	// SQLの実行
@@ -241,7 +241,7 @@ func (c *Customer) GetCustomer(UserID string) {
 }
 
 // StripeAccountIDを取得
-func GetStripeAccountID(UserID string) (StripeAccountID string) {
+func CustomerGetStripeAccountID(UserID string) (StripeAccountID string) {
 	db := ConnectSQL()
 	// SQLの実行
 	rows, _ := db.Query(`

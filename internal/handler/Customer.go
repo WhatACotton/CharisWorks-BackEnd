@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 仮登録を行う。ここでの登録内容はUserIDと作成日時だけ。
+// 仮登録
 func TemporarySignUp(c *gin.Context) {
 	CustomerReqPayload := new(validation.CustomerReqPayload)
 	if CustomerReqPayload.VerifyCustomer(c) {
@@ -35,6 +35,7 @@ func TemporarySignUp(c *gin.Context) {
 	}
 }
 
+// 本登録
 func SignUp(c *gin.Context) {
 	//登録情報変更処理
 	//bodyにアカウントの詳細情報が入っている。
@@ -55,6 +56,7 @@ func SignUp(c *gin.Context) {
 	}
 }
 
+// ログイン
 func LogIn(c *gin.Context) {
 	UserReqPayload := new(validation.CustomerReqPayload)
 	if UserReqPayload.VerifyCustomer(c) {
@@ -83,15 +85,17 @@ func LogIn(c *gin.Context) {
 
 }
 
+// 顧客情報の取得
 func GetCustomer(c *gin.Context) {
 	_, UserID := GetDatafromSessionKey(c)
 	if UserID != "" {
 		Customer := new(database.Customer)
-		Customer.GetCustomer(UserID)
+		Customer.CustomerGet(UserID)
 		c.JSON(http.StatusOK, Customer)
 	}
 }
 
+// 顧客情報の更新
 func ModifyCustomer(c *gin.Context) {
 	//登録情報変更処理
 	//bodyにアカウントの詳細情報が入っている。
@@ -108,6 +112,7 @@ func ModifyCustomer(c *gin.Context) {
 	}
 }
 
+// ログアウト
 func LogOut(c *gin.Context) {
 	_, UserID := GetDatafromSessionKey(c)
 	//c.JSON(http.StatusOK, "SuccessFully Logouted!!")
@@ -125,6 +130,7 @@ func LogOut(c *gin.Context) {
 
 }
 
+// アカウントの削除
 func DeleteCustomer(c *gin.Context) {
 	//アカウントの削除
 	_, UserID := GetDatafromSessionKey(c)

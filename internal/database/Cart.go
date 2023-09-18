@@ -20,42 +20,7 @@ type CartContent struct {
 }
 type CartContents []CartContent
 
-func (c *CartContentRequestPayload) Cart(CartID string) {
-	log.Println("CartID : " + CartID)
-	log.Print("ItemID : "+c.ItemID, " Quantity : ", c.Quantity)
-	Item := new(Item)
-	Item.ItemGet(c.ItemID)
-	//リクエストされた商品が登録可能か判定
-	log.Println("ItemStatus : " + Item.Status)
-	if Item.Status == "Available" {
-		Carts := GetCartContents(CartID)
-		//リクエストされた商品がカートに存在するか確認
-		//存在する場合
-		if searchCartContents(Carts, c.ItemID) {
-			if c.Quantity == 0 {
-				DeleteCartContent(CartID, c.ItemID)
-			} else {
-				if Item.Stock >= c.Quantity {
-					c.UpdateCartContent(CartID)
-				} else {
-					log.Print("stock is not enough")
-				}
-			}
-		} else {
-			//存在しない場合
-			if c.Quantity != 0 {
-				if Item.Stock >= c.Quantity {
-					c.PostCartContent(CartID)
-				} else {
-					log.Print("stock is not enough")
-				}
-
-			} else {
-				log.Print("CartReq Quantity is 0")
-			}
-		}
-	}
-}
+// カートの取得
 func GetCartContents(CartID string) (CartContents CartContents) {
 	db := ConnectSQL()
 	defer db.Close()
@@ -93,7 +58,46 @@ type CartContentRequestPayload struct {
 	Quantity int    `json:"Quantity"`
 }
 
-func (c CartContentRequestPayload) PostCartContent(CartID string) {
+// カートの追加・変更・削除
+func (c *CartContentRequestPayload) Cart(CartID string) {
+	log.Println("CartID : " + CartID)
+	log.Print("ItemID : "+c.ItemID, " Quantity : ", c.Quantity)
+	Item := new(Item)
+	Item.ItemGet(c.ItemID)
+	//リクエストされた商品が登録可能か判定
+	log.Println("ItemStatus : " + Item.Status)
+	if Item.Status == "Available" {
+		Carts := GetCartContents(CartID)
+		//リクエストされた商品がカートに存在するか確認
+		//存在する場合
+		if cartContentsSearch(Carts, c.ItemID) {
+			if c.Quantity == 0 {
+				CartContentDelete(CartID, c.ItemID)
+			} else {
+				if Item.Stock >= c.Quantity {
+					c.CartContentUpdate(CartID)
+				} else {
+					log.Print("stock is not enough")
+				}
+			}
+		} else {
+			//存在しない場合
+			if c.Quantity != 0 {
+				if Item.Stock >= c.Quantity {
+					c.CartContentPost(CartID)
+				} else {
+					log.Print("stock is not enough")
+				}
+
+			} else {
+				log.Print("CartReq Quantity is 0")
+			}
+		}
+	}
+}
+
+// カートに商品を追加
+func (c CartContentRequestPayload) CartContentPost(CartID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの準備
@@ -109,15 +113,9 @@ func (c CartContentRequestPayload) PostCartContent(CartID string) {
 	// SQLの実行
 	ins.Exec(CartID, c.ItemID, c.Quantity)
 }
-func searchCartContents(CartContents CartContents, ItemID string) bool {
-	for _, CartContent := range CartContents {
-		if CartContent.ItemID == ItemID {
-			return true
-		}
-	}
-	return false
-}
-func (c CartContentRequestPayload) UpdateCartContent(CartID string) {
+
+// カートの商品の変更
+func (c CartContentRequestPayload) CartContentUpdate(CartID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -135,7 +133,9 @@ func (c CartContentRequestPayload) UpdateCartContent(CartID string) {
 	ins.Exec(c.Quantity, CartID, c.ItemID)
 	defer ins.Close()
 }
-func DeleteCartContent(CartID string, ItemID string) {
+
+// カートから商品を削除
+func CartContentDelete(CartID string, ItemID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -154,23 +154,9 @@ func DeleteCartContent(CartID string, ItemID string) {
 	ins.Exec(CartID, ItemID)
 	defer ins.Close()
 }
-func DeleteCartContentforTransaction(CartID string) {
-	// データベースのハンドルを取得する
-	db := ConnectSQL()
 
-	// SQLの実行
-	ins, _ := db.Prepare(`
-	DELETE 
-	FROM
-		CartContents
-
-	WHERE 
-		CartID = ? `)
-	// SQLの実行
-	ins.Exec(CartID)
-	defer ins.Close()
-}
-func DeleteItemFromCartContent(ItemID string) {
+// 商品自体を削除したときにすべてのカートから特定のアイテムを消す　使用しない方針で行く(商品を削除する前に行う必要がある。)
+func CartContentItemDelete(ItemID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -188,7 +174,9 @@ func DeleteItemFromCartContent(ItemID string) {
 	// SQLの実行
 	ins.Exec(ItemID)
 }
-func DeleteCart(CartID string) {
+
+// カートから商品を一括で削除　transaction時に使用
+func CartDelete(CartID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
@@ -204,4 +192,14 @@ func DeleteCart(CartID string) {
 
 	// SQLの実行
 	del.Exec(CartID)
+}
+
+// カートに登録する商品が存在するかどうか
+func cartContentsSearch(CartContents CartContents, ItemID string) bool {
+	for _, CartContent := range CartContents {
+		if CartContent.ItemID == ItemID {
+			return true
+		}
+	}
+	return false
 }

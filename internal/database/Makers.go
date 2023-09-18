@@ -60,31 +60,56 @@ func MakerAccountDelete() {
 	//アカウント削除
 	//関連しているテーブルに影響を与えざるを得ないので、あまり使いたくない。
 }
-
-func (m Maker) MakerItemDetailsModyfy(i ItemDetails) {
-	//MakerItemDetailsの修正
+func MakerGetStripeID(Maker MadeBy) (StripeAccountID string) {
 	db := ConnectSQL()
 	defer db.Close()
-	// SQLの実行
-	db.Exec(`
-	UPDATE
+	rows, _ := db.Query(`
+	SELECT 
+		StripeAccountID
+	FROM 
 		MakersDetails
-	SET
-		MadeBy = ?,
-		Description = ?
-	WHERE
-		StripeAccountID = ?`, m.MadeBy, m.Description, m.StripeAccountID)
+	WHERE 
+		MadeBy = ?`, Maker)
+	rows.Scan(&StripeAccountID)
+	defer rows.Close()
+	return StripeAccountID
 }
-func MakerItemDetailsCreate() {
+func (m MadeBy) MakerItemsGet() (Items Items) {
+	db := ConnectSQL()
+	rows, _ := db.Query(
+		`SELECT 
+			Item.ItemID,
+			Item.Status,
+			Item.ItemName,
+			Item.Price,
+			Item.Stock,
+			Item.ItemOrder
+
+		FROM 
+			Item
+		WHERE
+			MadeBy = ?`,
+		m)
+	defer db.Close()
+	for rows.Next() {
+		Item := new(Item)
+		rows.Scan(&Item.ItemID, &Item.Status, &Item.ItemName, &Item.Price, &Item.Stock, &Item.ItemOrder)
+		Items = append(Items, *Item)
+	}
+	return Items
 
 }
-func ItemCreate() {
-	// Itemの作成
-}
-func ItemChange() {
-	//引数は変更前,変更後
-	//紐付いているItemの変更
-}
-func ItemChangeStatus() {
-	// Itemの状態の変更
+func (m MadeBy) MakerItemCreate(Item Item) {
+	db := ConnectSQL()
+	//UID,ItemID,Quantity
+	ins, _ := db.Prepare(`
+	INSERT 
+	INTO 
+		Item 
+		(DetailsID , Status , Price , Stock , ItemName , MadeBy) 
+		VALUES 
+		(? , ? , ? , ? , ? , ?)`)
+	defer ins.Close()
+	// SQLの実行
+	ins.Exec(Item.DetailsID, Item.Status, Item.Price, Item.Stock, Item.ItemName, Item.MadeBy)
 }

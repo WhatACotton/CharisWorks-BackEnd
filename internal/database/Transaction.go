@@ -24,6 +24,7 @@ type TransactionDetail struct {
 }
 type TransactionDetails []TransactionDetail
 
+// 取引履歴の作成
 func TransactionPost(Cart Cart, Customer Customer, StripeInfo cashing.StripeInfo, TransactionID string, CartContents CartContents) {
 	t := new(Transaction)
 	t.UserID = Customer.UserID
@@ -38,11 +39,11 @@ func TransactionPost(Cart Cart, Customer Customer, StripeInfo cashing.StripeInfo
 
 	TransactionContents := new(TransactionDetail)
 	for _, CartContent := range CartContents {
-		TransactionContents.TransactionConstruct(CartContent, Cart, TransactionID)
-		TransactionContents.transactionPostDetails()
+		TransactionContents.transactionConstruct(CartContent, Cart, TransactionID)
+		TransactionContents.transactionDetailsPost()
 	}
 }
-func (t *TransactionDetail) TransactionConstruct(CartContent CartContent, Cart Cart, TransactionID string) {
+func (t *TransactionDetail) transactionConstruct(CartContent CartContent, Cart Cart, TransactionID string) {
 	t.TransactionID = TransactionID
 	t.ItemID = CartContent.ItemID
 	t.Quantity = CartContent.Quantity
@@ -76,6 +77,8 @@ func (t *Transaction) transactionPost() {
 		t.Status,
 	)
 }
+
+// 取引履歴のステータスを取得
 func TransactionGetStatus(stripeID string) (status string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -100,6 +103,8 @@ func TransactionGetStatus(stripeID string) (status string) {
 	}
 	return status
 }
+
+// 取引履歴のステータスを更新
 func TransactionSetStatus(status string, stripeID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -121,6 +126,8 @@ func TransactionSetStatus(status string, stripeID string) {
 		panic(err)
 	}
 }
+
+// UserIDからStripeIDを取得
 func TransactionGetUserIDfromStripeID(ID string) (StripeID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -142,7 +149,9 @@ func TransactionGetUserIDfromStripeID(ID string) (StripeID string) {
 	}
 	return StripeID
 }
-func (t *TransactionDetail) transactionPostDetails() error {
+
+// 取引履歴の登録
+func (t *TransactionDetail) transactionDetailsPost() error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -172,6 +181,8 @@ func (t *TransactionDetail) transactionPostDetails() error {
 	}
 	return nil
 }
+
+// 購入処理
 func Purchased(TransactionDetail TransactionDetail) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -192,6 +203,8 @@ func Purchased(TransactionDetail TransactionDetail) {
 		panic(err)
 	}
 }
+
+// 取引履歴の詳細の取得
 func (t *Transaction) TransactionGetContents() (TransacitonContents TransactionDetails) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -241,6 +254,7 @@ func TransactionGet(UserID string) (Transactions Transactions) {
 	return Transactions
 }
 
+// 　StripeIDからTransactionIDを取得
 func TransactionGetID(StripeID string) (TransactionID string) {
 	db := ConnectSQL()
 	// SQLの実行

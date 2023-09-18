@@ -23,17 +23,17 @@ func ALL(c *gin.Context) {
 }
 func ItemDetails(c *gin.Context) {
 	ItemID := c.Query("ItemID")
-	DetailsID, Status := database.ItemDetailsIDGet(ItemID)
-	if DetailsID != "" {
-		ItemDetails := database.ItemDetailsGet(DetailsID)
-		c.JSON(200, gin.H{"ItemDetails": ItemDetails, "Status": Status})
+	Item := new(database.Item)
+	Item.ItemGet(ItemID)
+	if Item.DetailsID != "" {
+		c.JSON(200, gin.H{"Item": Item})
 	} else {
 		c.JSON(404, "{Not Found}")
 	}
 }
 func Category(c *gin.Context) {
 	Category := c.Param("category")
-	ItemList, err := database.ItemCategoryGet(Category)
+	ItemList, err := database.ItemGetCategory(Category)
 	if err != nil {
 		log.Print(err)
 	}
@@ -41,7 +41,7 @@ func Category(c *gin.Context) {
 }
 func Color(c *gin.Context) {
 	Color := c.Param("color")
-	ItemList, err := database.ItemColorGet(Color)
+	ItemList, err := database.ItemGetColor(Color)
 	if err != nil {
 		log.Print(err)
 	}

@@ -4,15 +4,20 @@ import "github.com/pkg/errors"
 
 // Item関連
 type Item struct {
-	ItemID    string `json:"id"`
-	DetailsID string `json:"infoid"`
-	Status    string `json:"status"`
-	ItemName  string `json:"name"`
-	Price     int    `json:"price"`
-	Stock     int    `json:"stock"`
-	MadeBy    string `json:"madeby"`
-	ItemOrder int    `json:"order"`
+	ItemID      string `json:"id"`
+	DetailsID   string `json:"infoid"`
+	Status      string `json:"status"`
+	ItemName    string `json:"name"`
+	Price       int    `json:"price"`
+	Stock       int    `json:"stock"`
+	MadeBy      MadeBy `json:"madeby"`
+	ItemOrder   int    `json:"order"`
+	Description string `json:"description"`
+	Color       string `json:"color"`
+	Series      string `json:"series"`
+	Size        int    `json:"size"`
 }
+type MadeBy string
 type Items []Item
 type TopItem struct {
 	ItemName string `json:"ItemName"`
@@ -58,7 +63,7 @@ func ItemGetALL() (Items, error) {
 	rows, err := db.Query(
 		`SELECT 
 			Item.ItemOrder,
-			Item.Name,
+			Item.ItemName,
 			Item.Stock,
 			Item.Price,
 			Item.Status 
@@ -82,14 +87,14 @@ func ItemGetALL() (Items, error) {
 	}
 	return returnItem, nil
 }
-func ItemCategoryGet(Category string) (Items, error) {
+func ItemGetCategory(Category string) (Items, error) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
 			Item.ItemOrder,
-			Item.Name,
+			Item.ItemName,
 			Item.Stock,
 			Item.Price,
 			Item.Status 
@@ -123,14 +128,14 @@ func ItemCategoryGet(Category string) (Items, error) {
 	}
 	return returnItem, nil
 }
-func ItemColorGet(Color string) (Items, error) {
+func ItemGetColor(Color string) (Items, error) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
 			Item.ItemOrder,
-			Item.Name,
+			Item.ItemName,
 			Item.Stock,
 			Item.Price,
 			Item.Status 
@@ -177,7 +182,11 @@ func (i *Item) ItemGet(ItemID string) {
 			Price,
 			Stock,
 			MadeBy,
-			ItemOrder
+			ItemOrder,
+			Description,
+			Color,
+			Series,
+			Size
 		FROM
 			Item
 		WHERE
@@ -185,6 +194,41 @@ func (i *Item) ItemGet(ItemID string) {
 		ItemID)
 	defer rows.Close()
 	for rows.Next() {
-		rows.Scan(&i.DetailsID, &i.Status, &i.ItemName, &i.Price, &i.Stock, &i.MadeBy, &i.ItemOrder)
+		rows.Scan(&i.DetailsID, &i.Status, &i.ItemName, &i.Price, &i.Stock, &i.MadeBy, &i.ItemOrder, &i.Description, &i.Color, &i.Series, &i.Size)
 	}
+}
+func ItemCreate(Item Item) {
+	db := ConnectSQL()
+	defer db.Close()
+	// SQLの実行
+	db.Exec(`
+	INSERT INTO 
+		Item 
+		(DetailsID,Status,ItemName,Price,Stock,MadeBy,ItemOrder,Description,Color,Series,Size) 
+	VALUES 
+		(?,?,?,?,?,?,?,?,?,?,?)`,
+		Item.DetailsID, Item.Status, Item.ItemName, Item.Price, Item.Stock, Item.MadeBy, Item.ItemOrder, Item.Description, Item.Color, Item.Series, Item.Size)
+}
+func ItemModify(Item Item) {
+	db := ConnectSQL()
+	defer db.Close()
+	// SQLの実行
+	db.Exec(`
+	UPDATE 
+		Item 
+	SET 
+		DetailsID = ?,
+		Status = ?,
+		ItemName = ?,
+		Price = ?,
+		Stock = ?,
+		MadeBy = ?,
+		ItemOrder = ?,
+		Description = ?,
+		Color = ?,
+		Series = ?,
+		Size = ?
+	WHERE 
+		ItemID = ?`,
+		Item.DetailsID, Item.Status, Item.ItemName, Item.Price, Item.Stock, Item.MadeBy, Item.ItemOrder, Item.Description, Item.Color, Item.Series, Item.Size, Item.ItemID)
 }
