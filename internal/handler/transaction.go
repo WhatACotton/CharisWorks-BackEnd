@@ -65,12 +65,11 @@ func totalPrice(Carts database.CartContents) (TotalPrice int) {
 
 // 購入履歴を取得する。
 func GetTransaction(c *gin.Context) {
-	CustomerSessionKey := new(string)
-	*CustomerSessionKey = validation.GetCustomerSessionKey(c)
 	TransactionContentsList := new([]database.TransactionDetails)
-	UserID := database.GetUserID(*CustomerSessionKey)
+	_, UserID := GetDatafromSessionKey(c)
+
 	log.Print("UserID:", UserID)
-	Transactions := database.GetTransactions(UserID)
+	Transactions := database.TransactionGet(UserID)
 	for _, Transaction := range Transactions {
 		TransactionContents := Transaction.TransactionGetContents()
 		*TransactionContentsList = append(*TransactionContentsList, TransactionContents)
@@ -91,7 +90,7 @@ func Webhook(c *gin.Context) {
 func completePayment(ID string) (err error) {
 	database.TransactionSetStatus("決済完了", ID)
 	Transaction := new(database.Transaction)
-	Transaction.TransactionID = database.GetTransactionID(ID)
+	Transaction.TransactionID = database.TransactionGetID(ID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -102,12 +101,10 @@ func completePayment(ID string) (err error) {
 	for _, TransactionContent := range TransactionContents {
 		log.Print("TransactionContent: ", TransactionContent)
 		database.Purchased(TransactionContent)
-		Itemdetails, err := database.ItemDetailsGet(TransactionContent.DetailsID)
-		if err != nil {
-			panic(err)
-		}
-		amount := float64(Itemdetails.Price) * float64(TransactionContent.Quantity) * 0.97 * 0.964
-		cashing.Transfer(amount, Itemdetails.Madeby, Itemdetails.ItemName)
+		Item := new(database.Item)
+		Item.ItemGet(TransactionContent.ItemID)
+		amount := float64(Item.Price) * float64(TransactionContent.Quantity) * 0.97 * 0.964
+		cashing.Transfer(amount, Item.MadeBy, Item.ItemName)
 	}
 	UserID := database.TransactionGetUserIDfromStripeID(ID)
 	if err != nil {

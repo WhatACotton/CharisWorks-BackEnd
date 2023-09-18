@@ -129,7 +129,6 @@ func DeleteCustomer(c *gin.Context) {
 	//アカウントの削除
 	_, UserID := GetDatafromSessionKey(c)
 	database.CustomerDelete(UserID)
-	database.CustomerDeleteSession(UserID)
 	file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatal(err)

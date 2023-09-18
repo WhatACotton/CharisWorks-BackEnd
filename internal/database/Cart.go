@@ -11,9 +11,8 @@ type CartContent struct {
 	//From CartRequestPayload
 	ItemID   string `json:"ItemID"`
 	Quantity int    `json:"Quantity"`
-	//From ItemForCart
-	DetailsID string `json:"DetailsID"`
-	Status    string `json:"Status"`
+	//From Item
+	Status string `json:"Status"`
 	//From Item
 	ItemName string `json:"ItemName"`
 	Price    int    `json:"Price"`
@@ -24,27 +23,28 @@ type CartContents []CartContent
 func (c *CartContentRequestPayload) Cart(CartID string) {
 	log.Println("CartID : " + CartID)
 	log.Print("ItemID : "+c.ItemID, " Quantity : ", c.Quantity)
-	ItemForCart := new(ItemForCart)
-	ItemForCart.ItemForCartGet(c.ItemID)
+	Item := new(Item)
+	Item.ItemGet(c.ItemID)
 	//リクエストされた商品が登録可能か判定
-	log.Println("ItemStatus : " + ItemForCart.Status)
-	if ItemForCart.Status == "Available" {
+	log.Println("ItemStatus : " + Item.Status)
+	if Item.Status == "Available" {
 		Carts := GetCartContents(CartID)
 		//リクエストされた商品がカートに存在するか確認
-		if SearchCartContents(Carts, c.ItemID) {
+		//存在する場合
+		if searchCartContents(Carts, c.ItemID) {
 			if c.Quantity == 0 {
 				DeleteCartContent(CartID, c.ItemID)
 			} else {
-
-				if ItemForCart.Stock >= c.Quantity {
+				if Item.Stock >= c.Quantity {
 					c.UpdateCartContent(CartID)
 				} else {
 					log.Print("stock is not enough")
 				}
 			}
 		} else {
+			//存在しない場合
 			if c.Quantity != 0 {
-				if ItemForCart.Stock >= c.Quantity {
+				if Item.Stock >= c.Quantity {
 					c.PostCartContent(CartID)
 				} else {
 					log.Print("stock is not enough")
@@ -56,42 +56,33 @@ func (c *CartContentRequestPayload) Cart(CartID string) {
 		}
 	}
 }
-
 func GetCartContents(CartID string) (CartContents CartContents) {
 	db := ConnectSQL()
 	defer db.Close()
 	rows, _ := db.Query(`
 	SELECT 
-		ItemDetails.DetailsID , 
 		Item.Status ,
+		Item.Price , 
+		Item.Name , 
+		Item.Stock 
 		CartContents.Order , 
 		CartContents.ItemID , 
 		CartContents.Quantity , 
-		ItemDetails.Price , 
-		ItemDetails.Name , 
-		ItemDetails.Stock 
-	
 	FROM 
-		ItemDetails
-	
-	JOIN 
 		Item
-
-	ON 
-		Item.DetailsID = ItemDetails.DetailsID 
-	
 	JOIN 
 		CartContents 
-
 	ON 
 	CartContents.ItemID = Item.ItemID 
-
 	WHERE 
 		CartID = ?`, CartID)
 	defer rows.Close()
 	for rows.Next() {
 		CartContent := new(CartContent)
-		rows.Scan(&CartContent.DetailsID, &CartContent.Status, &CartContent.Order, &CartContent.ItemID, &CartContent.Quantity, &CartContent.Price, &CartContent.ItemName, &CartContent.Stock)
+		rows.Scan(&CartContent.Status, &CartContent.Price, &CartContent.ItemName, &CartContent.Stock, &CartContent.Order, &CartContent.ItemID, &CartContent.Quantity)
+		if CartContent.Quantity <= CartContent.Stock {
+			CartContent.Status = "OutOfStock"
+		}
 		CartContents = append(CartContents, *CartContent)
 	}
 	return CartContents
@@ -118,8 +109,7 @@ func (c CartContentRequestPayload) PostCartContent(CartID string) {
 	// SQLの実行
 	ins.Exec(CartID, c.ItemID, c.Quantity)
 }
-
-func SearchCartContents(CartContents CartContents, ItemID string) bool {
+func searchCartContents(CartContents CartContents, ItemID string) bool {
 	for _, CartContent := range CartContents {
 		if CartContent.ItemID == ItemID {
 			return true
@@ -127,7 +117,6 @@ func SearchCartContents(CartContents CartContents, ItemID string) bool {
 	}
 	return false
 }
-
 func (c CartContentRequestPayload) UpdateCartContent(CartID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -146,7 +135,6 @@ func (c CartContentRequestPayload) UpdateCartContent(CartID string) {
 	ins.Exec(c.Quantity, CartID, c.ItemID)
 	defer ins.Close()
 }
-
 func DeleteCartContent(CartID string, ItemID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -166,7 +154,6 @@ func DeleteCartContent(CartID string, ItemID string) {
 	ins.Exec(CartID, ItemID)
 	defer ins.Close()
 }
-
 func DeleteCartContentforTransaction(CartID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -183,7 +170,6 @@ func DeleteCartContentforTransaction(CartID string) {
 	ins.Exec(CartID)
 	defer ins.Close()
 }
-
 func DeleteItemFromCartContent(ItemID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()

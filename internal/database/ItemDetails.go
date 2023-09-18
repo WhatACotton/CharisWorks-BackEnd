@@ -1,6 +1,19 @@
 package database
 
-import "github.com/pkg/errors"
+type ItemDetailsImage struct {
+	DetailsID string `json:"DetailsID"`
+	Image     string `json:"Image"`
+	Main      bool   `json:"Main"`
+	Stock     int    `json:"Stock"`
+	Price     int    `json:"Price"`
+	ItemName  string `json:"ItemName"`
+}
+type ItemDetails struct {
+	DetailsID   string `json:"DetailsID"`
+	Description string `json:"Description"`
+	Color       string `json:"Color"`
+	Series      string `json:"Series"`
+}
 
 func ItemDetailsCreate() {
 	// ItemDetailsの作成
@@ -8,19 +21,15 @@ func ItemDetailsCreate() {
 func ItemDetailsModyfy() {
 	// ItemDetailsの編集
 }
-func ItemDetailsGet(DetailsID string) (ItemDetails, error) {
+func ItemDetailsGet(DetailsID string) ItemDetails {
 	ItemDetails := new(ItemDetails)
 	ItemDetails.DetailsID = DetailsID
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
-	rows, err := db.Query(
+	rows, _ := db.Query(
 		`SELECT 
-			Stock,
-			Price,
-			ItemName,
 			Description,
-			MadeBy,
 			Color,
 			Series
 		From 
@@ -29,45 +38,33 @@ func ItemDetailsGet(DetailsID string) (ItemDetails, error) {
 		WHERE 
 			DetailsID = ?`,
 		DetailsID)
-	if err != nil {
-		return *ItemDetails, errors.Wrap(err, "error in getting TopItem /GetItemDetails1")
-	}
 	for rows.Next() {
-		err := rows.Scan(&ItemDetails.Stock, &ItemDetails.Price, &ItemDetails.ItemName, &ItemDetails.Description, &ItemDetails.MadeBy, &ItemDetails.Color, &ItemDetails.Series)
-		if err != nil {
-			return *ItemDetails, errors.Wrap(err, "error in scanning CartID /GetItemDetails2")
-		}
+		rows.Scan(&ItemDetails.Description, &ItemDetails.Color, &ItemDetails.Series)
 	}
-	return *ItemDetails, nil
+	return *ItemDetails
 }
-func ItemDetailsIDGet(ItemID string) (InfoID string, err error) {
+func ItemDetailsIDGet(ItemID string) (DetailsID string, Status string) {
 	db := ConnectSQL()
 	defer db.Close()
-	Status := new(string)
 	// SQLの実行
-	rows, err := db.Query(
+	rows, _ := db.Query(
 		`SELECT 
-			InfoID,
-			Status
-
+			DetailsID,
+			status
 		FROM 
 			Item 
 		
 		WHERE 
 			ItemID = ?`,
 		ItemID)
-	if err != nil {
-		return "error", errors.Wrap(err, "error in getting TopItem /GetInfoID1")
-	}
+
 	for rows.Next() {
-		err := rows.Scan(&InfoID, &Status)
-		if err != nil {
-			return "error", errors.Wrap(err, "error in scanning CartID /GetInfoID2")
-		}
+		rows.Scan(&DetailsID, &Status)
 	}
-	if *Status == `Available` {
-		return InfoID, nil
-	} else {
-		return "Couldn't get", nil
-	}
+	return DetailsID, Status
+}
+
+func ItemDetailsUploadImage() {
+	//画像を取得して、特定の場所に保存
+	//画像のインスペクト・サイズの確認・
 }

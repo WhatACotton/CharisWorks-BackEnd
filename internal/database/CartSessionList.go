@@ -5,10 +5,11 @@ type Cart struct {
 	SessionKey string `json:"SessionKey"`
 }
 
+// CartSessionListからCartIDを取得する
 func (c *Cart) CartSessionListGetCartID() {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
-
+	defer db.Close()
 	// SQLの実行
 	rows, _ := db.Query(`
 	SELECT 
@@ -27,10 +28,11 @@ func (c *Cart) CartSessionListGetCartID() {
 	}
 }
 
+// CartSessionListにCartIDを登録する
 func (c *Cart) CartSessionListCreate() {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
-
+	defer db.Close()
 	// SQLの準備
 	ins, _ := db.Prepare(`
 	INSERT 
@@ -42,4 +44,19 @@ func (c *Cart) CartSessionListCreate() {
 	`)
 	defer ins.Close()
 	ins.Exec(c.CartID, c.SessionKey)
+}
+
+// CartSessionListの削除　セッションキーの更新に使う
+func CartSessionListDelete(CartID string) {
+	db := ConnectSQL()
+	defer db.Close()
+	// SQLの準備
+	ins, _ := db.Prepare(`
+	DELETE FROM 
+		CartSessionList 
+	WHERE 
+		CartID = ?
+	`)
+	defer ins.Close()
+	ins.Exec(CartID)
 }

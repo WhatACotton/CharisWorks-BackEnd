@@ -76,6 +76,7 @@ func GetDatafromSessionKey(c *gin.Context) (Cart database.Cart, UserID string) {
 			log.Print("don't have CartID in any place")
 			Cart.CartID = validation.GetUUID()
 		}
+		database.CartSessionListDelete(Cart.CartID)
 		Cart.SessionKey = validation.GetUUID()
 		Cart.CartSessionListCreate()
 		log.Print("Cart with sesssion. SessionKey : ", Cart.SessionKey, " CartID : ", Cart.CartID)

@@ -20,12 +20,14 @@ type Customer struct {
 	StripeAccountID string `json:"StripeAccountID,omitempty"`
 }
 
+// サインアップ処理　LoginLog,Customerにデータを追加
 func CustomerSignUp(req validation.CustomerReqPayload, NewSessionKey string, CartID string) {
 	log.Printf("SignUpCustomer Called")
 	log.Print("UserID : ", req.UserID)
 	log.Print("SessionKey : ", NewSessionKey)
 	db := ConnectSQL()
 	tx, _ := db.Begin()
+	//Customerに追加
 	_, err := tx.Exec(`
 	INSERT INTO 
 		Customer 
@@ -35,6 +37,7 @@ func CustomerSignUp(req validation.CustomerReqPayload, NewSessionKey string, Car
 	if err != nil {
 		tx.Rollback()
 	}
+	//LoginLogに追加
 	_, err = tx.Exec(`
 	INSERT INTO
 		LogInLog
@@ -46,8 +49,9 @@ func CustomerSignUp(req validation.CustomerReqPayload, NewSessionKey string, Car
 		tx.Rollback()
 	}
 	tx.Commit()
-
 }
+
+// 顧客情報の登録・変更
 func CustomerRegister(UserID string, customer validation.CustomerRegisterPayload) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -70,12 +74,14 @@ func CustomerRegister(UserID string, customer validation.CustomerRegisterPayload
 	// SQLの実行
 	ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.ZipCode), html.EscapeString(customer.Address), UserID)
 }
+
+// ログイン処理　LoginLog,Customerの最終セッションを更新
 func CustomerLogIn(UserID string, NewSessionKey string) {
 	db := ConnectSQL()
 	tx, _ := db.Begin()
 	_, err := tx.Exec(`
 	INSERT INTO 
-		LogIn Log
+		LogInLog
 		(UserID , SessionKey)
 		VALUES
 		(?,?)`, UserID, NewSessionKey)
@@ -96,6 +102,8 @@ func CustomerLogIn(UserID string, NewSessionKey string) {
 	}
 	tx.Commit()
 }
+
+// Email認証情報の更新　メールが変更されたとき、メール認証がリセットされてしまうので、未認証への変更も対応
 func CustomerEmailVerified(verify int, userid string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -114,31 +122,31 @@ func CustomerEmailVerified(verify int, userid string) {
 	defer ins.Close()
 }
 
-func CustomerDelete(userid string) {
+// 顧客情報の削除　LoginLog,Customerからデータを削除
+func CustomerDelete(UserID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
-	ins, _ := db.Prepare(`
+	tx, _ := db.Begin()
+	_, err := tx.Exec(`
 	DELETE FROM 
 		Customer 
 	WHERE 
-		UserID = ?`)
-
-	// SQLの実行
-	ins.Exec(userid)
-}
-func CustomerDeleteSession(userid string) {
-	// データベースのハンドルを取得する
-	db := ConnectSQL()
-	ins, _ := db.Prepare(`
+		UserID = ?`, UserID)
+	if err != nil {
+		tx.Rollback()
+	}
+	_, err = tx.Exec(`
 	DELETE FROM 
 		LogInLog 
-	
 	WHERE 
-		UserID = ?`)
-	// SQLの実行
-	ins.Exec(userid)
-	defer ins.Close()
+		UserID = ?`, UserID)
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
 }
+
+// Emailの変更
 func CustomerChangeEmail(userid string, email string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -155,6 +163,8 @@ func CustomerChangeEmail(userid string, email string) {
 	ins.Exec(email, userid)
 	defer ins.Close()
 }
+
+// CartIDをCustomerに登録　カートがからのときで、セッションカートリストのカートに商品がある場合は、そのカートIDを登録するので、内部関数化できない
 func CustomerSetCartID(userid string, CartID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -170,8 +180,9 @@ func CustomerSetCartID(userid string, CartID string) {
 
 	// SQLの実行
 	ins.Exec(CartID, userid)
-
 }
+
+// [出品者用]Stripeのアカウントを登録　同時にMakersDetailsにも登録
 func CustomerCreateStripeAccount(UserId string, StripeAccountID string) {
 	db := ConnectSQL()
 	tx, _ := db.Begin()
@@ -199,4 +210,119 @@ func CustomerCreateStripeAccount(UserId string, StripeAccountID string) {
 		tx.Rollback()
 	}
 	tx.Commit()
+}
+
+// 顧客の基本情報を取得
+func (c *Customer) GetCustomer(UserID string) {
+	db := ConnectSQL()
+	c.UserID = UserID
+	// SQLの実行
+	rows, _ := db.Query(`
+	SELECT 
+		Name,
+		ZipCode,
+		Address,
+		Email,
+		IsRegistered,
+		CreatedDate,
+		IsEmailVerified,
+		CartID,
+		StripeAccountID
+	FROM 
+		Customer 
+
+	WHERE 
+		UserID= ?`, UserID)
+	defer rows.Close()
+	// SQLの実行
+	for rows.Next() {
+		rows.Scan(&c.Name, &c.ZipCode, &c.Address, &c.Email, &c.IsRegistered, &c.CreatedDate, &c.IsEmailVerified, &c.CartID, &c.StripeAccountID)
+	}
+}
+
+// StripeAccountIDを取得
+func GetStripeAccountID(UserID string) (StripeAccountID string) {
+	db := ConnectSQL()
+	// SQLの実行
+	rows, _ := db.Query(`
+	SELECT 
+		StripeAccountID
+	FROM 
+		Customer 
+	WHERE 
+		UserID= ?`, UserID)
+	defer rows.Close()
+	// SQLの実行
+	for rows.Next() {
+		rows.Scan(&StripeAccountID)
+	}
+	return StripeAccountID
+}
+
+// UserIDの取得　GetDatafromSessionKeyで使用し、直接呼び出さない
+func GetUserID(SessionKey string) (UserID string) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	// SQLの実行
+
+	rows, _ := db.Query(`
+	SELECT 
+		UserID
+
+	FROM 
+		LogInLog
+
+	WHERE 
+		SessionKey = ?`, SessionKey)
+
+	defer rows.Close()
+	// SQLの実行
+	for rows.Next() {
+		rows.Scan(&UserID)
+	}
+	return UserID
+}
+
+// Emailの取得
+func GetEmail(UserID string) (Email string) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	// SQLの実行
+	rows, _ := db.Query(`
+	SELECT 
+		Email 
+	
+	FROM 
+		Customer 
+	
+	WHERE 
+		UserID = ?`, UserID)
+	defer rows.Close()
+	// SQLの実行
+	for rows.Next() {
+		rows.Scan(&Email)
+	}
+	return Email
+}
+
+// CartIDを取得
+func GetCartID(UID string) (CartID string) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+
+	// SQLの実行
+	rows, _ := db.Query(`
+	SELECT 
+		CartID
+	FROM 
+		Customer 
+	WHERE 
+		UID = ?`, UID)
+
+	defer rows.Close()
+	// SQLの実行
+	for rows.Next() {
+		rows.Scan(&CartID)
+	}
+	return CartID
 }

@@ -23,16 +23,10 @@ func ALL(c *gin.Context) {
 }
 func ItemDetails(c *gin.Context) {
 	ItemID := c.Query("ItemID")
-	InfoID, err := database.ItemDetailsIDGet(ItemID)
-	if err != nil {
-		log.Print(err)
-	}
-	if InfoID != "Couldn't get" {
-		ItemDetails, err := database.ItemDetailsGet(InfoID)
-		if err != nil {
-			log.Print(err)
-		}
-		c.JSON(200, ItemDetails)
+	DetailsID, Status := database.ItemDetailsIDGet(ItemID)
+	if DetailsID != "" {
+		ItemDetails := database.ItemDetailsGet(DetailsID)
+		c.JSON(200, gin.H{"ItemDetails": ItemDetails, "Status": Status})
 	} else {
 		c.JSON(404, "{Not Found}")
 	}
