@@ -1,5 +1,0 @@
-#!/bin/bash
-export MYSQL_PASS=jfalkdsjfsnafjsadjlkfsja
-export MYSQL_USER=CharisRoot
-export STRIPE_KEY=whsec_121629a0afddd3ed7c94034f38e359f399a60193ee3a82771b688fb4797c90e8 
-exec go run main.go
