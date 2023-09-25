@@ -3,10 +3,10 @@ package handler
 import (
 	"log"
 	"net/http"
-	"unify/cashing"
-	"unify/internal/database"
-	"unify/validation"
 
+	"github.com/WhatACotton/go-backend-test/cashing"
+	"github.com/WhatACotton/go-backend-test/internal/database"
+	"github.com/WhatACotton/go-backend-test/validation"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,7 +19,10 @@ func BuyItem(c *gin.Context) {
 		Customer.CustomerGet(UserID)
 		log.Print("Customer:", Customer.Name)
 		if Customer.IsRegistered && Customer.IsEmailVerified {
-			CartContents := database.GetCartContents(Cart.CartID)
+			CartContents, err := database.GetCartContents(Cart.CartID)
+			if err != nil {
+				log.Fatal(err)
+			}
 			if inspectCart(CartContents) {
 				TotalPrice := totalPrice(CartContents)
 				stripeInfo, err := cashing.Purchase(TotalPrice)
@@ -100,7 +103,7 @@ func completePayment(ID string) (err error) {
 		Item := new(database.Item)
 		Item.ItemGet(TransactionContent.ItemID)
 		amount := float64(Item.Price) * float64(TransactionContent.Quantity) * 0.97 * 0.964
-		cashing.Transfer(amount, database.MakerGetStripeID(Item.MadeBy), Item.ItemName)
+		cashing.Transfer(amount, database.MakerGetStripeID(Item.MakerName), Item.ItemName)
 	}
 	UserID := database.TransactionGetUserIDfromStripeID(ID)
 	CartID := database.GetCartID(UserID)

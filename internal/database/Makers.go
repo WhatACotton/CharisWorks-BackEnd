@@ -1,115 +1,128 @@
 package database
 
 type Maker struct {
-	MadeBy          string `json:"MadeBy"`
-	Description     string `json:"Description"`
+	MakerName       string `json:"MakerName"`
+	Description     string `json:"MakerDescription"`
 	StripeAccountID string `json:"StripeAccountID"`
 }
 
-func MakerAccountCreate(m Maker) {
-	//stripeAccountを元にアカウントを作成する。
-	//アカウントの画像はpathで指定して特定の場所に保存しておく必要がある。
+// Stripeのアカウントを登録
+func CustomerCreateStripeAccount(UserId string, StripeAccountID string) {
 	db := ConnectSQL()
-	ins, _ := db.Prepare(`
-	INSERT
-	INTO
-		MakersDetails
-		(MadeBy,Description,StripeAccountID)
-	VALUES
-		(?,?,?)`)
-	ins.Exec(m.MadeBy, m.Description, m.StripeAccountID)
-	defer ins.Close()
+	tx, _ := db.Begin()
+
+	_, err := tx.Exec(`
+	UPDATE 
+		Customer 
+	
+	SET 
+		StripeAccountID = ? 
+	
+	WHERE 
+		UserID = ?`, StripeAccountID, UserId)
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
 }
 
-func MakerAccountGet(MadeBy string) {
-	//stripeAccountID以外を取得してくる。
+// StripeAccountIDを取得
+func CustomerGetStripeAccountID(UserID string) (StripeAccountID string) {
 	db := ConnectSQL()
-	defer db.Close()
 	// SQLの実行
 	rows, _ := db.Query(`
-	SELECT
-		MadeBy,
-		Description
-	FROM
-		MakersDetails
-	WHERE
-		MadeBy = ?`, MadeBy)
+	SELECT 
+		StripeAccountID
+	FROM 
+		Customer 
+	WHERE 
+		UserID= ?`, UserID)
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
-		rows.Scan(&MadeBy)
+		rows.Scan(&StripeAccountID)
 	}
+	return StripeAccountID
 }
-func (m Maker) MakerAccountModyfy() {
+
+// Stripeのアカウント作成
+func (m Maker) MakerAccountCreate() {
+	db := ConnectSQL()
+	ins, _ := db.Prepare(`
+	UPDATE
+		Customer
+	SET
+		StripeAccountID = ?,
+		MakerName = ?,
+		MakerDescription = ?
+	WHERE
+		UserID = ?
+	`)
+	ins.Exec(m.MakerName, m.Description, m.StripeAccountID)
+	defer ins.Close()
+}
+
+// Stripeのアカウント情報の修正
+func (m *Maker) MakerAccountModyfy() {
 	//アカウント情報の修正
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
 	db.Exec(`
 	UPDATE
-		MakersDetails
+		Customer
 	SET
-		MadeBy = ?,
-		Description = ?
+		MakerName = ?,
+		MakerDescription = ?
 	WHERE
-		StripeAccountID = ?`, m.MadeBy, m.Description, m.StripeAccountID)
+		StripeAccountID = ?`, m.MakerName, m.Description, m.StripeAccountID)
 }
 
-// 削除は取引済みの商品の対応・アカウントなどの対応が必要なためできない。(すべてが終わったあとに実装するかもしれない。)
-func MakerAccountDelete() {
-	//アカウント削除
-	//関連しているテーブルに影響を与えざるを得ないので、あまり使いたくない。
-}
-func MakerGetStripeID(Maker MadeBy) (StripeAccountID string) {
+// MakerNameからStripeIDを取得
+func MakerGetStripeID(MakerName string) (StripeAccountID string) {
 	db := ConnectSQL()
 	defer db.Close()
 	rows, _ := db.Query(`
 	SELECT 
 		StripeAccountID
 	FROM 
-		MakersDetails
+		Cutomer
 	WHERE 
-		MadeBy = ?`, Maker)
+		MakerName = ?`, MakerName)
 	rows.Scan(&StripeAccountID)
 	defer rows.Close()
 	return StripeAccountID
 }
-func (m MadeBy) MakerItemsGet() (Items Items) {
-	db := ConnectSQL()
-	rows, _ := db.Query(
-		`SELECT 
-			Item.ItemID,
-			Item.Status,
-			Item.ItemName,
-			Item.Price,
-			Item.Stock,
-			Item.ItemOrder
 
-		FROM 
-			Item
-		WHERE
-			MadeBy = ?`,
-		m)
+// MakerNameをStripeIDから取得
+func MakerStripeAccountIDGet(StripeAccountID string) (MakerName string) {
+	db := ConnectSQL()
 	defer db.Close()
-	for rows.Next() {
-		Item := new(Item)
-		rows.Scan(&Item.ItemID, &Item.Status, &Item.ItemName, &Item.Price, &Item.Stock, &Item.ItemOrder)
-		Items = append(Items, *Item)
-	}
-	return Items
-
+	rows, _ := db.Query(`
+	SELECT 
+		MakerName
+	FROM 
+		Customer 
+	WHERE 
+		StripeAccountID = ?`, StripeAccountID)
+	rows.Scan(&MakerName)
+	defer rows.Close()
+	return MakerName
 }
-func (m MadeBy) MakerItemCreate(Item Item) {
+
+func (Maker *Maker) MakerDetailsGet() {
 	db := ConnectSQL()
-	//UID,ItemID,Quantity
-	ins, _ := db.Prepare(`
-	INSERT 
-	INTO 
-		Item 
-		(DetailsID , Status , Price , Stock , ItemName , MadeBy) 
-		VALUES 
-		(? , ? , ? , ? , ? , ?)`)
-	defer ins.Close()
-	// SQLの実行
-	ins.Exec(Item.DetailsID, Item.Status, Item.Price, Item.Stock, Item.ItemName, Item.MadeBy)
+	defer db.Close()
+	rows, _ := db.Query(`
+	SELECT 
+		MakerName,
+		MakerDescription
+	FROM 
+		Customer 
+	WHERE 
+		StripeAccountID = ?`, Maker.StripeAccountID)
+	for rows.Next() {
+		rows.Scan(&Maker.MakerName, &Maker.Description)
+	}
+	defer rows.Close()
 }

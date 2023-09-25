@@ -28,6 +28,7 @@ func CustomerSessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey s
 	}
 }
 
+// CustomerSessionKeyの取得
 func GetCustomerSessionKey(c *gin.Context) string {
 	session := sessions.DefaultMany(c, "SessionKey")
 	if session.Get("SessionKey") != nil {

@@ -1,8 +1,6 @@
 package database
 
-import (
-	"unify/cashing"
-)
+import "github.com/WhatACotton/go-backend-test/cashing"
 
 type Transaction struct {
 	TransactionID   string `json:"TransactionID"`

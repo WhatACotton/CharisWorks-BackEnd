@@ -3,17 +3,17 @@ package main
 import (
 	"io"
 	"os"
-	"unify/internal/database"
-	"unify/internal/handler"
-	"unify/validation"
 
+	"github.com/WhatACotton/go-backend-test/internal/database"
+	"github.com/WhatACotton/go-backend-test/internal/handler"
+	"github.com/WhatACotton/go-backend-test/validation"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 
 	// Logging to a file.
-	f, _ := os.Create("gin" + database.GetDate() + ".log")
+	f, _ := os.Create("log/gin" + database.GetDate() + ".log")
 	gin.DefaultWriter = io.MultiWriter(f)
 
 	// Use the following code if you need to write the logs to file and console at the same time.
@@ -27,9 +27,9 @@ func main() {
 	//ログイン
 	r.POST("/go/Login", handler.LogIn)
 	// 仮登録
-	r.POST("/go/SignUp", handler.TemporarySignUp)
+	r.POST("/go/SignUp", handler.SignUp)
 	// 本登録
-	r.POST("/go/Registration", handler.SignUp)
+	r.POST("/go/Registration", handler.Register)
 	// 登録内容の修正
 	r.POST("/go/Modify", handler.ModifyCustomer)
 	// アカウントの削除
@@ -41,7 +41,6 @@ func main() {
 	// 購入履歴の取得
 	r.GET("/go/GetTransactions", handler.GetTransaction)
 
-	r.GET("/go/CreateStripeAccount", handler.CreateStripeAccount)
 	// カート機能
 	// 商品の登録・修正・削除
 	r.POST("/go/PostCart", handler.PostCart)
@@ -58,6 +57,12 @@ func main() {
 	r.GET("/go/item/category/:category", handler.Category)
 	r.GET("/go/item/color/:color", handler.Color)
 
+	r.POST("/go/Maker/AccountCreate", handler.MakerStripeAccountCreate)
+	r.POST("/go/Maker/ItemMainCreate", handler.MakerItemMainCreate)
+	r.POST("/go/Maker/ItemDetailCreate", handler.MakerItemDetailCreate)
+	r.POST("/go/Maker/ItemDetailModyfy", handler.MakerItemDetailModyfy)
+	r.GET("/go/Maker/MakerDetailsGet", handler.MakerDetailsGet)
+	r.POST("/go/Maker/DetailsRegister", handler.MakerAccountRegister)
 	r.Run(":8080") // 0.0.0.0:8080 でサーバーを立てます。
 }
 

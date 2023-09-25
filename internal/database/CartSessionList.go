@@ -6,12 +6,12 @@ type Cart struct {
 }
 
 // CartSessionListからCartIDを取得する
-func (c *Cart) CartSessionListGetCartID() {
+func (c *Cart) CartSessionListGetCartID() error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
-	rows, _ := db.Query(`
+	rows, err := db.Query(`
 	SELECT 
 		CartID 
 		
@@ -21,20 +21,28 @@ func (c *Cart) CartSessionListGetCartID() {
 	WHERE 
 		SessionKey = ?`, c.SessionKey)
 
+	if err != nil {
+		return err
+	}
 	defer rows.Close()
+
 	// SQLの実行
 	for rows.Next() {
-		rows.Scan(&c.CartID)
+		err = rows.Scan(&c.CartID)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // CartSessionListにCartIDを登録する
-func (c *Cart) CartSessionListCreate() {
+func (c *Cart) CartSessionListCreate() error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの準備
-	ins, _ := db.Prepare(`
+	ins, err := db.Prepare(`
 	INSERT 
 	INTO 
 		CartSessionList 
@@ -42,21 +50,36 @@ func (c *Cart) CartSessionListCreate() {
 	VALUES
 	(?,?)
 	`)
+	if err != nil {
+		return err
+	}
 	defer ins.Close()
-	ins.Exec(c.CartID, c.SessionKey)
+	_, err = ins.Exec(c.CartID, c.SessionKey)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // CartSessionListの削除　セッションキーの更新に使う
-func CartSessionListDelete(CartID string) {
+func CartSessionListDelete(CartID string) error {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの準備
-	ins, _ := db.Prepare(`
+	ins, err := db.Prepare(`
 	DELETE FROM 
 		CartSessionList 
 	WHERE 
 		CartID = ?
 	`)
+	if err != nil {
+		return err
+	}
 	defer ins.Close()
-	ins.Exec(CartID)
+	_, err = ins.Exec(CartID)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }

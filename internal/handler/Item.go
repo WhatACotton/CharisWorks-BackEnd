@@ -2,8 +2,8 @@ package handler
 
 import (
 	"log"
-	"unify/internal/database"
 
+	"github.com/WhatACotton/go-backend-test/internal/database"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,16 +21,6 @@ func ALL(c *gin.Context) {
 	}
 	c.JSON(200, ItemList)
 }
-func ItemDetails(c *gin.Context) {
-	ItemID := c.Query("ItemID")
-	Item := new(database.Item)
-	Item.ItemGet(ItemID)
-	if Item.DetailsID != "" {
-		c.JSON(200, gin.H{"Item": Item})
-	} else {
-		c.JSON(404, "{Not Found}")
-	}
-}
 func Category(c *gin.Context) {
 	Category := c.Param("category")
 	ItemList, err := database.ItemGetCategory(Category)
@@ -46,4 +36,14 @@ func Color(c *gin.Context) {
 		log.Print(err)
 	}
 	c.JSON(200, ItemList)
+}
+func ItemDetails(c *gin.Context) {
+	ItemID := c.Query("ItemID")
+	Item := new(database.Item)
+	Item.ItemGet(ItemID)
+	if Item.ItemID != "" {
+		c.JSON(200, gin.H{"Item": Item})
+	} else {
+		c.JSON(404, "{Not Found}")
+	}
 }

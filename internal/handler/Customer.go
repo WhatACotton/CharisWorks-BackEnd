@@ -3,15 +3,14 @@ package handler
 import (
 	"log"
 	"net/http"
-	"os"
-	"unify/internal/database"
-	"unify/validation"
 
+	"github.com/WhatACotton/go-backend-test/internal/database"
+	"github.com/WhatACotton/go-backend-test/validation"
 	"github.com/gin-gonic/gin"
 )
 
-// 仮登録
-func TemporarySignUp(c *gin.Context) {
+// アカウント作成
+func SignUp(c *gin.Context) {
 	CustomerReqPayload := new(validation.CustomerReqPayload)
 	if CustomerReqPayload.VerifyCustomer(c) {
 		Cart := new(database.Cart)
@@ -23,20 +22,14 @@ func TemporarySignUp(c *gin.Context) {
 		log.Print("CartID: ", Cart.CartID)
 		_, NewSessionKey := validation.CustomerSessionStart(c)
 		database.CustomerSignUp(*CustomerReqPayload, NewSessionKey, Cart.CartID)
-		file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatal(err)
-		}
-		logger2 := log.New(file, "", log.Ldate|log.Ltime)
-		logger2.SetOutput(file)
-		logger2.Println("UserID :", CustomerReqPayload.UserID, " created.")
+		validation.LoginLogging(CustomerReqPayload.UserID + "created")
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
 	}
 }
 
-// 本登録
-func SignUp(c *gin.Context) {
+// 初回登録
+func Register(c *gin.Context) {
 	//登録情報変更処理
 	//bodyにアカウントの詳細情報が入っている。
 	_, UserID := GetDatafromSessionKey(c)
@@ -45,13 +38,13 @@ func SignUp(c *gin.Context) {
 		return
 	}
 	if h.InspectCusromerRegisterPayload() {
+		//初回登録なので、記入漏れがないかの確認
 		if h.InspectFirstRegisterPayload() {
 			database.CustomerRegister(UserID, *h)
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "未入力欄があります。"})
 		}
 	} else {
-
 		c.JSON(http.StatusBadRequest, gin.H{"message": "変更できませんでした。"})
 	}
 }
@@ -59,30 +52,27 @@ func SignUp(c *gin.Context) {
 // ログイン
 func LogIn(c *gin.Context) {
 	UserReqPayload := new(validation.CustomerReqPayload)
+	//ユーザ認証
 	if UserReqPayload.VerifyCustomer(c) {
 		log.Print("UserID : ", UserReqPayload.UserID)
+		//Eamil認証
 		if UserReqPayload.EmailVerified {
 			database.CustomerEmailVerified(1, UserReqPayload.UserID)
 		} else {
 			database.CustomerEmailVerified(0, UserReqPayload.UserID)
 		}
+		//Emailが変更されているかどうかの処理
 		Email := database.GetEmail(UserReqPayload.UserID)
 		log.Print(Email)
 		if Email != UserReqPayload.Email {
 			database.CustomerChangeEmail(UserReqPayload.UserID, UserReqPayload.Email)
 		}
-		GetDatafromSessionKey(c)
-		file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatal(err)
-		}
-		logger2 := log.New(file, "", log.Ldate|log.Ltime)
-		logger2.SetOutput(file)
-		logger2.Println("UserID :", UserReqPayload.UserID, " logined.")
+		_, NewSessionKey := validation.CustomerSessionStart(c)
+		database.CustomerLogIn(UserReqPayload.UserID, NewSessionKey)
+		validation.LoginLogging(UserReqPayload.UserID + "logined")
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
-
 }
 
 // 顧客情報の取得
@@ -92,6 +82,8 @@ func GetCustomer(c *gin.Context) {
 		Customer := new(database.Customer)
 		Customer.CustomerGet(UserID)
 		c.JSON(http.StatusOK, Customer)
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "未ログインです。"})
 	}
 }
 
@@ -116,18 +108,10 @@ func ModifyCustomer(c *gin.Context) {
 func LogOut(c *gin.Context) {
 	_, UserID := GetDatafromSessionKey(c)
 	//c.JSON(http.StatusOK, "SuccessFully Logouted!!")
-	file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
-	logger2 := log.New(file, "", log.Ldate|log.Ltime)
-	logger2.SetOutput(file)
-	logger2.Println("UserID :", UserID, " logouted.")
+	validation.LoginLogging(UserID + "logouted")
 	//ログアウト処理
 	OldSessionKey := validation.CustomerSessionEnd(c)
-
 	log.Print("SessionKey was :", OldSessionKey)
-
 }
 
 // アカウントの削除
@@ -135,13 +119,7 @@ func DeleteCustomer(c *gin.Context) {
 	//アカウントの削除
 	_, UserID := GetDatafromSessionKey(c)
 	database.CustomerDelete(UserID)
-	file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
-	logger2 := log.New(file, "", log.Ldate|log.Ltime)
-	logger2.SetOutput(file)
-	logger2.Println("UserID :", UserID, " deleted.")
-	c.JSON(http.StatusOK, gin.H{"message": "アカウントを削除しました。"})
+	validation.LoginLogging(UserID + "deleted")
 
+	c.JSON(http.StatusOK, gin.H{"message": "アカウントを削除しました。"})
 }

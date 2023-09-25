@@ -21,18 +21,18 @@ type CartContent struct {
 type CartContents []CartContent
 
 // カートの取得
-func GetCartContents(CartID string) (CartContents CartContents) {
+func GetCartContents(CartID string) (CartContents CartContents, err error) {
 	db := ConnectSQL()
 	defer db.Close()
-	rows, _ := db.Query(`
+	rows, err := db.Query(`
 	SELECT 
 		Item.Status ,
 		Item.Price , 
-		Item.Name , 
-		Item.Stock 
-		CartContents.Order , 
+		Item.ItemName , 
+		Item.Stock ,
+		CartContents.CartOrder , 
 		CartContents.ItemID , 
-		CartContents.Quantity , 
+		CartContents.Quantity
 	FROM 
 		Item
 	JOIN 
@@ -41,16 +41,22 @@ func GetCartContents(CartID string) (CartContents CartContents) {
 	CartContents.ItemID = Item.ItemID 
 	WHERE 
 		CartID = ?`, CartID)
+	if err != nil {
+		return CartContents, err
+	}
 	defer rows.Close()
 	for rows.Next() {
 		CartContent := new(CartContent)
-		rows.Scan(&CartContent.Status, &CartContent.Price, &CartContent.ItemName, &CartContent.Stock, &CartContent.Order, &CartContent.ItemID, &CartContent.Quantity)
+		err := rows.Scan(&CartContent.Status, &CartContent.Price, &CartContent.ItemName, &CartContent.Stock, &CartContent.Order, &CartContent.ItemID, &CartContent.Quantity)
+		if err != nil {
+			return CartContents, err
+		}
 		if CartContent.Quantity <= CartContent.Stock {
 			CartContent.Status = "OutOfStock"
 		}
 		CartContents = append(CartContents, *CartContent)
 	}
-	return CartContents
+	return CartContents, nil
 }
 
 type CartContentRequestPayload struct {
@@ -59,7 +65,7 @@ type CartContentRequestPayload struct {
 }
 
 // カートの追加・変更・削除
-func (c *CartContentRequestPayload) Cart(CartID string) {
+func (c *CartContentRequestPayload) Cart(CartID string) error {
 	log.Println("CartID : " + CartID)
 	log.Print("ItemID : "+c.ItemID, " Quantity : ", c.Quantity)
 	Item := new(Item)
@@ -67,7 +73,10 @@ func (c *CartContentRequestPayload) Cart(CartID string) {
 	//リクエストされた商品が登録可能か判定
 	log.Println("ItemStatus : " + Item.Status)
 	if Item.Status == "Available" {
-		Carts := GetCartContents(CartID)
+		Carts, err := GetCartContents(CartID)
+		if err != nil {
+			return err
+		}
 		//リクエストされた商品がカートに存在するか確認
 		//存在する場合
 		if cartContentsSearch(Carts, c.ItemID) {
@@ -94,33 +103,41 @@ func (c *CartContentRequestPayload) Cart(CartID string) {
 			}
 		}
 	}
+	return nil
 }
 
 // カートに商品を追加
-func (c CartContentRequestPayload) CartContentPost(CartID string) {
+func (c CartContentRequestPayload) CartContentPost(CartID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの準備
 	//UID,ItemID,Quantity
-	ins, _ := db.Prepare(`
+	ins, err := db.Prepare(`
 	INSERT 
 	INTO 
 		CartContent 
 		(CartID , ItemID , Quantity) 
 		VALUES 
 		(? , ? , ?)`)
+	if err != nil {
+		return err
+	}
 	defer ins.Close()
 	// SQLの実行
-	ins.Exec(CartID, c.ItemID, c.Quantity)
+	_, err = ins.Exec(CartID, c.ItemID, c.Quantity)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // カートの商品の変更
-func (c CartContentRequestPayload) CartContentUpdate(CartID string) {
+func (c CartContentRequestPayload) CartContentUpdate(CartID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
 	// SQLの実行
-	ins, _ := db.Prepare(`
+	ins, err := db.Prepare(`
 	UPDATE 
 		CartContent 
 	SET 
@@ -129,18 +146,25 @@ func (c CartContentRequestPayload) CartContentUpdate(CartID string) {
 		CartId = ? 
 	AND 
 		ItemID = ?`)
+	if err != nil {
+		return err
+	}
 	// SQLの実行
-	ins.Exec(c.Quantity, CartID, c.ItemID)
+	_, err = ins.Exec(c.Quantity, CartID, c.ItemID)
 	defer ins.Close()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // カートから商品を削除
-func CartContentDelete(CartID string, ItemID string) {
+func CartContentDelete(CartID string, ItemID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
 	// SQLの実行
-	ins, _ := db.Prepare(`
+	ins, err := db.Prepare(`
 	DELETE 
 	FROM
 		CartContents
@@ -150,48 +174,68 @@ func CartContentDelete(CartID string, ItemID string) {
 
 	AND 
 		ItemID = ?`)
+	if err != nil {
+		log.Print(err)
+		return err
+	}
 	// SQLの実行
-	ins.Exec(CartID, ItemID)
+	_, err = ins.Exec(CartID, ItemID)
+	if err != nil {
+		return err
+	}
 	defer ins.Close()
+	return nil
 }
 
 // 商品自体を削除したときにすべてのカートから特定のアイテムを消す　使用しない方針で行く(商品を削除する前に行う必要がある。)
-func CartContentItemDelete(ItemID string) {
+func CartContentItemDelete(ItemID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
 
 	// SQLの準備
-	ins, _ := db.Prepare(`
+	ins, err := db.Prepare(`
 	DELETE 
 	FROM 
 		CartContents 
 
 	WHERE 
 		ItemID = ?`)
+	if err != nil {
+		log.Print(err)
+		return err
+	}
 	defer ins.Close()
-
 	// SQLの実行
-	ins.Exec(ItemID)
+	_, err = ins.Exec(ItemID)
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+	return nil
 }
 
 // カートから商品を一括で削除　transaction時に使用
-func CartDelete(CartID string) {
+func CartDelete(CartID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
 	// SQLの準備
-	del, _ := db.Prepare(`
+	del, err := db.Prepare(`
 	DELETE 
 	FROM 
 		CartContents 
 	WHERE 
 		CartID = ?
 	`)
+	if err != nil {
+		return err
+	}
 	defer del.Close()
 
 	// SQLの実行
 	del.Exec(CartID)
+	return nil
 }
 
 // カートに登録する商品が存在するかどうか

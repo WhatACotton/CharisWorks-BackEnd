@@ -18,10 +18,11 @@ type CustomerReqPayload struct {
 	CartID        string
 }
 
+// HeaderのAuthenticationに入っているJWTからEmail,UserID,EmailVerifiedを取得
 func (user *CustomerReqPayload) VerifyCustomer(c *gin.Context) bool {
 	// Firebaseアプリを初期化する
 	conf := &firebase.Config{
-		ProjectID: "iris-test-52dcd",
+		ProjectID: "charisworks-a1ef5",
 	}
 	opt := option.WithCredentialsFile("application_default_credentials.json")
 	app, err := firebase.NewApp(context.Background(), conf, opt)

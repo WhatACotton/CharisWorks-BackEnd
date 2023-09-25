@@ -3,9 +3,9 @@ package handler
 import (
 	"log"
 	"net/http"
-	"unify/internal/database"
-	"unify/validation"
 
+	"github.com/WhatACotton/go-backend-test/internal/database"
+	"github.com/WhatACotton/go-backend-test/validation"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +18,10 @@ func PostCart(c *gin.Context) {
 		log.Print(err)
 	}
 	NewCartReq.Cart(Cart.CartID)
-	Carts := database.GetCartContents(Cart.CartID)
+	Carts, err := database.GetCartContents(Cart.CartID)
+	if err != nil {
+		log.Print(err)
+	}
 	c.JSON(http.StatusOK, Carts)
 }
 
@@ -26,64 +29,77 @@ func PostCart(c *gin.Context) {
 func GetCart(c *gin.Context) {
 	Cart, _ := GetDatafromSessionKey(c)
 	log.Print(Cart.CartID)
-	if Cart.SessionKey != "new" {
-		CartContents := database.GetCartContents(Cart.CartID)
-		if CartContents == nil {
-			c.JSON(http.StatusOK, "There is no Cart")
-		} else {
-			c.JSON(http.StatusOK, CartContents)
-		}
-		log.Print(CartContents)
-	} else {
-		c.JSON(http.StatusOK, "未ログインです")
+	CartContents, err := database.GetCartContents(Cart.CartID)
+	if err != nil {
+		log.Print(err)
 	}
+	if CartContents == nil {
+		c.JSON(http.StatusOK, "There is no Cart")
+	} else {
+		c.JSON(http.StatusOK, CartContents)
+	}
+	log.Print(CartContents)
 }
 
-// セッションキーから、UserIDとCartIDを取得
+// セッションキーから、UserIDとCartを取得
+// 同時にログイン中ならログイン状態の更新も行う
 func GetDatafromSessionKey(c *gin.Context) (Cart database.Cart, UserID string) {
 	log.Print("Getting CartID...")
 	CustomerSessionKey := validation.GetCustomerSessionKey(c)
 	CartSessionKey := validation.GetCartSessionKey(c)
+	//まずはCartSessionKeyの取得情報からCartIDを取得しておく
 	if CartSessionKey != "new" {
 		log.Print("have CartSessionKey")
 		Cart.SessionKey = CartSessionKey
 		Cart.CartSessionListGetCartID()
 	}
+	//次にCustomerSessionKeyを持っているならログイン情報の取得
 	if CustomerSessionKey != "new" {
+		//ログインしている
 		log.Print("logined")
+		//CustomerSessionKeyからUserIDを取得
 		UserID = database.GetUserID(CustomerSessionKey)
+		//UserIDからCartIDを取得
 		CartIDfromCustomer := database.GetCartID(UserID)
-		CartContents := database.GetCartContents(CartIDfromCustomer)
+		//カートの中に商品が入っているかの処理
+		CartContents, err := database.GetCartContents(CartIDfromCustomer)
+		if err != nil {
+			log.Print(err)
+		}
 		if CartContents != nil {
 			log.Print("have CartContents from CustomerData")
 			Cart.CartID = CartIDfromCustomer
 		}
+		//CartSessionKeyからカート情報を取得できず、更に顧客情報に登録されているカートにも商品が入っていなかったらCartIDを振り直す
 		if Cart.CartID == "" {
 			log.Print("don't have CartID in any place")
 			Cart.CartID = validation.GetUUID()
 		}
+		//この場合はログイン中なので、もしCartSessionKeyを持っていたら、それを削除
 		validation.CartSessionEnd(c)
-		OldSessionKey, NewSessionKey := validation.CustomerSessionStart(c)
-		if OldSessionKey == "new" {
-			validation.CustomerSessionEnd(c)
-			c.JSON(http.StatusOK, "未ログインです")
-		} else {
-			UserID := database.GetUserID(OldSessionKey)
-			log.Print("UserID : ", UserID)
-			database.CustomerLogIn(UserID, NewSessionKey)
-		}
+		_, CustomerSessionKey = validation.CustomerSessionStart(c)
+		database.CustomerLogIn(UserID, CustomerSessionKey)
 		database.CustomerSetCartID(UserID, Cart.CartID)
 	} else {
+		//ログインしていない
 		log.Print("not logined")
 		if Cart.CartID == "" {
+			//CartIDが取得失敗
 			log.Print("don't have CartID in any place")
 			Cart.CartID = validation.GetUUID()
+		} else {
+			//CartIDが取得できたので、そのCartIDに紐づくSessionKeyをリセット
+			database.CartSessionListDelete(Cart.CartID)
 		}
-		database.CartSessionListDelete(Cart.CartID)
+		//新しいSessionKeyの発行
+
 		Cart.SessionKey = validation.GetUUID()
+		//CaerSessionListへの登録
 		Cart.CartSessionListCreate()
 		log.Print("Cart with sesssion. SessionKey : ", Cart.SessionKey, " CartID : ", Cart.CartID)
+		//cookieに保存
 		validation.SetCartSessionKey(c, Cart.SessionKey)
+
 	}
 	log.Print("CartID:", Cart.CartID)
 	return Cart, UserID

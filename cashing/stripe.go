@@ -18,7 +18,7 @@ import (
 	"github.com/stripe/stripe-go/v75/webhook"
 )
 
-const IPAddress = "192.168.10.175"
+const IPAddress = "192.168.70.196"
 
 type StripeInfo struct {
 	URL         string
@@ -133,8 +133,8 @@ func CreateStripeAccount(email string) (stripeID string, URL string) {
 func createAccountLink(ID string) string {
 	params := &stripe.AccountLinkParams{
 		Account:    stripe.String(ID),
-		RefreshURL: stripe.String("http://" + IPAddress + "/reauth"),
-		ReturnURL:  stripe.String("http://" + IPAddress + "/return"),
+		RefreshURL: stripe.String("http://" + IPAddress + "/mypage"),
+		ReturnURL:  stripe.String("http://" + IPAddress + "/mypage"),
 		Type:       stripe.String("account_onboarding"),
 		Collect:    stripe.String("eventually_due"),
 	}
