@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/WhatACotton/go-backend-test/validation"
 	"github.com/stripe/stripe-go/v75"
 	"github.com/stripe/stripe-go/v75/account"
 	"github.com/stripe/stripe-go/v75/accountlink"
@@ -18,7 +19,7 @@ import (
 	"github.com/stripe/stripe-go/v75/webhook"
 )
 
-const IPAddress = "192.168.70.196"
+const IPAddress = "192.168.10.178"
 
 type StripeInfo struct {
 	URL         string
@@ -156,6 +157,8 @@ func Transfer(amount float64, stripeID string, ItemName string) {
 	}
 	tr, _ := transfer.New(params)
 	log.Print(tr.ID)
+	validation.TransferLogging(tr.ID + stripeID + strconv.FormatFloat(amount, 'f', 2, 64) + ItemName)
+
 }
 func Refund(ID string) {
 	stripe.Key = "sk_test_51Nj1urA3bJzqElthx8UK5v9CdaucJOZj3FwkOHZ8KjDt25IAvplosSab4uybQOyE2Ne6xxxI4Rnh8pWEbYUwPoPG00wvseAHzl"

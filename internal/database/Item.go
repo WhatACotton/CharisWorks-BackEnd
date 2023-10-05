@@ -1,30 +1,33 @@
 package database
 
 import (
+	"log"
+
 	"github.com/pkg/errors"
 )
 
 // Item関連
 type Item struct {
-	ItemID    string `json:"id"`
-	Status    string `json:"status"`
-	ItemName  string `json:"name"`
-	Price     int    `json:"price"`
-	Stock     int    `json:"stock"`
-	MakerName string `json:"makername"`
-	ItemOrder int    `json:"order"`
-	Color     string `json:"color"`
-	Series    string `json:"series"`
-	Size      int    `json:"size"`
+	ItemID      string `json:"ItemID"`
+	Status      string `json:"Status"`
+	Name        string `json:"Name"`
+	Price       int    `json:"price"`
+	Stock       int    `json:"Stock"`
+	MakerName   string `json:"MakerName"`
+	Order       int    `json:"Order"`
+	Color       string `json:"Color"`
+	Series      string `json:"Series"`
+	Size        string `json:"Size"`
+	Description string `json:"Description"`
 	//MakersDetailsから取得
-	Description string `json:"description"`
+	MakerDescription string `json:"MakerDescription,omitempty"`
 }
 type ItemMain struct {
-	ItemID   string `json:"ItemID"`
-	Status   string `json:"Status"`
-	Price    int    `json:"Price"`
-	Stock    int    `json:"Stock"`
-	ItemName string `json:"ItemName"`
+	ItemID string `json:"ItemID"`
+	Status string `json:"Status"`
+	Price  int    `json:"Price"`
+	Stock  int    `json:"Stock"`
+	Name   string `json:"Name"`
 }
 type ItemDetail struct {
 	ItemID      string `json:"ItemID"`
@@ -34,18 +37,18 @@ type ItemDetail struct {
 	Size        string `json:"Size"`
 }
 type ItemForList struct {
-	ItemID    string            `json:"id"`
-	ItemName  string            `json:"name"`
-	Price     int               `json:"price"`
-	Stock     int               `json:"stock"`
-	ItemOrder int               `json:"order"`
-	Tags      map[string]string `json:"tags"`
+	ItemID string            `json:"ItemID"`
+	Name   string            `json:"Name"`
+	Price  int               `json:"Price"`
+	Stock  int               `json:"Stock"`
+	Order  int               `json:"Order"`
+	Tags   map[string]string `json:"tags"`
 }
 type Items []Item
 type TopItem struct {
-	ItemName string `json:"ItemName"`
-	Stock    int    `json:"Stock"`
-	Order    int    `json:"Order"`
+	Name  string `json:"Name"`
+	Stock int    `json:"Stock"`
+	Order int    `json:"Order"`
 }
 type TopItems []TopItem
 
@@ -55,10 +58,10 @@ func (i *Item) ItemGet(ItemID string) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
-	rows, _ := db.Query(
+	rows, err := db.Query(
 		`SELECT
 			Item.Status,
-			Item.ItemName,
+			Item.Name,
 			Item.Price,
 			Item.Stock,
 			Item.MakerName,
@@ -66,19 +69,21 @@ func (i *Item) ItemGet(ItemID string) {
 			Item.Color,
 			Item.Series,
 			Item.Size,
-			MakersDetails.Description,
-		FROM
-			Item
-		JOIN
-			MakersDetails
-		ON
-			Item.MakerName = MakersDetails.MakerName
-		WHERE
+			Customer.MakerDescription
+		FROM 
+			Item 
+		JOIN 
+			Customer 
+		ON 
+			Item.MakerName = Customer.MakerName 
+		WHERE 
 			ItemID = ?`,
 		ItemID)
+	log.Print("rows:", rows, "err:", err)
 	defer rows.Close()
 	for rows.Next() {
-		rows.Scan(&i.Status, &i.ItemName, &i.Price, &i.Stock, &i.MakerName, &i.ItemOrder, &i.Color, &i.Series, &i.Size, &i.Description)
+		err := rows.Scan(&i.Status, &i.Name, &i.Price, &i.Stock, &i.MakerName, &i.Order, &i.Color, &i.Series, &i.Size, &i.MakerDescription)
+		log.Print("Item:", i, "err:", err)
 	}
 }
 
@@ -89,7 +94,7 @@ func ItemGetTop() (TopItems, error) {
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
-			Item.ItemName,
+			Item.Name,
 			Item.Stock,
 			Item.ItemOrder 
 		FROM 
@@ -97,16 +102,16 @@ func ItemGetTop() (TopItems, error) {
 		WHERE
 			Item.Status = 'Available'
 			AND
-			TOP = 'true'
+			TOP = 1
 		ORDER BY 
-			ItemDetails.ItemOrder`)
+			Item.Order`)
 	if err != nil {
 		return nil, errors.Wrap(err, "error in getting TopItem /GetTop1")
 	}
 	var returnItem []TopItem
 	for rows.Next() {
 		TopItem := new(TopItem)
-		err := rows.Scan(&TopItem.ItemName, &TopItem.Stock, &TopItem.Order)
+		err := rows.Scan(&TopItem.Name, &TopItem.Stock, &TopItem.Order)
 		if err != nil {
 			return nil, errors.Wrap(err, "error in scanning CartID /GetTop2")
 		}
@@ -116,36 +121,41 @@ func ItemGetTop() (TopItems, error) {
 }
 
 // すべてのItemの取得
-func ItemGetALL() (Items, error) {
+func ItemGetALL() (Items Items, err error) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
+			Item.ItemID,
 			Item.ItemOrder,
-			Item.ItemName,
-			Item.Stock,
+			Item.Status,
 			Item.Price,
-			Item.Status 
-
+			Item.Stock,
+			Item.Name,
+			Item.Description,
+			Item.Color,
+			Item.Series,
+			Item.Size,
+			Item.MakerName
 		FROM 
 			Item 
-
 		WHERE 
 			Item.Status = 'Available'`)
+	log.Print("rows:", rows, "err:", err)
 	if err != nil {
 		return nil, errors.Wrap(err, "error in getting TopItem /GetALL1")
 	}
-	var returnItem Items
 	for rows.Next() {
 		Item := new(Item)
-		err := rows.Scan(&Item.ItemOrder, &Item.ItemName, &Item.Stock, &Item.Price, &Item.Status)
+		err := rows.Scan(&Item.ItemID, &Item.Order, &Item.Status, &Item.Price, &Item.Stock, &Item.Name, &Item.Description, &Item.Color, &Item.Series, &Item.Size, &Item.MakerName)
+		log.Print("Item:", Item, "err:", err)
 		if err != nil {
 			return nil, errors.Wrap(err, "error in scanning CartID /GetALL2")
 		}
-		returnItem = append(returnItem, *Item)
+		Items = append(Items, *Item)
 	}
-	return returnItem, nil
+	return Items, nil
 }
 
 // カテゴリごとのItemの取得
@@ -155,8 +165,8 @@ func ItemGetCategory(Category string) (Items, error) {
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
-			Item.ItemOrder,
-			Item.ItemName,
+			Item.Order,
+			Item.Name,
 			Item.Stock,
 			Item.Price,
 			Item.Status 
@@ -172,7 +182,7 @@ func ItemGetCategory(Category string) (Items, error) {
 	var returnItem []Item
 	for rows.Next() {
 		Item := new(Item)
-		err := rows.Scan(&Item.ItemOrder, &Item.ItemName, &Item.Stock, &Item.Price, &Item.Status)
+		err := rows.Scan(&Item.Order, &Item.Name, &Item.Stock, &Item.Price, &Item.Status)
 		if err != nil {
 			return nil, errors.Wrap(err, "error in scanning CartID /GetItemCategory2")
 		}
@@ -188,16 +198,15 @@ func ItemGetColor(Color string) (Items, error) {
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
-			Item.ItemOrder,
-			Item.ItemName,
-			Item.Stock,
-			Item.Price,
-			Item.Status 
-		
+			ItemOrder,
+			Name,
+			Stock,
+			Price,
+			Status 
 		FROM 
 			Item
-		AND 
-			ItemDetails.Color = ?`,
+		WHERE 
+			Color = ?`,
 		Color)
 	if err != nil {
 		return nil, errors.Wrap(err, "error in getting TopItem /GetItemColor1")
@@ -205,7 +214,7 @@ func ItemGetColor(Color string) (Items, error) {
 	var returnItem []Item
 	for rows.Next() {
 		Item := new(Item)
-		err := rows.Scan(&Item.ItemOrder, &Item.ItemName, &Item.Stock, &Item.Price, &Item.Status)
+		err := rows.Scan(&Item.Order, &Item.Name, &Item.Stock, &Item.Price, &Item.Status)
 		if err != nil {
 			return nil, errors.Wrap(err, "error in scanning CartID /GetItemColor2")
 		}
@@ -217,24 +226,30 @@ func ItemGetColor(Color string) (Items, error) {
 // 出品者ごとのItemの取得
 func ItemGetMaker(MakerName string) (Items Items) {
 	db := ConnectSQL()
-	rows, _ := db.Query(
+	rows, err := db.Query(
 		`SELECT 
-			Item.ItemID,
-			Item.Status,
-			Item.ItemName,
-			Item.Price,
-			Item.Stock,
-			Item.ItemOrder
-
+			ItemID,
+			Status,
+			Name,
+			Price,
+			Stock,
+			MakerName,
+			ItemOrder,
+			Color,
+			Series,
+			Size,
+			Description
 		FROM 
-			Item
-		WHERE
+			Item 
+		WHERE 
 			MakerName = ?`,
 		MakerName)
 	defer db.Close()
+	log.Print("rows:", rows, "err:", err)
 	for rows.Next() {
 		Item := new(Item)
-		rows.Scan(&Item.ItemID, &Item.Status, &Item.ItemName, &Item.Price, &Item.Stock, &Item.ItemOrder)
+		err := rows.Scan(&Item.ItemID, &Item.Status, &Item.Name, &Item.Price, &Item.Stock, &Item.MakerName, &Item.Order, &Item.Color, &Item.Series, &Item.Size, &Item.Description)
+		log.Print("Item:", Item, "err:", err)
 		Items = append(Items, *Item)
 	}
 	return Items
@@ -242,16 +257,18 @@ func ItemGetMaker(MakerName string) (Items Items) {
 
 // Itemの主要情報の作成
 func ItemMainCreate(ItemMain ItemMain, MakerName string) {
+	log.Print("MakerName:", MakerName)
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
-	db.Exec(`
+	res, err := db.Exec(`
 	INSERT INTO 
 		Item 
-		(ItemID,Status,ItemName,Price,Stock,MakerName) 
+		(ItemID,Status,Name,Price,Stock,MakerName) 
 	VALUES 
 		(?,?,?,?,?,?)`,
-		ItemMain.ItemID, ItemMain.Status, ItemMain.ItemName, ItemMain.Price, ItemMain.Stock, MakerName)
+		ItemMain.ItemID, ItemMain.Status, ItemMain.Name, ItemMain.Price, ItemMain.Stock, MakerName)
+	log.Print("res:", res, "err:", err)
 }
 
 // Itemの詳細の作成
@@ -259,11 +276,16 @@ func ItemDetailCreate(ItemDetail ItemDetail, MakerName string) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
-	db.Exec(`
-	INSERT INTO 
-		ItemDetails 
-		(ItemID,Description,Color,Series,Size) 
-	VALUES 
-		(?,?,?,?,?)`,
-		ItemDetail.ItemID, ItemDetail.Description, ItemDetail.Color, ItemDetail.Series, ItemDetail.Size)
+	res, err := db.Exec(`
+	UPDATE
+		Item
+	SET
+		Description = ?,
+		Color = ?,
+		Series = ?,
+		Size = ?
+	WHERE
+		ItemID = ?`,
+		ItemDetail.Description, ItemDetail.Color, ItemDetail.Series, ItemDetail.Size, ItemDetail.ItemID)
+	log.Print("res:", res, "err:", err)
 }

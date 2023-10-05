@@ -47,3 +47,10 @@ func ItemDetails(c *gin.Context) {
 		c.JSON(404, "{Not Found}")
 	}
 }
+func ItemMakerGet(c *gin.Context) {
+	MakerName := c.Param("MakerName")
+	log.Print("MakerName:", MakerName)
+	Items := database.ItemGetMaker(MakerName)
+	c.JSON(200, Items)
+
+}

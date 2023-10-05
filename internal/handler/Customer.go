@@ -69,7 +69,7 @@ func LogIn(c *gin.Context) {
 		}
 		_, NewSessionKey := validation.CustomerSessionStart(c)
 		database.CustomerLogIn(UserReqPayload.UserID, NewSessionKey)
-		validation.LoginLogging(UserReqPayload.UserID + "logined")
+		validation.LoginLogging(UserReqPayload.UserID + " logined")
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
 	}
@@ -108,7 +108,7 @@ func ModifyCustomer(c *gin.Context) {
 func LogOut(c *gin.Context) {
 	_, UserID := GetDatafromSessionKey(c)
 	//c.JSON(http.StatusOK, "SuccessFully Logouted!!")
-	validation.LoginLogging(UserID + "logouted")
+	validation.LoginLogging(UserID + " logouted")
 	//ログアウト処理
 	OldSessionKey := validation.CustomerSessionEnd(c)
 	log.Print("SessionKey was :", OldSessionKey)

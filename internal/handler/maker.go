@@ -31,15 +31,18 @@ func MakerStripeAccountCreate(c *gin.Context) {
 
 // 商品の登録(Status,Price,Stock,ItemName)
 func MakerItemMainCreate(c *gin.Context) {
+	log.Print("Creating ItemMain...")
 	StripeAccountID := makerStripeAccountIDGet(c)
 	if StripeAccountID != "" {
 		i := new(database.ItemMain)
 		if err := c.BindJSON(&i); err != nil {
 			log.Print(err)
 		}
-		MadeBy := database.MakerStripeAccountIDGet(StripeAccountID)
-		if i.ItemName == "" || i.Price == 0 || i.Stock == 0 || i.Status == "" {
-			database.ItemMainCreate(*i, MadeBy)
+		log.Print("ItemMain:", i)
+		MakerName := database.MakerStripeAccountIDGet(StripeAccountID)
+		log.Print("MadeBy:", MakerName)
+		if i.Name != "" || i.Price != 0 || i.Stock != 0 || i.Status != "" {
+			database.ItemMainCreate(*i, MakerName)
 		}
 	}
 }
@@ -52,8 +55,9 @@ func MakerItemDetailCreate(c *gin.Context) {
 		if err := c.BindJSON(&i); err != nil {
 			log.Print(err)
 		}
+		log.Print("ItemDetail:", i)
 		MadeBy := database.MakerStripeAccountIDGet(StripeAccountID)
-		if i.ItemID == "" || i.Description == "" || i.Color == "" || i.Series == "" || i.Size == "" {
+		if i.ItemID != "" || i.Description != "" || i.Color != "" || i.Series != "" || i.Size != "" {
 			database.ItemDetailCreate(*i, MadeBy)
 		}
 	}

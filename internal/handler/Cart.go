@@ -72,7 +72,7 @@ func GetDatafromSessionKey(c *gin.Context) (Cart database.Cart, UserID string) {
 		}
 		//CartSessionKeyからカート情報を取得できず、更に顧客情報に登録されているカートにも商品が入っていなかったらCartIDを振り直す
 		if Cart.CartID == "" {
-			log.Print("don't have CartID in any place")
+			log.Print("don't have CartContents in any place")
 			Cart.CartID = validation.GetUUID()
 		}
 		//この場合はログイン中なので、もしCartSessionKeyを持っていたら、それを削除
@@ -80,6 +80,8 @@ func GetDatafromSessionKey(c *gin.Context) (Cart database.Cart, UserID string) {
 		_, CustomerSessionKey = validation.CustomerSessionStart(c)
 		database.CustomerLogIn(UserID, CustomerSessionKey)
 		database.CustomerSetCartID(UserID, Cart.CartID)
+		database.CartSessionListDelete(Cart.CartID)
+
 	} else {
 		//ログインしていない
 		log.Print("not logined")

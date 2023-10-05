@@ -1,0 +1,93 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /go/Login                 --> github.com/WhatACotton/go-backend-test/internal/handler.LogIn (5 handlers)
+[GIN-debug] POST   /go/SignUp                --> github.com/WhatACotton/go-backend-test/internal/handler.SignUp (5 handlers)
+[GIN-debug] POST   /go/Registration          --> github.com/WhatACotton/go-backend-test/internal/handler.Register (5 handlers)
+[GIN-debug] POST   /go/Modify                --> github.com/WhatACotton/go-backend-test/internal/handler.ModifyCustomer (5 handlers)
+[GIN-debug] DELETE /go/DeleteCustomer        --> github.com/WhatACotton/go-backend-test/internal/handler.DeleteCustomer (5 handlers)
+[GIN-debug] POST   /go/SessionEnd            --> github.com/WhatACotton/go-backend-test/internal/handler.LogOut (5 handlers)
+[GIN-debug] GET    /go/GetCustomer           --> github.com/WhatACotton/go-backend-test/internal/handler.GetCustomer (5 handlers)
+[GIN-debug] GET    /go/GetTransactions       --> github.com/WhatACotton/go-backend-test/internal/handler.GetTransaction (5 handlers)
+[GIN-debug] POST   /go/PostCart              --> github.com/WhatACotton/go-backend-test/internal/handler.PostCart (5 handlers)
+[GIN-debug] GET    /go/GetCart               --> github.com/WhatACotton/go-backend-test/internal/handler.GetCart (5 handlers)
+[GIN-debug] POST   /go/Transaction           --> github.com/WhatACotton/go-backend-test/internal/handler.BuyItem (5 handlers)
+[GIN-debug] POST   /go/stripe                --> github.com/WhatACotton/go-backend-test/internal/handler.Webhook (5 handlers)
+[GIN-debug] GET    /go/item/top              --> github.com/WhatACotton/go-backend-test/internal/handler.Top (5 handlers)
+[GIN-debug] GET    /go/item/all              --> github.com/WhatACotton/go-backend-test/internal/handler.ALL (5 handlers)
+[GIN-debug] GET    /go/item/details          --> github.com/WhatACotton/go-backend-test/internal/handler.ItemDetails (5 handlers)
+[GIN-debug] GET    /go/item/category/:category --> github.com/WhatACotton/go-backend-test/internal/handler.Category (5 handlers)
+[GIN-debug] GET    /go/item/color/:color     --> github.com/WhatACotton/go-backend-test/internal/handler.Color (5 handlers)
+[GIN-debug] POST   /go/Maker/AccountCreate   --> github.com/WhatACotton/go-backend-test/internal/handler.MakerStripeAccountCreate (5 handlers)
+[GIN-debug] POST   /go/Maker/ItemMainCreate  --> github.com/WhatACotton/go-backend-test/internal/handler.MakerItemMainCreate (5 handlers)
+[GIN-debug] POST   /go/Maker/ItemDetailCreate --> github.com/WhatACotton/go-backend-test/internal/handler.MakerItemDetailCreate (5 handlers)
+[GIN-debug] POST   /go/Maker/ItemDetailModyfy --> github.com/WhatACotton/go-backend-test/internal/handler.MakerItemDetailModyfy (5 handlers)
+[GIN-debug] GET    /go/Maker/MakerDetailsGet --> github.com/WhatACotton/go-backend-test/internal/handler.MakerDetailsGet (5 handlers)
+[GIN-debug] POST   /go/Maker/DetailsRegister --> github.com/WhatACotton/go-backend-test/internal/handler.MakerAccountRegister (5 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8080
+[GIN] 2023/09/29 - 16:43:11 | 200 |  134.717511ms |       127.0.0.1 | POST     "/go/Login"
+[GIN] 2023/09/29 - 16:43:12 | 200 |   29.604328ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/09/29 - 16:43:16 | 200 |   27.095268ms |       127.0.0.1 | GET      "/go/GetCart"
+[GIN] 2023/09/29 - 16:43:23 | 200 |  704.619453ms |             ::1 | POST     "/go/Transaction"
+[GIN] 2023/09/29 - 16:43:42 | 200 |    28.78774ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/09/29 - 16:44:15 | 200 |   652.89778ms |             ::1 | POST     "/go/Transaction"
+[GIN] 2023/09/29 - 16:44:31 | 200 |     616.466µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:44:31 | 200 |     384.894µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:44:31 | 200 |     282.871µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:44:32 | 200 |     249.337µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:44:32 | 200 |  865.894332ms |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:44:32 | 200 |     504.524µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:44:34 | 200 |   27.234592ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/09/29 - 16:45:26 | 200 |   80.724177ms |             ::1 | POST     "/go/PostCart"
+[GIN] 2023/09/29 - 16:45:30 | 200 |   81.277506ms |       127.0.0.1 | POST     "/go/PostCart"
+[GIN] 2023/09/29 - 16:45:33 | 200 |     531.966µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:45:34 | 200 |  629.235315ms |       127.0.0.1 | POST     "/go/Transaction"
+[GIN] 2023/09/29 - 16:45:48 | 200 |    1.584341ms |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:45:48 | 200 |    1.064158ms |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:45:48 | 200 |     401.576µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:45:49 | 200 |  844.697307ms |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:45:49 | 200 |     359.323µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:45:49 | 200 |     332.802µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:45:51 | 200 |   17.766508ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/09/29 - 16:46:50 | 200 |     309.777µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:48:45 | 200 |   29.222222ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/09/29 - 16:48:48 | 200 |   22.390967ms |       127.0.0.1 | GET      "/go/GetCart"
+[GIN] 2023/09/29 - 16:48:53 | 200 |   34.582486ms |             ::1 | POST     "/go/PostCart"
+[GIN] 2023/09/29 - 16:48:56 | 200 |   63.040593ms |       127.0.0.1 | POST     "/go/PostCart"
+[GIN] 2023/09/29 - 16:48:57 | 200 |   27.266063ms |             ::1 | GET      "/go/GetCart"
+[GIN] 2023/09/29 - 16:49:02 | 200 |  609.528063ms |       127.0.0.1 | POST     "/go/Transaction"
+[GIN] 2023/09/29 - 16:49:17 | 200 |    1.493622ms |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:49:17 | 200 |     899.754µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:49:17 | 200 |     398.925µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:49:18 | 200 |     493.655µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:49:18 | 200 |  853.133018ms |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:49:18 | 200 |     566.136µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:49:20 | 200 |   26.931323ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/09/29 - 16:50:20 | 200 |      534.17µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:53:01 | 200 |   78.707497ms |             ::1 | POST     "/go/PostCart"
+[GIN] 2023/09/29 - 16:53:06 | 200 |   533.49125ms |       127.0.0.1 | POST     "/go/Transaction"
+[GIN] 2023/09/29 - 16:53:25 | 200 |     503.895µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:53:25 | 200 |     375.593µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:53:25 | 200 |     282.787µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:53:26 | 200 |  791.349278ms |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:53:26 | 200 |     302.952µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:53:26 | 200 |     370.012µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:53:28 | 200 |   21.629679ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/09/29 - 16:54:27 | 200 |     567.328µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:55:00 | 200 |    36.83998ms |             ::1 | POST     "/go/PostCart"
+[GIN] 2023/09/29 - 16:55:03 | 200 |   61.427505ms |       127.0.0.1 | POST     "/go/PostCart"
+[GIN] 2023/09/29 - 16:55:06 | 200 |   37.204539ms |             ::1 | GET      "/go/GetCart"
+[GIN] 2023/09/29 - 16:55:08 | 200 |  673.927135ms |       127.0.0.1 | POST     "/go/Transaction"
+[GIN] 2023/09/29 - 16:55:28 | 200 |      531.37µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:55:28 | 200 |     206.437µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:55:28 | 200 |     557.687µs |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:55:29 | 200 |     657.983µs |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:55:29 | 200 |  839.173903ms |             ::1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:55:29 | 200 |    1.006724ms |       127.0.0.1 | POST     "/go/stripe"
+[GIN] 2023/09/29 - 16:55:31 | 200 |   16.366837ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/09/29 - 16:56:30 | 200 |     663.682µs |       127.0.0.1 | POST     "/go/stripe"

@@ -1,5 +1,7 @@
 package database
 
+import "log"
+
 type Cart struct {
 	CartID     string `json:"CartID"`
 	SessionKey string `json:"SessionKey"`
@@ -54,7 +56,8 @@ func (c *Cart) CartSessionListCreate() error {
 		return err
 	}
 	defer ins.Close()
-	_, err = ins.Exec(c.CartID, c.SessionKey)
+	res, err := ins.Exec(c.CartID, c.SessionKey)
+	log.Print("res:", res, "err:", err)
 	if err != nil {
 		return err
 	}

@@ -1,5 +1,7 @@
 package database
 
+import "log"
+
 type Maker struct {
 	MakerName       string `json:"MakerName"`
 	Description     string `json:"MakerDescription"`
@@ -68,7 +70,7 @@ func (m *Maker) MakerAccountModyfy() {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
-	db.Exec(`
+	res, err := db.Exec(`
 	UPDATE
 		Customer
 	SET
@@ -76,20 +78,25 @@ func (m *Maker) MakerAccountModyfy() {
 		MakerDescription = ?
 	WHERE
 		StripeAccountID = ?`, m.MakerName, m.Description, m.StripeAccountID)
+	log.Print("res:", res, "err:", err)
 }
 
 // MakerNameからStripeIDを取得
 func MakerGetStripeID(MakerName string) (StripeAccountID string) {
 	db := ConnectSQL()
 	defer db.Close()
-	rows, _ := db.Query(`
+	rows, err := db.Query(`
 	SELECT 
 		StripeAccountID
 	FROM 
-		Cutomer
+		Customer
 	WHERE 
 		MakerName = ?`, MakerName)
-	rows.Scan(&StripeAccountID)
+	log.Print(err)
+	for rows.Next() {
+		rows.Scan(&StripeAccountID)
+	}
+	log.Print("MakerName : " + MakerName + " StripeAccountID : " + StripeAccountID)
 	defer rows.Close()
 	return StripeAccountID
 }
@@ -105,7 +112,12 @@ func MakerStripeAccountIDGet(StripeAccountID string) (MakerName string) {
 		Customer 
 	WHERE 
 		StripeAccountID = ?`, StripeAccountID)
-	rows.Scan(&MakerName)
+	for rows.Next() {
+		err := rows.Scan(&MakerName)
+		if err != nil {
+			log.Print(err)
+		}
+	}
 	defer rows.Close()
 	return MakerName
 }

@@ -74,7 +74,7 @@ func GetTransaction(c *gin.Context) {
 	log.Print("UserID:", UserID)
 	Transactions := database.TransactionGet(UserID)
 	for _, Transaction := range Transactions {
-		TransactionContents := Transaction.TransactionGetContents()
+		TransactionContents := Transaction.TransactionDetailsGet()
 		*TransactionContentsList = append(*TransactionContentsList, TransactionContents)
 	}
 	c.JSON(http.StatusOK, gin.H{"TransactionLists": Transactions, "Transactions": *TransactionContentsList})
@@ -96,14 +96,15 @@ func completePayment(ID string) (err error) {
 	database.TransactionSetStatus("決済完了", ID)
 	Transaction := new(database.Transaction)
 	Transaction.TransactionID = database.TransactionGetID(ID)
-	TransactionContents := Transaction.TransactionGetContents()
-	for _, TransactionContent := range TransactionContents {
-		log.Print("TransactionContent: ", TransactionContent)
-		database.Purchased(TransactionContent)
+	TransactionDetails := Transaction.TransactionDetailsGet()
+	log.Print(len(TransactionDetails))
+	for _, TransactionDetail := range TransactionDetails {
+		log.Print("TransactionContent: ", TransactionDetail)
+		database.Purchased(TransactionDetail)
 		Item := new(database.Item)
-		Item.ItemGet(TransactionContent.ItemID)
-		amount := float64(Item.Price) * float64(TransactionContent.Quantity) * 0.97 * 0.964
-		cashing.Transfer(amount, database.MakerGetStripeID(Item.MakerName), Item.ItemName)
+		Item.ItemGet(TransactionDetail.ItemID)
+		amount := float64(Item.Price) * float64(TransactionDetail.Quantity) * 0.97 * 0.964
+		cashing.Transfer(amount, database.MakerGetStripeID(Item.MakerName), Item.Name)
 	}
 	UserID := database.TransactionGetUserIDfromStripeID(ID)
 	CartID := database.GetCartID(UserID)

@@ -1,6 +1,10 @@
 package database
 
-import "github.com/WhatACotton/go-backend-test/cashing"
+import (
+	"log"
+
+	"github.com/WhatACotton/go-backend-test/cashing"
+)
 
 type Transaction struct {
 	TransactionID   string `json:"TransactionID"`
@@ -33,8 +37,8 @@ func TransactionPost(Cart Cart, Customer Customer, StripeInfo cashing.StripeInfo
 	t.TransactionTime = GetDate()
 	t.StripeID = StripeInfo.ID
 	t.Status = "決済前"
+	t.ZipCode = Customer.ZipCode
 	t.transactionPost()
-
 	TransactionContents := new(TransactionDetail)
 	for _, CartContent := range CartContents {
 		TransactionContents.transactionConstruct(CartContent, Cart, TransactionID)
@@ -55,11 +59,12 @@ func (t *Transaction) transactionPost() {
 	ins, _ := db.Prepare(`
 	INSERT 
 		INTO 
-			Transaction
+			Transactions
 			(UserID,TransactionID,Name,TotalAmount,ZipCode,Address,TransactionTime,StripeID,Status)
 			VALUES
-			(?,?,?,?,?,?,?,?,?,?)
+			(?,?,?,?,?,?,?,?,?)
 	`)
+
 	defer ins.Close()
 
 	// SQLの実行
@@ -203,21 +208,23 @@ func Purchased(TransactionDetail TransactionDetail) {
 }
 
 // 取引履歴の詳細の取得
-func (t *Transaction) TransactionGetContents() (TransacitonContents TransactionDetails) {
+func (t *Transaction) TransactionDetailsGet() (TransacitonDetails TransactionDetails) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
-	TransactionContent := new(TransactionDetail)
+	TransactionDetail := new(TransactionDetail)
 	// SQLの実行
 	rows, _ := db.Query(`
-		SELECT * FROM TransactionContent WHERE TransactionID = ?`, t.TransactionID)
+		SELECT TransactionID,Quantity,ItemOrder,ItemID FROM TransactionDetails WHERE TransactionID = ?`, t.TransactionID)
+
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
-		rows.Scan(&TransactionContent.ItemOrder, &TransactionContent.ItemID, &TransactionContent.TransactionID, &TransactionContent.Quantity)
-		TransacitonContents = append(TransacitonContents, *TransactionContent)
+		err := rows.Scan(&TransactionDetail.TransactionID, &TransactionDetail.Quantity, &TransactionDetail.ItemOrder, &TransactionDetail.ItemID)
+		log.Print("TransactionContent:", TransactionDetail, "err:", err)
+		TransacitonDetails = append(TransacitonDetails, *TransactionDetail)
 	}
-	return TransacitonContents
+	return TransacitonDetails
 }
 
 // 取引履歴の取得
@@ -256,7 +263,7 @@ func TransactionGet(UserID string) (Transactions Transactions) {
 func TransactionGetID(StripeID string) (TransactionID string) {
 	db := ConnectSQL()
 	// SQLの実行
-	rows, _ := db.Query(`
+	rows, err := db.Query(`
 	SELECT 
 		TransactionID
 	FROM 
@@ -264,11 +271,13 @@ func TransactionGetID(StripeID string) (TransactionID string) {
 	WHERE 
 		StripeID = ?
 		`, StripeID)
+	log.Print("rows:", rows, "err:", err)
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
 		//err := rows.Scan(&Customer)
 		rows.Scan(&TransactionID)
 	}
+	log.Print("TransactionID:", TransactionID)
 	return TransactionID
 }

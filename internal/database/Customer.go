@@ -250,7 +250,6 @@ func (c *Customer) CustomerGet(UserID string) {
 	for rows.Next() {
 		rows.Scan(&c.Name, &c.ZipCode, &c.Address, &c.Email, &c.IsRegistered, &c.CreatedDate, &c.LastAccessedDate, &c.IsEmailVerified, &c.CartID, &c.StripeAccountID)
 	}
-	log.Print(c)
 }
 
 // UserIDの取得　GetDatafromSessionKeyで使用し、直接呼び出さない

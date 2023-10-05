@@ -56,12 +56,13 @@ func main() {
 	r.GET("/go/item/details", handler.ItemDetails)
 	r.GET("/go/item/category/:category", handler.Category)
 	r.GET("/go/item/color/:color", handler.Color)
+	r.GET("/go/item/maker/:MakerName", handler.ItemMakerGet)
 
 	r.POST("/go/Maker/AccountCreate", handler.MakerStripeAccountCreate)
 	r.POST("/go/Maker/ItemMainCreate", handler.MakerItemMainCreate)
 	r.POST("/go/Maker/ItemDetailCreate", handler.MakerItemDetailCreate)
 	r.POST("/go/Maker/ItemDetailModyfy", handler.MakerItemDetailModyfy)
-	r.GET("/go/Maker/MakerDetailsGet", handler.MakerDetailsGet)
+	r.GET("/go/Maker/Details", handler.MakerDetailsGet)
 	r.POST("/go/Maker/DetailsRegister", handler.MakerAccountRegister)
 	r.Run(":8080") // 0.0.0.0:8080 でサーバーを立てます。
 }

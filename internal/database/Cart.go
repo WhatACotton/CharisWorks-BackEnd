@@ -28,7 +28,7 @@ func GetCartContents(CartID string) (CartContents CartContents, err error) {
 	SELECT 
 		Item.Status ,
 		Item.Price , 
-		Item.ItemName , 
+		Item.Name , 
 		Item.Stock ,
 		CartContents.CartOrder , 
 		CartContents.ItemID , 
@@ -40,7 +40,9 @@ func GetCartContents(CartID string) (CartContents CartContents, err error) {
 	ON 
 	CartContents.ItemID = Item.ItemID 
 	WHERE 
-		CartID = ?`, CartID)
+		CartID = ?
+	Order By CartContents.CartOrder
+		`, CartID)
 	if err != nil {
 		return CartContents, err
 	}
@@ -51,7 +53,7 @@ func GetCartContents(CartID string) (CartContents CartContents, err error) {
 		if err != nil {
 			return CartContents, err
 		}
-		if CartContent.Quantity <= CartContent.Stock {
+		if CartContent.Quantity > CartContent.Stock {
 			CartContent.Status = "OutOfStock"
 		}
 		CartContents = append(CartContents, *CartContent)
@@ -108,6 +110,7 @@ func (c *CartContentRequestPayload) Cart(CartID string) error {
 
 // カートに商品を追加
 func (c CartContentRequestPayload) CartContentPost(CartID string) error {
+	log.Print("CartContentPost")
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	// SQLの準備
@@ -115,16 +118,18 @@ func (c CartContentRequestPayload) CartContentPost(CartID string) error {
 	ins, err := db.Prepare(`
 	INSERT 
 	INTO 
-		CartContent 
+		CartContents 
 		(CartID , ItemID , Quantity) 
 		VALUES 
 		(? , ? , ?)`)
+	log.Print("ins : ", ins, " err : ", err)
 	if err != nil {
 		return err
 	}
 	defer ins.Close()
 	// SQLの実行
-	_, err = ins.Exec(CartID, c.ItemID, c.Quantity)
+	res, err := ins.Exec(CartID, c.ItemID, c.Quantity)
+	log.Print("res : ", res, " err : ", err)
 	if err != nil {
 		return err
 	}
@@ -139,7 +144,7 @@ func (c CartContentRequestPayload) CartContentUpdate(CartID string) error {
 	// SQLの実行
 	ins, err := db.Prepare(`
 	UPDATE 
-		CartContent 
+		CartContents 
 	SET 
 		Quantity = ? 
 	WHERE 
