@@ -11,3 +11,5 @@
 2023/09/29 18:39:20 UserID : tr_1NvdANA3bJzqElth5KPBHOQFacct_1Nu2pWPMclGuluNH3740.32ItemName
 2023/10/04 21:17:20 UserID : tr_1NxU0xA3bJzqElthxJa1lGnnacct_1Nu2pWPMclGuluNH2805.24ItemName
 2023/10/04 21:17:20 UserID : tr_1NxU0yA3bJzqElthqoonm35lacct_1Nu2pWPMclGuluNH5610.48ItemName
+2023/10/05 11:48:57 UserID : tr_1NxhcTA3bJzqElthy5OGlUheacct_1Nu2pWPMclGuluNH9350.80ItemName
+2023/10/05 11:48:58 UserID : tr_1NxhcUA3bJzqElthi74QlG8Gacct_1Nu2pWPMclGuluNH7480.64ItemName
