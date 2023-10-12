@@ -28,6 +28,7 @@ func CustomerSessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey s
 	}
 }
 
+// CustomerSessionKeyの取得
 func GetCustomerSessionKey(c *gin.Context) string {
 	session := sessions.DefaultMany(c, "SessionKey")
 	if session.Get("SessionKey") != nil {
@@ -42,7 +43,6 @@ func CustomerSessionEnd(c *gin.Context) (OldSessionKey string) {
 	session := sessions.DefaultMany(c, "SessionKey")
 	if session.Get("SessionKey") != nil {
 		OldSessionKey = session.Get("SessionKey").(string)
-
 		session.Delete("SessionKey")
 		session.Save()
 	}
@@ -57,22 +57,21 @@ type CustomerRegisterPayload struct {
 }
 
 func (c *CustomerRegisterPayload) InspectCusromerRegisterPayload() bool {
-	if c.Name == "" || c.Address == "" || c.PhoneNumber == "" || c.ZipCode == "" {
+	if c.Name == "" || c.Address == "" || c.ZipCode == "" {
 		return false
 	}
-	phonePattern := regexp.MustCompile(`^0\d{9,10}$`)
-	phoneNumber := c.PhoneNumber
-	matched := phonePattern.MatchString(phoneNumber)
-	if matched {
-	} else {
-		fmt.Println("電話番号の形式が正しくありません")
-		return false
-	}
+
 	zipCodePattern := regexp.MustCompile(`\d{3}-\d{4}`)
-	matched = zipCodePattern.MatchString(c.ZipCode)
+	matched := zipCodePattern.MatchString(c.ZipCode)
 	if matched {
 	} else {
 		fmt.Println("郵便番号の形式が正しくありません")
+		return false
+	}
+	return true
+}
+func (c *CustomerRegisterPayload) InspectFirstRegisterPayload() bool {
+	if c.Name == "山田 カリス" || c.Address == "住所" || c.ZipCode == "000-0000" {
 		return false
 	}
 	return true

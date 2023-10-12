@@ -3,6 +3,8 @@ package validation
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"log"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -63,4 +65,26 @@ func SessionConfig(r *gin.Engine) {
 	store := cookie.NewStore([]byte(GenerateRandomKey()))
 	cookies := []string{"CartSessionKey", "SessionKey"}
 	r.Use(sessions.SessionsMany(cookies, store))
+}
+
+// アカウント関連のロギング
+func LoginLogging(Text string) {
+	file, err := os.OpenFile("accountlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logger := log.New(file, "", log.Ldate|log.Ltime)
+	logger.SetOutput(file)
+	logger.Println("UserID :", Text)
+}
+
+// 送金関連のロギング
+func TransferLogging(Text string) {
+	file, err := os.OpenFile("transferlog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logger := log.New(file, "", log.Ldate|log.Ltime)
+	logger.SetOutput(file)
+	logger.Println("UserID :", Text)
 }

@@ -11,6 +11,7 @@ func SetCartSessionKey(c *gin.Context, CartSessionKey string) {
 	session.Save()
 }
 
+// CartSessionKeyの取得
 func GetCartSessionKey(c *gin.Context) (CartSessionKey string) {
 	session := sessions.DefaultMany(c, "CartSessionKey")
 	if session.Get("CartSessionKey") == nil {

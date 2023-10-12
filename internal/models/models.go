@@ -1,14 +1,14 @@
 package models
 
 type LogInLog struct {
-	UID       string
+	UserID    string
 	LoginId   string
 	LoginDate string
 }
 
 // Transaction関連
 type TransactionRequestPayload struct {
-	UID    string `json:"UID"`
+	UserID string `json:"UserID"`
 	ItemId string `json:"ItemId"`
 	Count  int    `json:"count"`
 }
@@ -20,13 +20,13 @@ type Transaction struct {
 }
 type TransactionList struct {
 	CartId          string `json:"CartId"`
-	UID             string `json:"UID"`
+	UserID          string `json:"UserID"`
 	TransactionDate string `json:"TransactionDate"`
 }
 
 type Bill struct {
 	CartId          string        `json:"CartId"`
-	UID             string        `json:"UID"`
+	UserID          string        `json:"UserID"`
 	Name            string        `json:"Name"`
 	Address         string        `json:"address"`
 	PhoneNumber     string        `json:"PhoneNumber"`

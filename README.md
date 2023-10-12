@@ -140,60 +140,77 @@ Server ->> Client:Carts
 
 ```mermaid
 erDiagram
-Customer||--o{Cart:""
-Cart}o--o|ItemList:"一つのカートに同じItem_Idが複数存在することはない"
-ItemList|o--o|ItemInfo:""
-Transaction}o--||ItemInfo:"ここでInfo_Idにしているので変更があっても旧Idに遡れる"
-TransactionList }o--||Customer:""
-TransactionList ||--|{Transaction:""
-
+Customer }|--|{Transactions:""
+Transactions}|--|{TransactionDetails:""
+TransactionDetails}|--|{Item:""
+Item}|--|{CartContents:""
+Item}|--|{ItemDetailsImage:"商品の画像"
+CartContents}|--|{Customer:""
+CartContents}|--|{CartSessionList:""
+Customer}|--|{LogInLog:"ログインとセッションの管理"
+Item}|--|{Customer:"出品者が商品を出品"
 Customer{
- string UID
- string Address
- string Name
- string PhoneNumber
- string CartId
- string LastSession_Key
+    UserID string PK "FirebaseTokenから取得"
+    Email string "FirebaseTokenから取得"
+    CartID string UK
+    IsEmailVerified bool "FirebaseTokenから取得"
+    CreatedDate timestamp "作成日時"
+    Name string "名前"
+    ZipCode string "郵便番号"
+    Address string "郵便番号以降の住所"
+    IsRegistered bool "本登録"
+    StripeAccountID string "出品者のみ アカウントが許可されたとき'Allow'となる"
+    MakerName string "出品者のみ"
+    MakerDescription string "出品者のみ"
 }
-
-TransactionList{
- string CartID
- timestamp TransactionTime
- string UID
- int TotalPrice
- string Address
- string Name
- string PhoneNumber
+ItemDetailsImage{
+    ItemID string PK
+    Image string "画像へのpath"
+    Order int
 }
-
-Transaction{
- string CartId
- string InfoId
- int quantity
+Item{
+    ItemOrder int PK "商品の順番"
+    ItemID string
+    Status string "商品の状態(買えるかどうかなど)"
+    Price int "価格"
+    Stock int "在庫"
+    ItemName string "商品の名前"
+    Description string "商品説明"
+    Color stirng "色"
+    Series string "シリーズ"
+    ItemSize string "商品のサイズなど"
+    MakerName string FK "出品者の名前"
+    Top int "Topに表示するかどうか"
 }
-
-
-
-Cart{
- int order "Auto Inctriment: 商品の登録した順番を管理"
- string Cart_Id
- string Item_Id
- int quantity
+TransactionDetails{
+    ItemOrder int PK "取引商品の順番"
+    TransactionID string UK
+    Quantity int "数量"
+    ItemID string FK
 }
-
-ItemList{
- string ItemId
- string InfoId "マイナーチェンジはItem_Idに紐付ける"
- string status "購入可能かどうか"
+Transactions{
+    UserID string UK
+    TransactionID string PK
+    Name string "顧客の名前"
+    TotalAmount int "購入金額"
+    ZipCode string "顧客の郵便番号"
+    Address string "郵便番号の先の住所"
+    TransactionTime timestamp "取引された時間"
+    StripeID string "Stripeから振られたID"
+    Status string "取引の状態"
 }
-ItemInfo{
- string InfoId
- int Price
- string Name
- int stock
- string Color
- string Key_Words
- string Description
- bool Top "Topに表示するかどうか"
+CartContents{
+    CartOrder int PK "カートに入っている商品の順番"
+    CartID string UK
+    ItemID string FK
+    Quantity int "数量"
+}
+CartSessionList{
+    CartID string FK
+    SessionKey string
+}
+LogInLog{
+    UserID string PK
+    SessionKey string
 }
 ```

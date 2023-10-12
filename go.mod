@@ -1,4 +1,4 @@
-module unify
+module github.com/WhatACotton/go-backend-test
 
 go 1.20
 

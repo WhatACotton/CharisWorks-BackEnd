@@ -1,0 +1,83 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /go/Login                 --> github.com/WhatACotton/go-backend-test/internal/handler.LogIn (5 handlers)
+[GIN-debug] POST   /go/SignUp                --> github.com/WhatACotton/go-backend-test/internal/handler.SignUp (5 handlers)
+[GIN-debug] POST   /go/Registration          --> github.com/WhatACotton/go-backend-test/internal/handler.Register (5 handlers)
+[GIN-debug] POST   /go/Modify                --> github.com/WhatACotton/go-backend-test/internal/handler.ModifyCustomer (5 handlers)
+[GIN-debug] DELETE /go/DeleteCustomer        --> github.com/WhatACotton/go-backend-test/internal/handler.DeleteCustomer (5 handlers)
+[GIN-debug] POST   /go/SessionEnd            --> github.com/WhatACotton/go-backend-test/internal/handler.LogOut (5 handlers)
+[GIN-debug] GET    /go/GetCustomer           --> github.com/WhatACotton/go-backend-test/internal/handler.GetCustomer (5 handlers)
+[GIN-debug] GET    /go/GetTransactions       --> github.com/WhatACotton/go-backend-test/internal/handler.GetTransaction (5 handlers)
+[GIN-debug] POST   /go/PostCart              --> github.com/WhatACotton/go-backend-test/internal/handler.PostCart (5 handlers)
+[GIN-debug] GET    /go/GetCart               --> github.com/WhatACotton/go-backend-test/internal/handler.GetCart (5 handlers)
+[GIN-debug] POST   /go/Transaction           --> github.com/WhatACotton/go-backend-test/internal/handler.BuyItem (5 handlers)
+[GIN-debug] POST   /go/stripe                --> github.com/WhatACotton/go-backend-test/internal/handler.Webhook (5 handlers)
+[GIN-debug] GET    /go/item/top              --> github.com/WhatACotton/go-backend-test/internal/handler.Top (5 handlers)
+[GIN-debug] GET    /go/item/all              --> github.com/WhatACotton/go-backend-test/internal/handler.ALL (5 handlers)
+[GIN-debug] GET    /go/item/details          --> github.com/WhatACotton/go-backend-test/internal/handler.ItemDetails (5 handlers)
+[GIN-debug] GET    /go/item/category/:category --> github.com/WhatACotton/go-backend-test/internal/handler.Category (5 handlers)
+[GIN-debug] GET    /go/item/color/:color     --> github.com/WhatACotton/go-backend-test/internal/handler.Color (5 handlers)
+[GIN-debug] GET    /go/item/maker/:MakerName --> github.com/WhatACotton/go-backend-test/internal/handler.ItemMakerGet (5 handlers)
+[GIN-debug] POST   /go/Maker/AccountCreate   --> github.com/WhatACotton/go-backend-test/internal/handler.MakerStripeAccountCreate (5 handlers)
+[GIN-debug] POST   /go/Maker/ItemMainCreate  --> github.com/WhatACotton/go-backend-test/internal/handler.MakerItemMainCreate (5 handlers)
+[GIN-debug] POST   /go/Maker/ItemDetailCreate --> github.com/WhatACotton/go-backend-test/internal/handler.MakerItemDetailCreate (5 handlers)
+[GIN-debug] POST   /go/Maker/ItemDetailModyfy --> github.com/WhatACotton/go-backend-test/internal/handler.MakerItemDetailModyfy (5 handlers)
+[GIN-debug] GET    /go/Maker/Details         --> github.com/WhatACotton/go-backend-test/internal/handler.MakerDetailsGet (5 handlers)
+[GIN-debug] POST   /go/Maker/DetailsRegister --> github.com/WhatACotton/go-backend-test/internal/handler.MakerAccountRegister (5 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8080
+[GIN] 2023/10/12 - 17:33:11 | 401 |    8.687768ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:33:26 | 401 |   15.979212ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:33:40 | 401 |   14.338428ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:33:46 | 200 |  170.126731ms |       127.0.0.1 | POST     "/go/Login"
+[GIN] 2023/10/12 - 17:33:47 | 200 |   23.507068ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:35:57 | 200 |   35.488429ms |       127.0.0.1 | POST     "/go/SessionEnd"
+[GIN] 2023/10/12 - 17:35:58 | 401 |     6.51799ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:36:14 | 401 |   18.652332ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:36:21 | 401 |   11.364288ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:36:27 | 401 |   14.078217ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:36:30 | 401 |   13.440536ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:36:54 | 401 |    18.85878ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:37:03 | 401 |   10.034382ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:37:59 | 401 |    9.950513ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:39:23 | 401 |   16.640224ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:39:30 | 401 |    9.983914ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:39:32 | 401 |   13.372244ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:39:46 | 401 |   14.555995ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:39:51 | 401 |   12.672641ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:39:53 | 401 |    9.827357ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:39:57 | 200 |    82.73749ms |             ::1 | POST     "/go/Login"
+[GIN] 2023/10/12 - 17:39:58 | 200 |   27.352315ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:40:07 | 200 |   24.600902ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:47:41 | 401 |    8.028562ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:47:42 | 200 |   23.599992ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:47:43 | 200 |    30.31654ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:47:45 | 200 |   27.651888ms |             ::1 | POST     "/go/SessionEnd"
+[GIN] 2023/10/12 - 17:47:50 | 401 |    6.198471ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:47:52 | 401 |   17.433134ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:47:59 | 200 |   68.388408ms |       127.0.0.1 | POST     "/go/Login"
+[GIN] 2023/10/12 - 17:47:59 | 200 |   15.242955ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:47:59 | 200 |   22.406979ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:48:08 | 401 |      6.4534ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:48:09 | 200 |   28.902619ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:48:09 | 200 |   21.174697ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:48:22 | 401 |    7.535329ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:48:23 | 200 |   30.670924ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 17:48:24 | 200 |   30.192902ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 18:02:25 | 401 |    5.422609ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 18:02:26 | 401 |    5.275089ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 18:02:29 | 401 |    3.421006ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 18:02:30 | 401 |    8.169214ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 18:02:32 | 200 |   17.207463ms |             ::1 | POST     "/go/SessionEnd"
+[GIN] 2023/10/12 - 18:02:34 | 401 |    6.020999ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 18:02:35 | 401 |    7.639727ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 18:02:43 | 401 |    5.574972ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 18:02:44 | 401 |   10.158335ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 18:02:55 | 200 |    7.575804ms |       127.0.0.1 | POST     "/go/SessionEnd"
+[GIN] 2023/10/12 - 18:02:59 | 401 |    5.583682ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/10/12 - 18:03:00 | 401 |   12.863094ms |       127.0.0.1 | GET      "/go/GetCustomer"
