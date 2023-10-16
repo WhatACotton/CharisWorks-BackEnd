@@ -20,8 +20,15 @@ func SignUp(c *gin.Context) {
 			Cart.CartID = validation.GetUUID()
 		}
 		log.Print("CartID: ", Cart.CartID)
+		CustomerRegisterPayload := new(database.CustomerRegisterPayload)
+		err := c.BindJSON(&CustomerRegisterPayload)
+		if err != nil {
+			log.Print(err)
+		}
+		log.Print(CustomerRegisterPayload)
+
 		_, NewSessionKey := validation.CustomerSessionStart(c)
-		database.CustomerSignUp(*CustomerReqPayload, NewSessionKey, Cart.CartID)
+		database.CustomerSignUp(*CustomerReqPayload, *CustomerRegisterPayload, NewSessionKey, Cart.CartID)
 		validation.LoginLogging(CustomerReqPayload.UserID + "created")
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})

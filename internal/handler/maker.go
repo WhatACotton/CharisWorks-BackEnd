@@ -140,3 +140,11 @@ func MakerAccountRegister(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"Maker": m})
 	}
 }
+func MakerGetItem(c *gin.Context) {
+	_, UserID := GetDatafromSessionKey(c)
+	MakerName := database.MakerNameGet(UserID)
+	if MakerName != "" {
+		Items := database.ItemGetMaker(MakerName)
+		c.JSON(http.StatusOK, Items)
+	}
+}

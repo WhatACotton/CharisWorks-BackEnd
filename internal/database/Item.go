@@ -23,11 +23,15 @@ type Item struct {
 	MakerDescription string `json:"MakerDescription,omitempty"`
 }
 type ItemMain struct {
-	ItemID string `json:"ItemID"`
-	Status string `json:"Status"`
-	Price  int    `json:"Price"`
-	Stock  int    `json:"Stock"`
-	Name   string `json:"Name"`
+	ItemID      string `json:"ItemID"`
+	Status      string `json:"Status"`
+	Price       int    `json:"Price"`
+	Stock       int    `json:"Stock"`
+	Name        string `json:"Name"`
+	Description string `json:"Description"`
+	Color       string `json:"Color"`
+	Series      string `json:"Series"`
+	Size        string `json:"Size"`
 }
 type ItemDetail struct {
 	ItemID      string `json:"ItemID"`
@@ -48,7 +52,6 @@ type Items []Item
 type TopItem struct {
 	Name  string `json:"Name"`
 	Stock int    `json:"Stock"`
-	Order int    `json:"Order"`
 }
 type TopItems []TopItem
 
@@ -111,7 +114,7 @@ func ItemGetTop() (TopItems, error) {
 	var returnItem []TopItem
 	for rows.Next() {
 		TopItem := new(TopItem)
-		err := rows.Scan(&TopItem.Name, &TopItem.Stock, &TopItem.Order)
+		err := rows.Scan(&TopItem.Name, &TopItem.Stock)
 		if err != nil {
 			return nil, errors.Wrap(err, "error in scanning CartID /GetTop2")
 		}
@@ -264,10 +267,10 @@ func ItemMainCreate(ItemMain ItemMain, MakerName string) {
 	res, err := db.Exec(`
 	INSERT INTO 
 		Item 
-		(ItemID,Status,Name,Price,Stock,MakerName) 
+		(ItemID,Status,Name,Price,Stock,MakerName,Description,Color,Series,Size) 
 	VALUES 
 		(?,?,?,?,?,?)`,
-		ItemMain.ItemID, ItemMain.Status, ItemMain.Name, ItemMain.Price, ItemMain.Stock, MakerName)
+		ItemMain.ItemID, ItemMain.Status, ItemMain.Name, ItemMain.Price, ItemMain.Stock, MakerName, ItemMain.Description, ItemMain.Color, ItemMain.Series, ItemMain.Size)
 	log.Print("res:", res, "err:", err)
 }
 

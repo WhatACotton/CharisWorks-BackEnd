@@ -64,6 +64,7 @@ func main() {
 	r.POST("/go/Maker/ItemDetailModyfy", handler.MakerItemDetailModyfy)
 	r.GET("/go/Maker/Details", handler.MakerDetailsGet)
 	r.POST("/go/Maker/DetailsRegister", handler.MakerAccountRegister)
+	r.GET("/go/Maker/GetItem", handler.MakerGetItem)
 	r.Run(":8080") // 0.0.0.0:8080 でサーバーを立てます。
 }
 

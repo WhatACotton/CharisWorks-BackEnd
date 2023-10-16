@@ -20,9 +20,14 @@ type Customer struct {
 	StripeAccountID  string `json:"StripeAccountID,omitempty"`
 	LastAccessedDate string `json:"LastAccessedDate"`
 }
+type CustomerRegisterPayload struct {
+	Name    string `json:"Name"`
+	ZipCode string `json:"ZipCode"`
+	Address string `json:"Address"`
+}
 
 // サインアップ処理　LoginLog,Customerにデータを追加
-func CustomerSignUp(req validation.CustomerReqPayload, NewSessionKey string, CartID string) error {
+func CustomerSignUp(req validation.CustomerReqPayload, CustomerRegisterPayload CustomerRegisterPayload, NewSessionKey string, CartID string) error {
 	log.Printf("SignUpCustomer Called")
 	log.Print("UserID : ", req.UserID)
 	log.Print("SessionKey : ", NewSessionKey)
@@ -35,9 +40,9 @@ func CustomerSignUp(req validation.CustomerReqPayload, NewSessionKey string, Car
 	_, err := tx.Exec(`
 	INSERT INTO 
 		Customer 
-		(UserID,Email,CartID) 
+		(UserID,Email,CartID,Name,ZipCode,Address) 
 		VALUES 
-		(?,?,?)`, req.UserID, req.Email, CartID)
+		(?,?,?,?,?,?)`, req.UserID, req.Email, CartID, CustomerRegisterPayload.Name, CustomerRegisterPayload.ZipCode, CustomerRegisterPayload.Address)
 
 	if err != nil {
 		tx.Rollback()
@@ -115,7 +120,6 @@ func CustomerLogIn(UserID string, NewSessionKey string) error {
 		(UserID , SessionKey)
 		VALUES
 		(?,?)`, UserID, NewSessionKey)
-
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -316,6 +320,7 @@ func GetCartID(UID string) (CartID string) {
 	// SQLの実行
 	for rows.Next() {
 		err := rows.Scan(&CartID)
+
 		if err != nil {
 			log.Print(err)
 		}
