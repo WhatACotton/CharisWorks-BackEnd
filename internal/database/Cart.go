@@ -93,7 +93,7 @@ func (c *CartContentRequestPayload) Cart(CartID string) error {
 			}
 		} else {
 			//存在しない場合
-			if c.Quantity != 0 {
+			if c.Quantity > 0 {
 				if Item.Stock >= c.Quantity {
 					c.CartContentPost(CartID)
 				} else {
@@ -101,7 +101,7 @@ func (c *CartContentRequestPayload) Cart(CartID string) error {
 				}
 
 			} else {
-				log.Print("CartReq Quantity is 0")
+				log.Print("CartReq Quantity is invailed")
 			}
 		}
 	}

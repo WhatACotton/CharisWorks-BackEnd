@@ -26,8 +26,6 @@ func main() {
 	// アカウント管理
 	//ログイン
 	r.POST("/go/Login", handler.LogIn)
-	// 仮登録
-	r.POST("/go/SignUp", handler.SignUp)
 	// 本登録
 	r.POST("/go/Registration", handler.Register)
 	// 登録内容の修正

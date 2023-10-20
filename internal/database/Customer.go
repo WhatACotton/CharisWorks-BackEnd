@@ -26,43 +26,24 @@ type CustomerRegisterPayload struct {
 	Address string `json:"Address"`
 }
 
-// サインアップ処理　LoginLog,Customerにデータを追加
-func CustomerSignUp(req validation.CustomerReqPayload, CustomerRegisterPayload CustomerRegisterPayload, NewSessionKey string, CartID string) error {
-	log.Printf("SignUpCustomer Called")
-	log.Print("UserID : ", req.UserID)
-	log.Print("SessionKey : ", NewSessionKey)
-	log.Print("Email : ", req.Email)
-	log.Print("CartID : ", CartID)
+func CustomerSignUp(c validation.CustomerReqPayload) error {
+	// データベースのハンドルを取得する
 	db := ConnectSQL()
-	defer db.Close()
-	tx, _ := db.Begin()
-	//Customerに追加
-	_, err := tx.Exec(`
-	INSERT INTO 
-		Customer 
-		(UserID,Email,CartID,Name,ZipCode,Address) 
-		VALUES 
-		(?,?,?,?,?,?)`, req.UserID, req.Email, CartID, CustomerRegisterPayload.Name, CustomerRegisterPayload.ZipCode, CustomerRegisterPayload.Address)
-
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	//LoginLogに追加
-	_, err = tx.Exec(`
+	ins, err := db.Prepare(`
 	INSERT INTO
-		LogInLog
-		(UserID,SessionKey)
+		Customer
+		(UserID,Email,IsEmailVerified)
 		VALUES
-		(?,?)
-	`, req.UserID, NewSessionKey)
+		(?,?,?)`)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
-	tx.Commit()
-	defer tx.Rollback()
+	// SQLの実行
+	_, err = ins.Exec(c.UserID, c.Email, c.EmailVerified)
+	if err != nil {
+		return err
+	}
+	defer ins.Close()
 	return nil
 }
 
@@ -253,6 +234,10 @@ func (c *Customer) CustomerGet(UserID string) {
 	// SQLの実行
 	for rows.Next() {
 		rows.Scan(&c.Name, &c.ZipCode, &c.Address, &c.Email, &c.IsRegistered, &c.CreatedDate, &c.LastAccessedDate, &c.IsEmailVerified, &c.CartID, &c.StripeAccountID)
+	}
+	if c.Email == "" {
+		log.Print("not found")
+		c.UserID = "not found"
 	}
 }
 

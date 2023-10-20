@@ -9,32 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// アカウント作成
-func SignUp(c *gin.Context) {
-	CustomerReqPayload := new(validation.CustomerReqPayload)
-	if CustomerReqPayload.VerifyCustomer(c) {
-		Cart := new(database.Cart)
-		Cart.SessionKey = validation.GetCartSessionKey(c)
-		if Cart.SessionKey == "new" {
-			log.Print("don't have sessionKey")
-			Cart.CartID = validation.GetUUID()
-		}
-		log.Print("CartID: ", Cart.CartID)
-		CustomerRegisterPayload := new(database.CustomerRegisterPayload)
-		err := c.BindJSON(&CustomerRegisterPayload)
-		if err != nil {
-			log.Print(err)
-		}
-		log.Print(CustomerRegisterPayload)
-
-		_, NewSessionKey := validation.CustomerSessionStart(c)
-		database.CustomerSignUp(*CustomerReqPayload, *CustomerRegisterPayload, NewSessionKey, Cart.CartID)
-		validation.LoginLogging(CustomerReqPayload.UserID + "created")
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "不正なアクセスです。"})
-	}
-}
-
 // 初回登録
 func Register(c *gin.Context) {
 	//登録情報変更処理
@@ -68,14 +42,23 @@ func LogIn(c *gin.Context) {
 		} else {
 			database.CustomerEmailVerified(0, UserReqPayload.UserID)
 		}
-		//Emailが変更されているかどうかの処理
-		Email := database.GetEmail(UserReqPayload.UserID)
-		log.Print(Email)
-		if Email != UserReqPayload.Email {
-			database.CustomerChangeEmail(UserReqPayload.UserID, UserReqPayload.Email)
+		Customer := new(database.Customer)
+		Customer.CustomerGet(UserReqPayload.UserID)
+		if Customer.UserID == "not found" {
+			log.Print("New User")
+			database.CustomerSignUp(*UserReqPayload)
+		} else {
+			//Emailが変更されているかどうかの処理
+			Email := database.GetEmail(UserReqPayload.UserID)
+			log.Print(Email)
+			if Email != UserReqPayload.Email {
+				database.CustomerChangeEmail(UserReqPayload.UserID, UserReqPayload.Email)
+			}
+
 		}
 		_, NewSessionKey := validation.CustomerSessionStart(c)
 		database.CustomerLogIn(UserReqPayload.UserID, NewSessionKey)
+
 		validation.LoginLogging(UserReqPayload.UserID + " logined")
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})

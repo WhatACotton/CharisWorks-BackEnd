@@ -15,10 +15,6 @@ type CustomerReqPayload struct {
 	Email         string
 	UserID        string
 	EmailVerified bool
-	CartID        string
-	ZipCode       string
-	Address       string
-	Name          string
 }
 
 // HeaderのAuthenticationに入っているJWTからEmail,UserID,EmailVerifiedを取得

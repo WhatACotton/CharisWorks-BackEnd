@@ -50,10 +50,9 @@ func CustomerSessionEnd(c *gin.Context) (OldSessionKey string) {
 }
 
 type CustomerRegisterPayload struct {
-	Name        string `json:"Name"`
-	ZipCode     string `json:"ZipCode"`
-	Address     string `json:"Address"`
-	PhoneNumber string `json:"PhoneNumber"`
+	Name    string `json:"Name"`
+	ZipCode string `json:"ZipCode"`
+	Address string `json:"Address"`
 }
 
 func (c *CustomerRegisterPayload) InspectCusromerRegisterPayload() bool {
