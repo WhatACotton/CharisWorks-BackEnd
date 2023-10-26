@@ -1,4 +1,4 @@
-# go-backend-server
+# CharisWorks-BackEnd
 
 **これは golang ベースで作られた開発中のバックエンドサーバです。**
 
