@@ -28,7 +28,7 @@ func GetCartContents(CartID string) (CartContents CartContents, err error) {
 	SELECT 
 		Item.Status ,
 		Item.Price , 
-		Item.Name , 
+		Item.ItemName , 
 		Item.Stock ,
 		CartContents.CartOrder , 
 		CartContents.ItemID , 
@@ -127,6 +127,7 @@ func (c CartContentRequestPayload) CartContentPost(CartID string) error {
 		return err
 	}
 	defer ins.Close()
+	defer db.Close()
 	// SQLの実行
 	res, err := ins.Exec(CartID, c.ItemID, c.Quantity)
 	log.Print("res : ", res, " err : ", err)
@@ -140,7 +141,7 @@ func (c CartContentRequestPayload) CartContentPost(CartID string) error {
 func (c CartContentRequestPayload) CartContentUpdate(CartID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
-
+	defer db.Close()
 	// SQLの実行
 	ins, err := db.Prepare(`
 	UPDATE 
@@ -157,6 +158,7 @@ func (c CartContentRequestPayload) CartContentUpdate(CartID string) error {
 	// SQLの実行
 	_, err = ins.Exec(c.Quantity, CartID, c.ItemID)
 	defer ins.Close()
+	defer db.Close()
 	if err != nil {
 		return err
 	}
@@ -189,6 +191,7 @@ func CartContentDelete(CartID string, ItemID string) error {
 		return err
 	}
 	defer ins.Close()
+	defer db.Close()
 	return nil
 }
 
@@ -237,7 +240,7 @@ func CartDelete(CartID string) error {
 		return err
 	}
 	defer del.Close()
-
+	defer db.Close()
 	// SQLの実行
 	del.Exec(CartID)
 	return nil

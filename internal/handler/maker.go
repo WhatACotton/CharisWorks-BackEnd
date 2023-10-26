@@ -41,7 +41,7 @@ func MakerItemMainCreate(c *gin.Context) {
 		log.Print("ItemMain:", i)
 		MakerName := database.MakerStripeAccountIDGet(StripeAccountID)
 		log.Print("MadeBy:", MakerName)
-		if i.Name != "" || i.Price != 0 || i.Stock != 0 || i.Status != "" {
+		if i.Name != "" || i.Price != 0 || i.Stock != 0 || i.Status != "" || MakerName != "" || i.Description != "" || i.Color != "" || i.Series != "" || i.Size != "" {
 			database.ItemMainCreate(*i, MakerName)
 		}
 	}
