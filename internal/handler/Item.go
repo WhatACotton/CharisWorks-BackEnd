@@ -38,7 +38,7 @@ func Color(c *gin.Context) {
 	c.JSON(200, ItemList)
 }
 func ItemDetails(c *gin.Context) {
-	ItemID := c.Query("ItemID")
+	ItemID := c.Param("ItemID")
 	Item := new(database.Item)
 	Item.ItemGet(ItemID)
 	if Item.ItemID != "" {
@@ -50,6 +50,13 @@ func ItemDetails(c *gin.Context) {
 func ItemMakerGet(c *gin.Context) {
 	MakerName := c.Param("MakerName")
 	log.Print("MakerName:", MakerName)
+	Items := database.ItemGetMaker(MakerName)
+	c.JSON(200, Items)
+}
+func ItemMakerIDGet(c *gin.Context) {
+	StripeAccountID := c.Param("StripeAccountID")
+	log.Print("StripeAccountID:", StripeAccountID)
+	MakerName := database.MakerStripeAccountIDGet(StripeAccountID)
 	Items := database.ItemGetMaker(MakerName)
 	c.JSON(200, Items)
 

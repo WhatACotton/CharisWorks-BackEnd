@@ -41,7 +41,7 @@ func MakerItemMainCreate(c *gin.Context) {
 		log.Print("ItemMain:", i)
 		MakerName := database.MakerStripeAccountIDGet(StripeAccountID)
 		log.Print("MadeBy:", MakerName)
-		if i.Name != "" || i.Price != 0 || i.Stock != 0 || i.Status != "" {
+		if i.Name != "" || i.Price != 0 || i.Stock != 0 || i.Status != "" || MakerName != "" || i.Description != "" || i.Color != "" || i.Series != "" || i.Size != "" {
 			database.ItemMainCreate(*i, MakerName)
 		}
 	}
@@ -138,5 +138,13 @@ func MakerAccountRegister(c *gin.Context) {
 		m.MakerAccountModyfy()
 		m.MakerDetailsGet()
 		c.JSON(http.StatusOK, gin.H{"Maker": m})
+	}
+}
+func MakerGetItem(c *gin.Context) {
+	_, UserID := GetDatafromSessionKey(c)
+	MakerName := database.MakerNameGet(UserID)
+	if MakerName != "" {
+		Items := database.ItemGetMaker(MakerName)
+		c.JSON(http.StatusOK, Items)
 	}
 }

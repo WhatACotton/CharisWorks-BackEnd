@@ -19,45 +19,33 @@ type Customer struct {
 	CartID           string `json:"CartID"`
 	StripeAccountID  string `json:"StripeAccountID,omitempty"`
 	LastAccessedDate string `json:"LastAccessedDate"`
+	MakerName        string `json:"MakerName,omitempty"`
+}
+type CustomerRegisterPayload struct {
+	Name    string `json:"Name"`
+	ZipCode string `json:"ZipCode"`
+	Address string `json:"Address"`
 }
 
-// サインアップ処理　LoginLog,Customerにデータを追加
-func CustomerSignUp(req validation.CustomerReqPayload, NewSessionKey string, CartID string) error {
-	log.Printf("SignUpCustomer Called")
-	log.Print("UserID : ", req.UserID)
-	log.Print("SessionKey : ", NewSessionKey)
-	log.Print("Email : ", req.Email)
-	log.Print("CartID : ", CartID)
+func CustomerSignUp(c validation.CustomerReqPayload) error {
+	// データベースのハンドルを取得する
 	db := ConnectSQL()
-	defer db.Close()
-	tx, _ := db.Begin()
-	//Customerに追加
-	_, err := tx.Exec(`
-	INSERT INTO 
-		Customer 
-		(UserID,Email,CartID) 
-		VALUES 
-		(?,?,?)`, req.UserID, req.Email, CartID)
-
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	//LoginLogに追加
-	_, err = tx.Exec(`
+	ins, err := db.Prepare(`
 	INSERT INTO
-		LogInLog
-		(UserID,SessionKey)
+		Customer
+		(UserID,Email,IsEmailVerified)
 		VALUES
-		(?,?)
-	`, req.UserID, NewSessionKey)
+		(?,?,?)`)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
-	tx.Commit()
-	defer tx.Rollback()
+	// SQLの実行
+	_, err = ins.Exec(c.UserID, c.Email, c.EmailVerified)
+	if err != nil {
+		return err
+	}
+	defer ins.Close()
+	defer db.Close()
 	return nil
 }
 
@@ -82,6 +70,7 @@ func CustomerRegister(UserID string, customer validation.CustomerRegisterPayload
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 	defer ins.Close()
 
 	// SQLの実行
@@ -115,7 +104,6 @@ func CustomerLogIn(UserID string, NewSessionKey string) error {
 		(UserID , SessionKey)
 		VALUES
 		(?,?)`, UserID, NewSessionKey)
-
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -142,6 +130,7 @@ func CustomerEmailVerified(verify int, userid string) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 	defer ins.Close()
 	// SQLの実行
 	_, err = ins.Exec(verify, userid)
@@ -156,6 +145,7 @@ func CustomerEmailVerified(verify int, userid string) error {
 func CustomerDelete(UserID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
+	defer db.Close()
 	tx, _ := db.Begin()
 	_, err := tx.Exec(`
 	DELETE FROM 
@@ -201,6 +191,7 @@ func CustomerChangeEmail(userid string, email string) error {
 		return err
 	}
 	defer ins.Close()
+	defer db.Close()
 	return nil
 
 }
@@ -209,6 +200,7 @@ func CustomerChangeEmail(userid string, email string) error {
 func CustomerSetCartID(userid string, CartID string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
+	defer db.Close()
 	ins, _ := db.Prepare(`
 	UPDATE 
 		Customer 
@@ -239,16 +231,22 @@ func (c *Customer) CustomerGet(UserID string) {
 		LastAccessedDate,
 		IsEmailVerified,
 		CartID,
-		StripeAccountID
+		StripeAccountID,
+		MakerName
 	FROM 
 		Customer 
 
 	WHERE 
 		UserID= ?`, UserID)
 	defer rows.Close()
+	defer db.Close()
 	// SQLの実行
 	for rows.Next() {
-		rows.Scan(&c.Name, &c.ZipCode, &c.Address, &c.Email, &c.IsRegistered, &c.CreatedDate, &c.LastAccessedDate, &c.IsEmailVerified, &c.CartID, &c.StripeAccountID)
+		rows.Scan(&c.Name, &c.ZipCode, &c.Address, &c.Email, &c.IsRegistered, &c.CreatedDate, &c.LastAccessedDate, &c.IsEmailVerified, &c.CartID, &c.StripeAccountID, &c.MakerName)
+	}
+	if c.Email == "" {
+		log.Print("not found")
+		c.UserID = "not found"
 	}
 }
 
@@ -280,6 +278,7 @@ func GetUserID(SessionKey string) (UserID string) {
 func GetEmail(UserID string) (Email string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
+	defer db.Close()
 	// SQLの実行
 	rows, _ := db.Query(`
 	SELECT 
@@ -313,9 +312,11 @@ func GetCartID(UID string) (CartID string) {
 		UserID = ?`, UID)
 
 	defer rows.Close()
+	defer db.Close()
 	// SQLの実行
 	for rows.Next() {
 		err := rows.Scan(&CartID)
+
 		if err != nil {
 			log.Print(err)
 		}

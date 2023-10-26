@@ -26,8 +26,6 @@ func main() {
 	// アカウント管理
 	//ログイン
 	r.POST("/go/Login", handler.LogIn)
-	// 仮登録
-	r.POST("/go/SignUp", handler.SignUp)
 	// 本登録
 	r.POST("/go/Registration", handler.Register)
 	// 登録内容の修正
@@ -53,10 +51,11 @@ func main() {
 	//商品API
 	r.GET("/go/item/top", handler.Top)
 	r.GET("/go/item/all", handler.ALL)
-	r.GET("/go/item/details", handler.ItemDetails)
+	r.GET("/go/item/details/:ItemID", handler.ItemDetails)
 	r.GET("/go/item/category/:category", handler.Category)
 	r.GET("/go/item/color/:color", handler.Color)
 	r.GET("/go/item/maker/:MakerName", handler.ItemMakerGet)
+	r.GET("/go/item/maker/id/:StripeAccountID", handler.ItemMakerIDGet)
 
 	r.POST("/go/Maker/AccountCreate", handler.MakerStripeAccountCreate)
 	r.POST("/go/Maker/ItemMainCreate", handler.MakerItemMainCreate)
@@ -64,6 +63,7 @@ func main() {
 	r.POST("/go/Maker/ItemDetailModyfy", handler.MakerItemDetailModyfy)
 	r.GET("/go/Maker/Details", handler.MakerDetailsGet)
 	r.POST("/go/Maker/DetailsRegister", handler.MakerAccountRegister)
+	r.GET("/go/Maker/GetItem", handler.MakerGetItem)
 	r.Run(":8080") // 0.0.0.0:8080 でサーバーを立てます。
 }
 

@@ -138,3 +138,19 @@ func (Maker *Maker) MakerDetailsGet() {
 	}
 	defer rows.Close()
 }
+func MakerNameGet(UserID string) (MakerName string) {
+	db := ConnectSQL()
+	defer db.Close()
+	rows, _ := db.Query(`
+	SELECT 
+		MakerName
+	FROM 
+		Customer 
+	WHERE 
+		UserID = ?`, UserID)
+	for rows.Next() {
+		rows.Scan(&MakerName)
+	}
+	defer rows.Close()
+	return MakerName
+}

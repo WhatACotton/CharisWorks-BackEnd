@@ -3,6 +3,7 @@ package database
 import (
 	"log"
 
+	"github.com/WhatACotton/go-backend-test/validation"
 	"github.com/pkg/errors"
 )
 
@@ -11,7 +12,7 @@ type Item struct {
 	ItemID      string `json:"ItemID"`
 	Status      string `json:"Status"`
 	Name        string `json:"Name"`
-	Price       int    `json:"price"`
+	Price       int    `json:"Price"`
 	Stock       int    `json:"Stock"`
 	MakerName   string `json:"MakerName"`
 	Order       int    `json:"Order"`
@@ -23,11 +24,15 @@ type Item struct {
 	MakerDescription string `json:"MakerDescription,omitempty"`
 }
 type ItemMain struct {
-	ItemID string `json:"ItemID"`
-	Status string `json:"Status"`
-	Price  int    `json:"Price"`
-	Stock  int    `json:"Stock"`
-	Name   string `json:"Name"`
+	ItemID      string `json:"ItemID"`
+	Status      string `json:"Status"`
+	Price       int    `json:"Price"`
+	Stock       int    `json:"Stock"`
+	Name        string `json:"Name"`
+	Description string `json:"Description"`
+	Color       string `json:"Color"`
+	Series      string `json:"Series"`
+	Size        string `json:"Size"`
 }
 type ItemDetail struct {
 	ItemID      string `json:"ItemID"`
@@ -48,7 +53,6 @@ type Items []Item
 type TopItem struct {
 	Name  string `json:"Name"`
 	Stock int    `json:"Stock"`
-	Order int    `json:"Order"`
 }
 type TopItems []TopItem
 
@@ -61,7 +65,7 @@ func (i *Item) ItemGet(ItemID string) {
 	rows, err := db.Query(
 		`SELECT
 			Item.Status,
-			Item.Name,
+			Item.ItemName,
 			Item.Price,
 			Item.Stock,
 			Item.MakerName,
@@ -69,6 +73,7 @@ func (i *Item) ItemGet(ItemID string) {
 			Item.Color,
 			Item.Series,
 			Item.Size,
+			Item.Description,
 			Customer.MakerDescription
 		FROM 
 			Item 
@@ -82,7 +87,7 @@ func (i *Item) ItemGet(ItemID string) {
 	log.Print("rows:", rows, "err:", err)
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&i.Status, &i.Name, &i.Price, &i.Stock, &i.MakerName, &i.Order, &i.Color, &i.Series, &i.Size, &i.MakerDescription)
+		err := rows.Scan(&i.Status, &i.Name, &i.Price, &i.Stock, &i.MakerName, &i.Order, &i.Color, &i.Series, &i.Size, &i.Description, &i.MakerDescription)
 		log.Print("Item:", i, "err:", err)
 	}
 }
@@ -94,7 +99,7 @@ func ItemGetTop() (TopItems, error) {
 	// SQLの実行
 	rows, err := db.Query(
 		`SELECT 
-			Item.Name,
+			Item.ItemName,
 			Item.Stock,
 			Item.ItemOrder 
 		FROM 
@@ -111,7 +116,7 @@ func ItemGetTop() (TopItems, error) {
 	var returnItem []TopItem
 	for rows.Next() {
 		TopItem := new(TopItem)
-		err := rows.Scan(&TopItem.Name, &TopItem.Stock, &TopItem.Order)
+		err := rows.Scan(&TopItem.Name, &TopItem.Stock)
 		if err != nil {
 			return nil, errors.Wrap(err, "error in scanning CartID /GetTop2")
 		}
@@ -132,7 +137,7 @@ func ItemGetALL() (Items Items, err error) {
 			Item.Status,
 			Item.Price,
 			Item.Stock,
-			Item.Name,
+			Item.ItemName,
 			Item.Description,
 			Item.Color,
 			Item.Series,
@@ -166,7 +171,7 @@ func ItemGetCategory(Category string) (Items, error) {
 	rows, err := db.Query(
 		`SELECT 
 			Item.Order,
-			Item.Name,
+			Item.ItemName,
 			Item.Stock,
 			Item.Price,
 			Item.Status 
@@ -199,7 +204,7 @@ func ItemGetColor(Color string) (Items, error) {
 	rows, err := db.Query(
 		`SELECT 
 			ItemOrder,
-			Name,
+			ItemName,
 			Stock,
 			Price,
 			Status 
@@ -230,7 +235,7 @@ func ItemGetMaker(MakerName string) (Items Items) {
 		`SELECT 
 			ItemID,
 			Status,
-			Name,
+			ItemName,
 			Price,
 			Stock,
 			MakerName,
@@ -257,6 +262,7 @@ func ItemGetMaker(MakerName string) (Items Items) {
 
 // Itemの主要情報の作成
 func ItemMainCreate(ItemMain ItemMain, MakerName string) {
+	ItemID := validation.GetUUID()
 	log.Print("MakerName:", MakerName)
 	db := ConnectSQL()
 	defer db.Close()
@@ -264,10 +270,10 @@ func ItemMainCreate(ItemMain ItemMain, MakerName string) {
 	res, err := db.Exec(`
 	INSERT INTO 
 		Item 
-		(ItemID,Status,Name,Price,Stock,MakerName) 
+		(ItemID,Status,ItemName,Price,Stock,MakerName,Description,Color,Series,Size) 
 	VALUES 
-		(?,?,?,?,?,?)`,
-		ItemMain.ItemID, ItemMain.Status, ItemMain.Name, ItemMain.Price, ItemMain.Stock, MakerName)
+		(?,?,?,?,?,?,?,?,?,?)`,
+		ItemID, ItemMain.Status, ItemMain.Name, ItemMain.Price, ItemMain.Stock, MakerName, ItemMain.Description, ItemMain.Color, ItemMain.Series, ItemMain.Size)
 	log.Print("res:", res, "err:", err)
 }
 
