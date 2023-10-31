@@ -50,13 +50,16 @@ func CustomerSessionEnd(c *gin.Context) (OldSessionKey string) {
 }
 
 type CustomerRegisterPayload struct {
-	Name    string `json:"Name"`
-	ZipCode string `json:"ZipCode"`
-	Address string `json:"Address"`
+	Name        string `json:"Name"`
+	ZipCode     string `json:"ZipCode"`
+	Address1    string `json:"Address1"`
+	Address2    string `json:"Address2"`
+	Address3    string `json:"Address3"`
+	PhoneNumber string `json:"PhoneNumber"`
 }
 
 func (c *CustomerRegisterPayload) InspectCusromerRegisterPayload() bool {
-	if c.Name == "" || c.Address == "" || c.ZipCode == "" {
+	if c.Name == "" || c.Address1 == "" || c.Address2 == "" || c.Address3 == "" || c.PhoneNumber == "" || c.ZipCode == "" {
 		return false
 	}
 
@@ -70,7 +73,7 @@ func (c *CustomerRegisterPayload) InspectCusromerRegisterPayload() bool {
 	return true
 }
 func (c *CustomerRegisterPayload) InspectFirstRegisterPayload() bool {
-	if c.Name == "山田 カリス" || c.Address == "住所" || c.ZipCode == "000-0000" {
+	if c.Name == "default" || c.Address1 == "default" || c.Address2 == "default" || c.Address3 == "default" || c.PhoneNumber == "default" || c.ZipCode == "default" {
 		return false
 	}
 	return true

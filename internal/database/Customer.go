@@ -11,7 +11,10 @@ type Customer struct {
 	UserID           string `json:"UserID"`
 	Name             string `json:"Name"`
 	ZipCode          string `json:"ZipCode"`
-	Address          string `json:"Address"`
+	Address1         string `json:"Address1"`
+	Address2         string `json:"Address2"`
+	Address3         string `json:"Address3"`
+	PhoneNumber      string `json:"PhoneNumber"`
 	Email            string `json:"Contact"`
 	IsRegistered     bool   `json:"IsRegistered"`
 	CreatedDate      string `json:"CreatedDate"`
@@ -22,9 +25,12 @@ type Customer struct {
 	MakerName        string `json:"MakerName,omitempty"`
 }
 type CustomerRegisterPayload struct {
-	Name    string `json:"Name"`
-	ZipCode string `json:"ZipCode"`
-	Address string `json:"Address"`
+	Name        string `json:"Name"`
+	ZipCode     string `json:"ZipCode"`
+	Address1    string `json:"Address1"`
+	Address2    string `json:"Address2"`
+	Address3    string `json:"Address3"`
+	PhoneNumber string `json:"PhoneNumber"`
 }
 
 func CustomerSignUp(c validation.CustomerReqPayload) error {
@@ -62,7 +68,10 @@ func CustomerRegister(UserID string, customer validation.CustomerRegisterPayload
 	SET 
 		Name = ?,
 		ZipCode = ?,
-		Address = ?,
+		Address1 = ?,
+		Address2 = ?,
+		Address3 = ?,
+		PhoneNumber = ?,
 		IsRegistered = true
 
 	WHERE 
@@ -74,7 +83,7 @@ func CustomerRegister(UserID string, customer validation.CustomerRegisterPayload
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.ZipCode), html.EscapeString(customer.Address), UserID)
+	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.ZipCode), html.EscapeString(customer.Address1), UserID)
 	if err != nil {
 		log.Print(err)
 		return err
@@ -224,7 +233,10 @@ func (c *Customer) CustomerGet(UserID string) {
 	SELECT 
 		Name,
 		ZipCode,
-		Address,
+		Address1,
+		Address2,
+		Address3,
+		PhoneNumber,
 		Email,
 		IsRegistered,
 		CreatedDate,
@@ -242,7 +254,7 @@ func (c *Customer) CustomerGet(UserID string) {
 	defer db.Close()
 	// SQLの実行
 	for rows.Next() {
-		rows.Scan(&c.Name, &c.ZipCode, &c.Address, &c.Email, &c.IsRegistered, &c.CreatedDate, &c.LastAccessedDate, &c.IsEmailVerified, &c.CartID, &c.StripeAccountID, &c.MakerName)
+		rows.Scan(&c.Name, &c.ZipCode, &c.Address1, &c.Address2, &c.Address3, &c.PhoneNumber, &c.Email, &c.IsRegistered, &c.CreatedDate, &c.LastAccessedDate, &c.IsEmailVerified, &c.CartID, &c.StripeAccountID, &c.MakerName)
 	}
 	if c.Email == "" {
 		log.Print("not found")

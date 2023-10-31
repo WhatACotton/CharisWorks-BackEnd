@@ -11,8 +11,11 @@ type Transaction struct {
 	UserID          string `json:"UserID"`
 	Name            string `json:"Name"`
 	TotalAmount     int    `json:"TotalAmount"`
-	ZipCode         string `json:"Zipcode"`
-	Address         string `json:"Address"`
+	ZipCode         string `json:"ZipCode"`
+	Address1        string `json:"Address1"`
+	Address2        string `json:"Address2"`
+	Address3        string `json:"Address3"`
+	PhoneNumber     string `json:"PhoneNumber"`
 	TransactionTime string `json:"TransactionTime"`
 	StripeID        string `json:"StripeID"`
 	Status          string `json:"status"`
@@ -33,7 +36,10 @@ func TransactionPost(Cart Cart, Customer Customer, StripeInfo cashing.StripeInfo
 	t.TransactionID = TransactionID
 	t.Name = Customer.Name
 	t.TotalAmount = int(StripeInfo.AmountTotal)
-	t.Address = Customer.Address
+	t.Address1 = Customer.Address1
+	t.Address2 = Customer.Address2
+	t.Address3 = Customer.Address3
+	t.PhoneNumber = Customer.PhoneNumber
 	t.TransactionTime = GetDate()
 	t.StripeID = StripeInfo.ID
 	t.Status = "決済前"
@@ -60,9 +66,9 @@ func (t *Transaction) transactionPost() {
 	INSERT 
 		INTO 
 			Transactions
-			(UserID,TransactionID,Name,TotalAmount,ZipCode,Address,TransactionTime,StripeID,Status)
+			(UserID,TransactionID,Name,TotalAmount,ZipCode,Address1,Address2,Address3,PhoneNumber,TransactionTime,StripeID,Status)
 			VALUES
-			(?,?,?,?,?,?,?,?,?)
+			(?,?,?,?,?,?,?,?,?,?,?,?)
 	`)
 
 	defer ins.Close()
@@ -74,7 +80,10 @@ func (t *Transaction) transactionPost() {
 		t.Name,
 		t.TotalAmount,
 		t.ZipCode,
-		t.Address,
+		t.Address1,
+		t.Address2,
+		t.Address3,
+		t.PhoneNumber,
 		t.TransactionTime,
 		t.StripeID,
 		t.Status,
@@ -237,7 +246,10 @@ func TransactionGet(UserID string) (Transactions Transactions) {
 		Name,
 		TotalAmount,
 		ZipCode,
-		Address,
+		Address1,
+		Address2,
+		Address3,
+		PhoneNumber,
 		TransactionTime,
 		StripeID,
 		Status
@@ -253,7 +265,7 @@ func TransactionGet(UserID string) (Transactions Transactions) {
 	for rows.Next() {
 		Transaction := new(Transaction)
 		//err := rows.Scan(&Customer)
-		rows.Scan(&Transaction.TransactionID, &Transaction.Name, &Transaction.TotalAmount, &Transaction.ZipCode, &Transaction.Address, &Transaction.TransactionTime, &Transaction.StripeID, &Transaction.Status)
+		rows.Scan(&Transaction.TransactionID, &Transaction.Name, &Transaction.TotalAmount, &Transaction.ZipCode, &Transaction.Address1, &Transaction.Address2, &Transaction.Address3, &Transaction.PhoneNumber, &Transaction.TransactionTime, &Transaction.StripeID, &Transaction.Status)
 		Transactions = append(Transactions, *Transaction)
 	}
 	return Transactions
