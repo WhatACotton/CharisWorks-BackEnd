@@ -67,11 +67,17 @@ func LogIn(c *gin.Context) {
 
 // 顧客情報の取得
 func GetCustomer(c *gin.Context) {
-	_, UserID := GetDatafromSessionKey(c)
+	Cart, UserID := GetDatafromSessionKey(c)
 	if UserID != "" {
 		Customer := new(database.Customer)
 		Customer.CustomerGet(UserID)
-		c.JSON(http.StatusOK, Customer)
+		CartContents, err := database.GetCartContents(Cart.CartID)
+		if err != nil {
+			log.Print(err)
+		}
+
+		c.JSON(http.StatusOK, gin.H{"Customer": Customer, "Cart": CartContents})
+		log.Print(gin.H{"Customer": Customer, "Cart": CartContents})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "未ログインです。"})
 	}
