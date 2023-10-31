@@ -59,7 +59,7 @@ type CustomerRegisterPayload struct {
 }
 
 func (c *CustomerRegisterPayload) InspectCusromerRegisterPayload() bool {
-	if c.Name == "" || c.Address1 == "" || c.Address2 == "" || c.Address3 == "" || c.PhoneNumber == "" || c.ZipCode == "" {
+	if c.Name == "" || c.Address1 == "" || c.Address2 == "" || c.PhoneNumber == "" || c.ZipCode == "" {
 		return false
 	}
 
