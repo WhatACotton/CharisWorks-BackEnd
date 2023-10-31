@@ -129,8 +129,7 @@ func (c CartContentRequestPayload) CartContentPost(CartID string) error {
 	defer ins.Close()
 	defer db.Close()
 	// SQLの実行
-	res, err := ins.Exec(CartID, c.ItemID, c.Quantity)
-	log.Print("res : ", res, " err : ", err)
+	_, err = ins.Exec(CartID, c.ItemID, c.Quantity)
 	if err != nil {
 		return err
 	}
