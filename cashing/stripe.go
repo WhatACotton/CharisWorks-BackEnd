@@ -19,8 +19,6 @@ import (
 	"github.com/stripe/stripe-go/v75/webhook"
 )
 
-const IPAddress = "192.168.10.11"
-
 type StripeInfo struct {
 	URL         string
 	AmountTotal int64
@@ -51,8 +49,8 @@ func createCheckoutSession(amount int64) (StripeInfo, error) {
 				Quantity: stripe.Int64(1),
 			},
 		},
-		SuccessURL: stripe.String("http://" + IPAddress + ":80/mypage"),
-		CancelURL:  stripe.String("http://" + IPAddress + ":80/signin"),
+		SuccessURL: stripe.String("http://" + os.Getenv("IP_ADDRESS") + ":80/mypage"),
+		CancelURL:  stripe.String("http://" + os.Getenv("IP_ADDRESS") + ":80/signin"),
 	}
 	s, _ := session.New(params)
 	log.Print(s.ID)
@@ -134,8 +132,8 @@ func CreateStripeAccount(email string) (stripeID string, URL string) {
 func createAccountLink(ID string) string {
 	params := &stripe.AccountLinkParams{
 		Account:    stripe.String(ID),
-		RefreshURL: stripe.String("http://" + IPAddress + "/mypage"),
-		ReturnURL:  stripe.String("http://" + IPAddress + "/mypage"),
+		RefreshURL: stripe.String("http://" + os.Getenv("IP_ADDRESS") + "/mypage"),
+		ReturnURL:  stripe.String("http://" + os.Getenv("IP_ADDRESS") + "/mypage"),
 		Type:       stripe.String("account_onboarding"),
 		Collect:    stripe.String("eventually_due"),
 	}

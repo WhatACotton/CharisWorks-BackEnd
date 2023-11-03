@@ -39,12 +39,6 @@ func main() {
 	// 購入履歴の取得
 	r.GET("/go/GetTransactions", handler.GetTransaction)
 
-	// カート機能
-	// 商品の登録・修正・削除
-	r.POST("/go/PostCart", handler.PostCart)
-	// カートの取得
-	r.GET("/go/GetCart", handler.GetCart)
-
 	// 購入処理
 	r.POST("/go/Transaction", handler.BuyItem)
 	r.POST("/go/stripe", handler.Webhook)

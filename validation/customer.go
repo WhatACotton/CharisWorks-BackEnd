@@ -10,7 +10,7 @@ import (
 )
 
 func CustomerSessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey string) {
-	session := sessions.DefaultMany(c, "SessionKey")
+	session := sessions.Default(c)
 	if session.Get("SessionKey") == nil {
 		SessionKey := GetUUID()
 		session.Set("SessionKey", SessionKey)
@@ -30,7 +30,7 @@ func CustomerSessionStart(c *gin.Context) (OldSessionKey string, NewSessionKey s
 
 // CustomerSessionKeyの取得
 func GetCustomerSessionKey(c *gin.Context) string {
-	session := sessions.DefaultMany(c, "SessionKey")
+	session := sessions.Default(c)
 	if session.Get("SessionKey") != nil {
 		SessionKey := session.Get("SessionKey").(string)
 
@@ -40,7 +40,7 @@ func GetCustomerSessionKey(c *gin.Context) string {
 	}
 }
 func CustomerSessionEnd(c *gin.Context) (OldSessionKey string) {
-	session := sessions.DefaultMany(c, "SessionKey")
+	session := sessions.Default(c)
 	if session.Get("SessionKey") != nil {
 		OldSessionKey = session.Get("SessionKey").(string)
 		session.Delete("SessionKey")

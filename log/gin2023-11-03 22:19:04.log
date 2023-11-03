@@ -1,0 +1,84 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /go/Login                 --> github.com/WhatACotton/go-backend-test/internal/handler.LogIn (5 handlers)
+[GIN-debug] POST   /go/Registration          --> github.com/WhatACotton/go-backend-test/internal/handler.Register (5 handlers)
+[GIN-debug] POST   /go/Modify                --> github.com/WhatACotton/go-backend-test/internal/handler.ModifyCustomer (5 handlers)
+[GIN-debug] DELETE /go/DeleteCustomer        --> github.com/WhatACotton/go-backend-test/internal/handler.DeleteCustomer (5 handlers)
+[GIN-debug] POST   /go/SessionEnd            --> github.com/WhatACotton/go-backend-test/internal/handler.LogOut (5 handlers)
+[GIN-debug] GET    /go/GetCustomer           --> github.com/WhatACotton/go-backend-test/internal/handler.GetCustomer (5 handlers)
+[GIN-debug] GET    /go/GetTransactions       --> github.com/WhatACotton/go-backend-test/internal/handler.GetTransaction (5 handlers)
+[GIN-debug] POST   /go/Transaction           --> github.com/WhatACotton/go-backend-test/internal/handler.BuyItem (5 handlers)
+[GIN-debug] POST   /go/stripe                --> github.com/WhatACotton/go-backend-test/internal/handler.Webhook (5 handlers)
+[GIN-debug] GET    /go/item/top              --> github.com/WhatACotton/go-backend-test/internal/handler.Top (5 handlers)
+[GIN-debug] GET    /go/item/all              --> github.com/WhatACotton/go-backend-test/internal/handler.ALL (5 handlers)
+[GIN-debug] GET    /go/item/details/:ItemID  --> github.com/WhatACotton/go-backend-test/internal/handler.ItemDetails (5 handlers)
+[GIN-debug] GET    /go/item/category/:category --> github.com/WhatACotton/go-backend-test/internal/handler.Category (5 handlers)
+[GIN-debug] GET    /go/item/color/:color     --> github.com/WhatACotton/go-backend-test/internal/handler.Color (5 handlers)
+[GIN-debug] GET    /go/item/maker/:MakerName --> github.com/WhatACotton/go-backend-test/internal/handler.ItemMakerGet (5 handlers)
+[GIN-debug] GET    /go/item/maker/id/:StripeAccountID --> github.com/WhatACotton/go-backend-test/internal/handler.ItemMakerIDGet (5 handlers)
+[GIN-debug] POST   /go/Maker/AccountCreate   --> github.com/WhatACotton/go-backend-test/internal/handler.MakerStripeAccountCreate (5 handlers)
+[GIN-debug] POST   /go/Maker/ItemMainCreate  --> github.com/WhatACotton/go-backend-test/internal/handler.MakerItemMainCreate (5 handlers)
+[GIN-debug] POST   /go/Maker/ItemDetailCreate --> github.com/WhatACotton/go-backend-test/internal/handler.MakerItemDetailCreate (5 handlers)
+[GIN-debug] POST   /go/Maker/ItemDetailModyfy --> github.com/WhatACotton/go-backend-test/internal/handler.MakerItemDetailModyfy (5 handlers)
+[GIN-debug] GET    /go/Maker/Details         --> github.com/WhatACotton/go-backend-test/internal/handler.MakerDetailsGet (5 handlers)
+[GIN-debug] POST   /go/Maker/DetailsRegister --> github.com/WhatACotton/go-backend-test/internal/handler.MakerAccountRegister (5 handlers)
+[GIN-debug] GET    /go/Maker/GetItem         --> github.com/WhatACotton/go-backend-test/internal/handler.MakerGetItem (5 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8080
+[GIN] 2023/11/03 - 22:19:06 | 401 |     182.262µs |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:19:15 | 200 |  116.764712ms |             ::1 | POST     "/go/Login"
+[GIN] 2023/11/03 - 22:19:16 | 200 |   14.204677ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:54:01 | 200 |   10.171165ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:54:05 | 200 |   13.509398ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:55:26 | 200 |   11.769496ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:56:08 | 200 |   15.322963ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:56:25 | 200 |    9.324662ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:56:29 | 200 |    11.94913ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:57:08 | 200 |     9.94417ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:57:11 | 200 |   17.825548ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:57:21 | 200 |    4.747087ms |             ::1 | POST     "/go/Modify"
+[GIN] 2023/11/03 - 22:57:22 | 200 |   13.610074ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:57:28 | 200 |    9.953643ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:57:33 | 200 |    9.028138ms |       127.0.0.1 | POST     "/go/Modify"
+[GIN] 2023/11/03 - 22:57:33 | 200 |     9.31258ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:58:02 | 200 |   13.545503ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:58:07 | 200 |    9.555052ms |             ::1 | POST     "/go/Modify"
+[GIN] 2023/11/03 - 22:58:07 | 200 |   10.313116ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:58:17 | 200 |   34.095416ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:58:24 | 200 |    8.753577ms |       127.0.0.1 | POST     "/go/Modify"
+[GIN] 2023/11/03 - 22:58:24 | 200 |     7.42483ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:58:34 | 200 |    9.767526ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 22:58:47 | 200 |    33.02094ms |             ::1 | POST     "/go/Modify"
+[GIN] 2023/11/03 - 22:58:47 | 200 |    8.564458ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 23:12:54 | 200 |   11.556623ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 23:12:54 | 200 |     9.78345ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 23:13:05 | 200 |   12.910332ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 23:13:15 | 200 |   11.604289ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 23:13:15 | 200 |   13.710943ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 23:13:19 | 200 |   11.543763ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 23:13:39 | 200 |   10.663358ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 23:13:51 | 200 |   11.282991ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/03 - 23:13:54 | 401 |    1.649328ms |             ::1 | GET      "/go/Maker/Details"
+[GIN] 2023/11/03 - 23:13:55 | 200 |   14.880178ms |       127.0.0.1 | GET      "/go/Maker/Details"
+[GIN] 2023/11/03 - 23:13:55 | 200 |   14.144966ms |             ::1 | GET      "/go/Maker/Details"
+[GIN] 2023/11/03 - 23:14:03 | 200 |   12.783667ms |       127.0.0.1 | GET      "/go/Maker/Details"
+[GIN] 2023/11/03 - 23:14:04 | 200 |    9.245489ms |             ::1 | POST     "/go/Maker/DetailsRegister"
+[GIN] 2023/11/03 - 23:14:05 | 200 |   12.336078ms |       127.0.0.1 | GET      "/go/Maker/Details"
+[GIN] 2023/11/03 - 23:14:05 | 200 |     9.49114ms |             ::1 | GET      "/go/Maker/Details"
+[GIN] 2023/11/03 - 23:14:08 | 200 |   74.168313ms |       127.0.0.1 | GET      "/go/Maker/Details"
+[GIN] 2023/11/03 - 23:14:42 | 200 |    1.685844ms |             ::1 | GET      "/go/item/all"
+[GIN] 2023/11/03 - 23:14:44 | 200 |    2.258876ms |       127.0.0.1 | GET      "/go/item/details/ItemID2"
+[GIN] 2023/11/03 - 23:14:44 | 200 |    2.136541ms |             ::1 | GET      "/go/item/details/ItemID2"
+[GIN] 2023/11/03 - 23:14:48 | 200 |    2.042758ms |       127.0.0.1 | GET      "/go/item/all"
+[GIN] 2023/11/03 - 23:14:49 | 200 |    1.387053ms |             ::1 | GET      "/go/item/details/ItemID"
+[GIN] 2023/11/03 - 23:14:49 | 200 |    1.302802ms |       127.0.0.1 | GET      "/go/item/details/ItemID"
+[GIN] 2023/11/03 - 23:14:49 | 200 |     1.22729ms |             ::1 | GET      "/go/item/details/ItemID"
+[GIN] 2023/11/03 - 23:14:50 | 200 |    2.328425ms |       127.0.0.1 | GET      "/go/item/all"
+[GIN] 2023/11/03 - 23:14:51 | 200 |    1.731699ms |             ::1 | GET      "/go/item/details/f6d655da-6fff-11ee-b3bc-e86a6465f38b"
+[GIN] 2023/11/03 - 23:14:51 | 200 |    1.557259ms |       127.0.0.1 | GET      "/go/item/details/f6d655da-6fff-11ee-b3bc-e86a6465f38b"
+[GIN] 2023/11/03 - 23:14:53 | 200 |    1.350978ms |             ::1 | GET      "/go/item/all"

@@ -3,38 +3,18 @@ package database
 import "log"
 
 type Maker struct {
+	UserID          string `json:"UserID"`
 	MakerName       string `json:"MakerName"`
 	Description     string `json:"MakerDescription"`
 	StripeAccountID string `json:"StripeAccountID"`
 }
 
-// Stripeのアカウントを登録
-func CustomerCreateStripeAccount(UserId string, StripeAccountID string) {
-	db := ConnectSQL()
-	tx, _ := db.Begin()
-
-	_, err := tx.Exec(`
-	UPDATE 
-		Customer 
-	
-	SET 
-		StripeAccountID = ? 
-	
-	WHERE 
-		UserID = ?`, StripeAccountID, UserId)
-	if err != nil {
-		tx.Rollback()
-	}
-	tx.Commit()
-}
-
-// StripeAccountIDを取得
-func CustomerGetStripeAccountID(UserID string) (StripeAccountID string) {
+func CustomerGetStripeAccountID(UserID string) (role string) {
 	db := ConnectSQL()
 	// SQLの実行
 	rows, _ := db.Query(`
 	SELECT 
-		StripeAccountID
+		role
 	FROM 
 		Customer 
 	WHERE 
@@ -42,25 +22,22 @@ func CustomerGetStripeAccountID(UserID string) (StripeAccountID string) {
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
-		rows.Scan(&StripeAccountID)
+		rows.Scan(&role)
 	}
-	return StripeAccountID
+	return role
 }
 
 // Stripeのアカウント作成
-func (m Maker) MakerAccountCreate() {
+func MakerAccountCreate(MakerName string, StripeAccountID string) {
 	db := ConnectSQL()
 	ins, _ := db.Prepare(`
-	UPDATE
-		Customer
-	SET
-		StripeAccountID = ?,
-		MakerName = ?,
-		MakerDescription = ?
-	WHERE
-		UserID = ?
-	`)
-	ins.Exec(m.MakerName, m.Description, m.StripeAccountID)
+	INSERT INTO
+		Maker
+		(UserID,StripeAccountID)
+	VALUES
+		(?,?)`)
+
+	ins.Exec(MakerName, StripeAccountID)
 	defer ins.Close()
 }
 
@@ -72,31 +49,30 @@ func (m *Maker) MakerAccountModyfy() {
 	// SQLの実行
 	res, err := db.Exec(`
 	UPDATE
-		Customer
+		Maker
 	SET
 		MakerName = ?,
-		MakerDescription = ?
+		Description = ?
 	WHERE
 		StripeAccountID = ?`, m.MakerName, m.Description, m.StripeAccountID)
 	log.Print("res:", res, "err:", err)
 }
 
 // MakerNameからStripeIDを取得
-func MakerGetStripeID(MakerName string) (StripeAccountID string) {
+func MakerGetStripeID(UserID string) (StripeAccountID string) {
 	db := ConnectSQL()
 	defer db.Close()
-	rows, err := db.Query(`
+	rows, _ := db.Query(`
 	SELECT 
 		StripeAccountID
 	FROM 
-		Customer
+		Maker
 	WHERE 
-		MakerName = ?`, MakerName)
-	log.Print(err)
+		UserID = ?`, UserID)
 	for rows.Next() {
 		rows.Scan(&StripeAccountID)
 	}
-	log.Print("MakerName : " + MakerName + " StripeAccountID : " + StripeAccountID)
+	log.Print("MakerName : " + UserID + " StripeAccountID : " + StripeAccountID)
 	defer rows.Close()
 	return StripeAccountID
 }
@@ -109,7 +85,7 @@ func MakerStripeAccountIDGet(StripeAccountID string) (MakerName string) {
 	SELECT 
 		MakerName
 	FROM 
-		Customer 
+		Maker 
 	WHERE 
 		StripeAccountID = ?`, StripeAccountID)
 	for rows.Next() {
@@ -128,9 +104,9 @@ func (Maker *Maker) MakerDetailsGet() {
 	rows, _ := db.Query(`
 	SELECT 
 		MakerName,
-		MakerDescription
+		Description
 	FROM 
-		Customer 
+		Maker 
 	WHERE 
 		StripeAccountID = ?`, Maker.StripeAccountID)
 	for rows.Next() {
@@ -138,19 +114,19 @@ func (Maker *Maker) MakerDetailsGet() {
 	}
 	defer rows.Close()
 }
-func MakerNameGet(UserID string) (MakerName string) {
+func MakerNameGet(UserID string) (StribeAccountID string) {
 	db := ConnectSQL()
 	defer db.Close()
 	rows, _ := db.Query(`
 	SELECT 
-		MakerName
+		StripeAccountID
 	FROM 
-		Customer 
+		Maker 
 	WHERE 
 		UserID = ?`, UserID)
 	for rows.Next() {
-		rows.Scan(&MakerName)
+		rows.Scan(&StribeAccountID)
 	}
 	defer rows.Close()
-	return MakerName
+	return StribeAccountID
 }

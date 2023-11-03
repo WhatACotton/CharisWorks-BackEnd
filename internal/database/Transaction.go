@@ -6,10 +6,25 @@ import (
 	"github.com/WhatACotton/go-backend-test/cashing"
 )
 
+type CartContent struct {
+
+	//Auto Incrment
+	Order int `json:"Order"`
+	//From CartRequestPayload
+	ItemID   string `json:"ItemID"`
+	Quantity int    `json:"Quantity"`
+	//From Item
+	Status string `json:"Status"`
+	//From Item
+	ItemName string `json:"ItemName"`
+	Price    int    `json:"Price"`
+	Stock    int    `json:"Stock"`
+}
+type CartContents []CartContent
 type Transaction struct {
 	TransactionID   string `json:"TransactionID"`
 	UserID          string `json:"UserID"`
-	Name            string `json:"Name"`
+	CustomerName    string `json:"Name"`
 	TotalAmount     int    `json:"TotalAmount"`
 	ZipCode         string `json:"ZipCode"`
 	Address1        string `json:"Address1"`
@@ -30,11 +45,11 @@ type TransactionDetail struct {
 type TransactionDetails []TransactionDetail
 
 // 取引履歴の作成
-func TransactionPost(Cart Cart, Customer Customer, StripeInfo cashing.StripeInfo, TransactionID string, CartContents CartContents) {
+func TransactionPost(Customer Customer, StripeInfo cashing.StripeInfo, TransactionID string, CartContents CartContents) {
 	t := new(Transaction)
 	t.UserID = Customer.UserID
 	t.TransactionID = TransactionID
-	t.Name = Customer.Name
+	t.CustomerName = Customer.CustomerName
 	t.TotalAmount = int(StripeInfo.AmountTotal)
 	t.Address1 = Customer.Address1
 	t.Address2 = Customer.Address2
@@ -47,11 +62,11 @@ func TransactionPost(Cart Cart, Customer Customer, StripeInfo cashing.StripeInfo
 	t.transactionPost()
 	TransactionContents := new(TransactionDetail)
 	for _, CartContent := range CartContents {
-		TransactionContents.transactionConstruct(CartContent, Cart, TransactionID)
+		TransactionContents.transactionConstruct(CartContent, TransactionID)
 		TransactionContents.transactionDetailsPost()
 	}
 }
-func (t *TransactionDetail) transactionConstruct(CartContent CartContent, Cart Cart, TransactionID string) {
+func (t *TransactionDetail) transactionConstruct(CartContent CartContent, TransactionID string) {
 	t.TransactionID = TransactionID
 	t.ItemID = CartContent.ItemID
 	t.Quantity = CartContent.Quantity
@@ -66,7 +81,7 @@ func (t *Transaction) transactionPost() {
 	INSERT 
 		INTO 
 			Transactions
-			(UserID,TransactionID,Name,TotalAmount,ZipCode,Address1,Address2,Address3,PhoneNumber,TransactionTime,StripeID,Status)
+			(UserID,TransactionID,CustomerName,TotalAmount,ZipCode,Address1,Address2,Address3,PhoneNumber,TransactionTime,StripeID,Status)
 			VALUES
 			(?,?,?,?,?,?,?,?,?,?,?,?)
 	`)
@@ -77,7 +92,7 @@ func (t *Transaction) transactionPost() {
 	ins.Exec(
 		t.UserID,
 		t.TransactionID,
-		t.Name,
+		t.CustomerName,
 		t.TotalAmount,
 		t.ZipCode,
 		t.Address1,
@@ -243,7 +258,7 @@ func TransactionGet(UserID string) (Transactions Transactions) {
 	rows, _ := db.Query(`
 	SELECT 
 		TransactionID,
-		Name,
+		CustomerName,
 		TotalAmount,
 		ZipCode,
 		Address1,
@@ -265,7 +280,7 @@ func TransactionGet(UserID string) (Transactions Transactions) {
 	for rows.Next() {
 		Transaction := new(Transaction)
 		//err := rows.Scan(&Customer)
-		rows.Scan(&Transaction.TransactionID, &Transaction.Name, &Transaction.TotalAmount, &Transaction.ZipCode, &Transaction.Address1, &Transaction.Address2, &Transaction.Address3, &Transaction.PhoneNumber, &Transaction.TransactionTime, &Transaction.StripeID, &Transaction.Status)
+		rows.Scan(&Transaction.TransactionID, &Transaction.CustomerName, &Transaction.TotalAmount, &Transaction.ZipCode, &Transaction.Address1, &Transaction.Address2, &Transaction.Address3, &Transaction.PhoneNumber, &Transaction.TransactionTime, &Transaction.StripeID, &Transaction.Status)
 		Transactions = append(Transactions, *Transaction)
 	}
 	return Transactions

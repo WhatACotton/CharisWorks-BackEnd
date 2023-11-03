@@ -13,19 +13,17 @@ import (
 
 // StripeAccountの作成
 func MakerStripeAccountCreate(c *gin.Context) {
-	_, UserID := GetDatafromSessionKey(c)
-	StripeAccountID := database.CustomerGetStripeAccountID(UserID)
-	if StripeAccountID == "Allow" {
+	UserID := GetDatafromSessionKey(c)
+	role := database.CustomerGetStripeAccountID(UserID)
+	if role == "preseller" {
 		email := database.GetEmail(UserID)
 		AccountID, URL := cashing.CreateStripeAccount(email)
-		database.CustomerCreateStripeAccount(UserID, AccountID)
-
+		database.MakerAccountCreate(UserID, AccountID)
 		c.JSON(http.StatusOK, gin.H{"message": "アカウント作成のリンクが作成されました。", "URL": URL})
 	} else {
-		if StripeAccountID == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "出品者登録が完了していません。", "errcode": "401"})
+		if role == "seller" {
+			c.JSON(http.StatusOK, gin.H{"message": "アカウントが作成されています。"})
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "アカウントが作成されています。"})
 	}
 }
 
@@ -39,10 +37,8 @@ func MakerItemMainCreate(c *gin.Context) {
 			log.Print(err)
 		}
 		log.Print("ItemMain:", i)
-		MakerName := database.MakerStripeAccountIDGet(StripeAccountID)
-		log.Print("MadeBy:", MakerName)
-		if i.Name != "" || i.Price != 0 || i.Stock != 0 || i.Status != "" || MakerName != "" || i.Description != "" || i.Color != "" || i.Series != "" || i.Size != "" {
-			database.ItemMainCreate(*i, MakerName)
+		if i.Name != "" || i.Price != 0 || i.Stock != 0 || i.Status != "" || i.Description != "" || i.Color != "" || i.Series != "" || i.Size != "" {
+			database.ItemMainCreate(*i, StripeAccountID)
 		}
 	}
 }
@@ -106,9 +102,10 @@ func MakerUploadImage(c *gin.Context) {
 
 // StripeAccountの取得
 func makerStripeAccountIDGet(c *gin.Context) (StripeAccountID string) {
-	_, UserID := GetDatafromSessionKey(c)
-	StripeAccountID = database.CustomerGetStripeAccountID(UserID)
-	if StripeAccountID != "allow" && StripeAccountID != "" {
+	UserID := GetDatafromSessionKey(c)
+	role := database.CustomerGetStripeAccountID(UserID)
+	if role == "Seller" {
+		StripeAccountID = database.MakerGetStripeID(UserID)
 		log.Print("StripeAccountID:", StripeAccountID)
 		return StripeAccountID
 	} else {
@@ -141,10 +138,10 @@ func MakerAccountRegister(c *gin.Context) {
 	}
 }
 func MakerGetItem(c *gin.Context) {
-	_, UserID := GetDatafromSessionKey(c)
-	MakerName := database.MakerNameGet(UserID)
-	if MakerName != "" {
-		Items := database.ItemGetMaker(MakerName)
+	UserID := GetDatafromSessionKey(c)
+	StribeAccountID := database.MakerNameGet(UserID)
+	if StribeAccountID != "" {
+		Items := database.ItemGetMaker(StribeAccountID)
 		c.JSON(http.StatusOK, Items)
 	}
 }

@@ -13,7 +13,7 @@ import (
 func Register(c *gin.Context) {
 	//登録情報変更処理
 	//bodyにアカウントの詳細情報が入っている。
-	_, UserID := GetDatafromSessionKey(c)
+	UserID := GetDatafromSessionKey(c)
 	h := new(validation.CustomerRegisterPayload)
 	if err := c.BindJSON(&h); err != nil {
 		return
@@ -35,7 +35,6 @@ func LogIn(c *gin.Context) {
 	UserReqPayload := new(validation.CustomerReqPayload)
 	//ユーザ認証
 	if UserReqPayload.VerifyCustomer(c) {
-		log.Print("UserID : ", UserReqPayload.UserID)
 		//Eamil認証
 		if UserReqPayload.EmailVerified {
 			database.CustomerEmailVerified(1, UserReqPayload.UserID)
@@ -50,15 +49,14 @@ func LogIn(c *gin.Context) {
 		} else {
 			//Emailが変更されているかどうかの処理
 			Email := database.GetEmail(UserReqPayload.UserID)
-			log.Print(Email)
 			if Email != UserReqPayload.Email {
+				log.Print("Email was changed")
 				database.CustomerChangeEmail(UserReqPayload.UserID, UserReqPayload.Email)
 			}
 
 		}
 		_, NewSessionKey := validation.CustomerSessionStart(c)
 		database.CustomerLogIn(UserReqPayload.UserID, NewSessionKey)
-
 		validation.LoginLogging(UserReqPayload.UserID + " logined")
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "ログインできませんでした。"})
@@ -67,17 +65,11 @@ func LogIn(c *gin.Context) {
 
 // 顧客情報の取得
 func GetCustomer(c *gin.Context) {
-	Cart, UserID := GetDatafromSessionKey(c)
+	UserID := GetDatafromSessionKey(c)
 	if UserID != "" {
 		Customer := new(database.Customer)
 		Customer.CustomerGet(UserID)
-		CartContents, err := database.GetCartContents(Cart.CartID)
-		if err != nil {
-			log.Print(err)
-		}
-
-		c.JSON(http.StatusOK, gin.H{"Customer": Customer, "Cart": CartContents})
-		log.Print(gin.H{"Customer": Customer, "Cart": CartContents})
+		c.JSON(http.StatusOK, gin.H{"Customer": Customer})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "未ログインです。"})
 	}
@@ -87,7 +79,7 @@ func GetCustomer(c *gin.Context) {
 func ModifyCustomer(c *gin.Context) {
 	//登録情報変更処理
 	//bodyにアカウントの詳細情報が入っている。
-	_, UserID := GetDatafromSessionKey(c)
+	UserID := GetDatafromSessionKey(c)
 	h := new(validation.CustomerRegisterPayload)
 	if err := c.BindJSON(&h); err != nil {
 		return
@@ -103,7 +95,7 @@ func ModifyCustomer(c *gin.Context) {
 
 // ログアウト
 func LogOut(c *gin.Context) {
-	_, UserID := GetDatafromSessionKey(c)
+	UserID := GetDatafromSessionKey(c)
 	//c.JSON(http.StatusOK, "SuccessFully Logouted!!")
 	validation.LoginLogging(UserID + " logouted")
 	//ログアウト処理
@@ -114,9 +106,30 @@ func LogOut(c *gin.Context) {
 // アカウントの削除
 func DeleteCustomer(c *gin.Context) {
 	//アカウントの削除
-	_, UserID := GetDatafromSessionKey(c)
+	UserID := GetDatafromSessionKey(c)
 	database.CustomerDelete(UserID)
 	validation.LoginLogging(UserID + "deleted")
 
 	c.JSON(http.StatusOK, gin.H{"message": "アカウントを削除しました。"})
+}
+
+// セッションキーから、UserIDとCartを取得
+// 同時にログイン中ならログイン状態の更新も行う
+func GetDatafromSessionKey(c *gin.Context) (UserID string) {
+	CustomerSessionKey := validation.GetCustomerSessionKey(c)
+	//次にCustomerSessionKeyを持っているならログイン情報の取得
+	if CustomerSessionKey != "new" {
+		//ログインしている
+		log.Print("logined")
+		//CustomerSessionKeyからUserIDを取得
+		UserID = database.GetUserID(CustomerSessionKey)
+		//この場合はログイン中なので、もしCartSessionKeyを持っていたら、それを削除
+		_, CustomerSessionKey = validation.CustomerSessionStart(c)
+		database.CustomerLogIn(UserID, CustomerSessionKey)
+	} else {
+		log.Print("not logined")
+		//cookieに保存
+
+	}
+	return UserID
 }
