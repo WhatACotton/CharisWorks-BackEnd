@@ -37,6 +37,7 @@ func CORS(r *gin.Engine) {
 			"Authorization",
 			"Access-Control-Allow-Credentials",
 		},
+
 		// cookieなどの情報を必要とするかどうか
 		AllowCredentials: true,
 		// preflightリクエストの結果をキャッシュする時間

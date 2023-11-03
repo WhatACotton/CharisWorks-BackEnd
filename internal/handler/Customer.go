@@ -92,6 +92,7 @@ func ModifyCustomer(c *gin.Context) {
 	if err := c.BindJSON(&h); err != nil {
 		return
 	}
+	log.Print(h)
 	if h.InspectCusromerRegisterPayload() {
 		database.CustomerRegister(UserID, *h)
 		log.Print("CustomerData was modified")

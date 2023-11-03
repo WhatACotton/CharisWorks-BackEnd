@@ -83,7 +83,7 @@ func CustomerRegister(UserID string, customer validation.CustomerRegisterPayload
 	defer ins.Close()
 
 	// SQLの実行
-	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.ZipCode), html.EscapeString(customer.Address1), UserID)
+	_, err = ins.Exec(html.EscapeString(customer.Name), html.EscapeString(customer.ZipCode), html.EscapeString(customer.Address1), html.EscapeString(customer.Address2), html.EscapeString(customer.Address3), html.EscapeString(customer.PhoneNumber), UserID)
 	if err != nil {
 		log.Print(err)
 		return err
