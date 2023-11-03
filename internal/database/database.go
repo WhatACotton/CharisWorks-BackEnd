@@ -23,7 +23,7 @@ type PatchRequestPayload struct {
 
 func ConnectSQL() (db *sql.DB) {
 	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_USER")+":"+os.Getenv("MYSQL_PASS")+"@tcp(localhost:3306)/CharisWorks")
+	db, err := sql.Open("mysql", os.Getenv("MYSQL_USER")+":"+os.Getenv("MYSQL_PASS")+"@tcp(localhost:3306)/CharisWorks_backup")
 
 	if err != nil {
 		// ここではエラーを返さない
