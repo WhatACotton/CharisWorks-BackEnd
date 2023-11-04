@@ -57,6 +57,31 @@ type TopItem struct {
 }
 type TopItems []TopItem
 
+func IsItemExist(ItemID string) (bool, int) {
+	db := ConnectSQL()
+	defer db.Close()
+	// SQLの実行
+	rows, _ := db.Query(
+		`SELECT
+			ItemID,
+			Stock
+		FROM 
+			Item 
+		WHERE 
+			ItemID = ?`,
+		ItemID)
+	defer rows.Close()
+	Stock := 0
+	for rows.Next() {
+		rows.Scan(&ItemID, &Stock)
+	}
+	if ItemID == "" {
+		return false, 0
+	} else {
+		return true, Stock
+	}
+}
+
 // Itemの取得
 func (i *Item) ItemGet(ItemID string) {
 	i.ItemID = ItemID

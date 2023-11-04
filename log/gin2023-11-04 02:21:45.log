@@ -11,8 +11,6 @@
 [GIN-debug] POST   /go/SessionEnd            --> github.com/WhatACotton/go-backend-test/internal/handler.LogOut (5 handlers)
 [GIN-debug] GET    /go/GetCustomer           --> github.com/WhatACotton/go-backend-test/internal/handler.GetCustomer (5 handlers)
 [GIN-debug] GET    /go/GetTransactions       --> github.com/WhatACotton/go-backend-test/internal/handler.GetTransaction (5 handlers)
-[GIN-debug] POST   /go/PostCart              --> github.com/WhatACotton/go-backend-test/internal/handler.PostCart (5 handlers)
-[GIN-debug] GET    /go/GetCart               --> github.com/WhatACotton/go-backend-test/internal/handler.GetCart (5 handlers)
 [GIN-debug] POST   /go/Transaction           --> github.com/WhatACotton/go-backend-test/internal/handler.BuyItem (5 handlers)
 [GIN-debug] POST   /go/stripe                --> github.com/WhatACotton/go-backend-test/internal/handler.Webhook (5 handlers)
 [GIN-debug] GET    /go/item/top              --> github.com/WhatACotton/go-backend-test/internal/handler.Top (5 handlers)
@@ -32,7 +30,9 @@
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8080
-[GIN] 2023/10/27 - 09:52:48 | 200 |    4.781092ms |             ::1 | GET      "/go/item/all"
-[GIN] 2023/10/27 - 09:54:47 | 200 |    4.329776ms |       127.0.0.1 | GET      "/go/item/details/ItemID"
-[GIN] 2023/10/27 - 09:54:47 | 200 |    1.344924ms |             ::1 | GET      "/go/item/details/ItemID"
-[GIN] 2023/10/27 - 09:54:51 | 200 |    1.160388ms |       127.0.0.1 | GET      "/go/item/all"
+[GIN] 2023/11/04 - 02:21:52 | 401 |     159.646µs |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 02:22:01 | 200 |   117.54704ms |             ::1 | POST     "/go/Login"
+[GIN] 2023/11/04 - 02:22:02 | 200 |   12.848029ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 02:22:05 | 200 |  568.809025ms |             ::1 | POST     "/go/Transaction"
+[GIN] 2023/11/04 - 02:22:38 | 200 |  235.718755ms |       127.0.0.1 | POST     "/go/Transaction"
+[GIN] 2023/11/04 - 02:22:54 | 200 |  489.715152ms |             ::1 | POST     "/go/Transaction"

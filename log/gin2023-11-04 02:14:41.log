@@ -30,15 +30,6 @@
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8080
-[GIN] 2023/11/03 - 23:47:10 | 401 |     177.075µs |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/03 - 23:47:24 | 200 |  133.026755ms |             ::1 | POST     "/go/Login"
-[GIN] 2023/11/03 - 23:47:24 | 200 |   11.646144ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/03 - 23:47:26 | 200 |   10.967305ms |             ::1 | GET      "/go/Maker/Details"
-[GIN] 2023/11/03 - 23:47:26 | 200 |   15.836802ms |       127.0.0.1 | GET      "/go/Maker/Details"
-[GIN] 2023/11/03 - 23:47:28 | 200 |    12.95925ms |             ::1 | GET      "/go/Maker/GetItem"
-[GIN] 2023/11/03 - 23:47:47 | 200 |   29.793462ms |       127.0.0.1 | POST     "/go/Maker/ItemMainCreate"
-[GIN] 2023/11/03 - 23:47:48 | 200 |   12.415715ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/03 - 23:48:47 | 200 |   12.436459ms |       127.0.0.1 | GET      "/go/Maker/Details"
-[GIN] 2023/11/03 - 23:48:47 | 200 |   21.290073ms |             ::1 | GET      "/go/Maker/Details"
-[GIN] 2023/11/03 - 23:48:53 | 200 |   10.480587ms |       127.0.0.1 | GET      "/go/Maker/GetItem"
-[GIN] 2023/11/03 - 23:49:08 | 404 |       6.366µs |             ::1 | GET      "/go/GetCart"
+[GIN] 2023/11/04 - 02:14:43 | 401 |     129.372µs |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 02:14:52 | 200 |  170.037494ms |       127.0.0.1 | POST     "/go/Login"
+[GIN] 2023/11/04 - 02:14:52 | 200 |   13.265337ms |             ::1 | GET      "/go/GetCustomer"

@@ -30,6 +30,17 @@
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8080
-[GIN] 2023/11/03 - 20:56:20 | 401 |     279.862µs |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/03 - 20:56:28 | 200 |  135.219962ms |             ::1 | POST     "/go/Login"
-[GIN] 2023/11/03 - 20:56:28 | 200 |   10.399352ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 03:03:38 | 401 |    1.141268ms |             ::1 | POST     "/go/Transaction"
+[GIN] 2023/11/04 - 03:03:41 | 401 |    1.267608ms |       127.0.0.1 | POST     "/go/Transaction"
+[GIN] 2023/11/04 - 03:03:53 | 401 |     119.302µs |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 03:04:05 | 200 |  282.343015ms |       127.0.0.1 | POST     "/go/Login"
+[GIN] 2023/11/04 - 03:04:05 | 200 |    10.60885ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 03:45:05 | 200 |   31.264339ms |       127.0.0.1 | GET      "/go/item/all"
+[GIN] 2023/11/04 - 03:45:23 | 200 |    3.789573ms |             ::1 | GET      "/go/item/all"
+[GIN] 2023/11/04 - 03:46:16 | 200 |  125.268098ms |       127.0.0.1 | POST     "/go/Login"
+[GIN] 2023/11/04 - 03:46:17 | 200 |   17.654822ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 03:46:29 | 200 |   39.082898ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 03:46:37 | 200 |   42.833257ms |             ::1 | GET      "/go/GetTransactions"
+[GIN] 2023/11/04 - 03:46:42 | 200 |    1.866158ms |       127.0.0.1 | GET      "/go/item/all"
+[GIN] 2023/11/04 - 03:46:56 | 200 |    3.686869ms |             ::1 | GET      "/go/item/all"
+[GIN] 2023/11/04 - 03:47:03 | 200 |    3.949143ms |       127.0.0.1 | GET      "/go/item/all"

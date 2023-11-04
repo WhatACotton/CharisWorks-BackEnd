@@ -13,12 +13,14 @@ import (
 // 商品の購入リクエストを作成。
 func BuyItem(c *gin.Context) {
 	log.Print("Creating PaymentIntent...")
+	log.Print(c)
 	UserID := GetDatafromSessionKey(c)
 	CartContents := new(database.CartContents)
 	err := c.BindJSON(&CartContents)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Print("CartContents:", CartContents)
 	if UserID != "" {
 		Customer := new(database.Customer)
 		Customer.CustomerGet(UserID)
@@ -55,6 +57,14 @@ func inspectCart(carts database.CartContents) bool {
 		if Cart.Status != "Available" {
 			return false
 		}
+		flag, stock := database.IsItemExist(Cart.ItemID)
+		if !flag {
+			return false
+		}
+		if stock < Cart.Quantity {
+			return false
+		}
+
 	}
 	return true
 }
