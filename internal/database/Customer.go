@@ -22,6 +22,7 @@ type Customer struct {
 	StripeAccountID  string `json:"StripeAccountID,omitempty"`
 	LastAccessedDate string `json:"LastAccessedDate"`
 	Role             string `json:"role"`
+	Cart             string `json:"Cart"`
 }
 type CustomerRegisterPayload struct {
 	CustomerName string `json:"Name"`
