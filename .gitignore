@@ -2,3 +2,5 @@ environment.sh
 application_default_credentials.json
 
 Start.sh
+accountlog.txt
+log/
