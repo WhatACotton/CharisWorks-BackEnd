@@ -13,24 +13,27 @@ import (
 // 商品の購入リクエストを作成。
 func BuyItem(c *gin.Context) {
 	log.Print("Creating PaymentIntent...")
-	Cart, UserID := GetDatafromSessionKey(c)
+	log.Print(c)
+	UserID := GetDatafromSessionKey(c)
+	CartContents := new(database.CartContents)
+	err := c.BindJSON(&CartContents)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Print("CartContents:", CartContents)
 	if UserID != "" {
 		Customer := new(database.Customer)
 		Customer.CustomerGet(UserID)
-		log.Print("Customer:", Customer.Name)
+		log.Print("Customer:", Customer.CustomerName)
 		if Customer.IsRegistered && Customer.IsEmailVerified {
-			CartContents, err := database.GetCartContents(Cart.CartID)
-			if err != nil {
-				log.Fatal(err)
-			}
-			if inspectCart(CartContents) {
-				TotalPrice := totalPrice(CartContents)
+			if inspectCart(*CartContents) {
+				TotalPrice := totalPrice(*CartContents)
 				stripeInfo, err := cashing.Purchase(TotalPrice)
 				if err != nil {
 					log.Fatal(err)
 				}
 				TransactionID := validation.GetUUID()
-				database.TransactionPost(Cart, *Customer, stripeInfo, TransactionID, CartContents)
+				database.TransactionPost(*Customer, stripeInfo, TransactionID, *CartContents)
 
 				c.JSON(http.StatusOK, gin.H{"message": "購入リンクが発行されました。", "url": stripeInfo.URL})
 			} else {
@@ -54,6 +57,14 @@ func inspectCart(carts database.CartContents) bool {
 		if Cart.Status != "Available" {
 			return false
 		}
+		flag, stock := database.IsItemExist(Cart.ItemID)
+		if !flag {
+			return false
+		}
+		if stock < Cart.Quantity {
+			return false
+		}
+
 	}
 	return true
 }
@@ -69,7 +80,7 @@ func totalPrice(Carts database.CartContents) (TotalPrice int) {
 // 購入履歴を取得する。
 func GetTransaction(c *gin.Context) {
 	TransactionContentsList := new([]database.TransactionDetails)
-	_, UserID := GetDatafromSessionKey(c)
+	UserID := GetDatafromSessionKey(c)
 
 	log.Print("UserID:", UserID)
 	Transactions := database.TransactionGet(UserID)
@@ -104,11 +115,9 @@ func completePayment(ID string) (err error) {
 		Item := new(database.Item)
 		Item.ItemGet(TransactionDetail.ItemID)
 		amount := float64(Item.Price) * float64(TransactionDetail.Quantity) * 0.97 * 0.964
-		cashing.Transfer(amount, database.MakerGetStripeID(Item.MakerName), Item.Name)
+		cashing.Transfer(amount, Item.StripeAccountID, Item.Name)
 	}
 	UserID := database.TransactionGetUserIDfromStripeID(ID)
-	CartID := database.GetCartID(UserID)
-	database.CartDelete(CartID)
 	database.CustomerSetCartID(UserID, validation.GetUUID())
 	return nil
 }

@@ -9,18 +9,19 @@ import (
 
 // Item関連
 type Item struct {
-	ItemID      string `json:"ItemID"`
-	Status      string `json:"Status"`
-	Name        string `json:"Name"`
-	Price       int    `json:"Price"`
-	Stock       int    `json:"Stock"`
-	MakerName   string `json:"MakerName"`
-	Order       int    `json:"Order"`
-	Color       string `json:"Color"`
-	Series      string `json:"Series"`
-	Size        string `json:"Size"`
-	Description string `json:"Description"`
+	ItemID          string `json:"ItemID"`
+	StripeAccountID string `json:"StripeAccountID"`
+	Status          string `json:"Status"`
+	Name            string `json:"Name"`
+	Price           int    `json:"Price"`
+	Stock           int    `json:"Stock"`
+	Order           int    `json:"Order"`
+	Color           string `json:"Color"`
+	Series          string `json:"Series"`
+	Size            string `json:"Size"`
+	Description     string `json:"Description"`
 	//MakersDetailsから取得
+	MakerName        string `json:"MakerName"`
 	MakerDescription string `json:"MakerDescription,omitempty"`
 }
 type ItemMain struct {
@@ -56,39 +57,62 @@ type TopItem struct {
 }
 type TopItems []TopItem
 
+func IsItemExist(ItemID string) (bool, int) {
+	db := ConnectSQL()
+	defer db.Close()
+	// SQLの実行
+	rows, _ := db.Query(
+		`SELECT
+			ItemID,
+			Stock
+		FROM 
+			Item 
+		WHERE 
+			ItemID = ?`,
+		ItemID)
+	defer rows.Close()
+	Stock := 0
+	for rows.Next() {
+		rows.Scan(&ItemID, &Stock)
+	}
+	if ItemID == "" {
+		return false, 0
+	} else {
+		return true, Stock
+	}
+}
+
 // Itemの取得
 func (i *Item) ItemGet(ItemID string) {
 	i.ItemID = ItemID
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
-	rows, err := db.Query(
+	rows, _ := db.Query(
 		`SELECT
 			Item.Status,
 			Item.ItemName,
 			Item.Price,
 			Item.Stock,
-			Item.MakerName,
 			Item.ItemOrder,
 			Item.Color,
 			Item.Series,
 			Item.Size,
 			Item.Description,
-			Customer.MakerDescription
+			Maker.MakerName,
+			Maker.Description
 		FROM 
 			Item 
 		JOIN 
-			Customer 
+			Maker
 		ON 
-			Item.MakerName = Customer.MakerName 
+			Item.StripeAccountID = Maker.StripeAccountID 
 		WHERE 
 			ItemID = ?`,
 		ItemID)
-	log.Print("rows:", rows, "err:", err)
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&i.Status, &i.Name, &i.Price, &i.Stock, &i.MakerName, &i.Order, &i.Color, &i.Series, &i.Size, &i.Description, &i.MakerDescription)
-		log.Print("Item:", i, "err:", err)
+		rows.Scan(&i.Status, &i.Name, &i.Price, &i.Stock, &i.Order, &i.Color, &i.Series, &i.Size, &i.Description, &i.MakerName, &i.MakerDescription)
 	}
 }
 
@@ -141,20 +165,17 @@ func ItemGetALL() (Items Items, err error) {
 			Item.Description,
 			Item.Color,
 			Item.Series,
-			Item.Size,
-			Item.MakerName
+			Item.Size
 		FROM 
 			Item 
 		WHERE 
 			Item.Status = 'Available'`)
-	log.Print("rows:", rows, "err:", err)
 	if err != nil {
 		return nil, errors.Wrap(err, "error in getting TopItem /GetALL1")
 	}
 	for rows.Next() {
 		Item := new(Item)
-		err := rows.Scan(&Item.ItemID, &Item.Order, &Item.Status, &Item.Price, &Item.Stock, &Item.Name, &Item.Description, &Item.Color, &Item.Series, &Item.Size, &Item.MakerName)
-		log.Print("Item:", Item, "err:", err)
+		err := rows.Scan(&Item.ItemID, &Item.Order, &Item.Status, &Item.Price, &Item.Stock, &Item.Name, &Item.Description, &Item.Color, &Item.Series, &Item.Size)
 		if err != nil {
 			return nil, errors.Wrap(err, "error in scanning CartID /GetALL2")
 		}
@@ -229,16 +250,15 @@ func ItemGetColor(Color string) (Items, error) {
 }
 
 // 出品者ごとのItemの取得
-func ItemGetMaker(MakerName string) (Items Items) {
+func ItemGetMaker(StribeAccountID string) (Items Items) {
 	db := ConnectSQL()
-	rows, err := db.Query(
+	rows, _ := db.Query(
 		`SELECT 
 			ItemID,
 			Status,
 			ItemName,
 			Price,
 			Stock,
-			MakerName,
 			ItemOrder,
 			Color,
 			Series,
@@ -247,42 +267,39 @@ func ItemGetMaker(MakerName string) (Items Items) {
 		FROM 
 			Item 
 		WHERE 
-			MakerName = ?`,
-		MakerName)
+			StripeAccountID = ?`,
+		StribeAccountID)
 	defer db.Close()
-	log.Print("rows:", rows, "err:", err)
 	for rows.Next() {
 		Item := new(Item)
-		err := rows.Scan(&Item.ItemID, &Item.Status, &Item.Name, &Item.Price, &Item.Stock, &Item.MakerName, &Item.Order, &Item.Color, &Item.Series, &Item.Size, &Item.Description)
-		log.Print("Item:", Item, "err:", err)
+		rows.Scan(&Item.ItemID, &Item.Status, &Item.Name, &Item.Price, &Item.Stock, &Item.Order, &Item.Color, &Item.Series, &Item.Size, &Item.Description)
 		Items = append(Items, *Item)
 	}
 	return Items
 }
 
 // Itemの主要情報の作成
-func ItemMainCreate(ItemMain ItemMain, MakerName string) {
+func ItemMainCreate(ItemMain ItemMain, StripeAccountID string) {
 	ItemID := validation.GetUUID()
-	log.Print("MakerName:", MakerName)
+	log.Print("MakerName:", StripeAccountID)
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
-	res, err := db.Exec(`
+	db.Exec(`
 	INSERT INTO 
 		Item 
-		(ItemID,Status,ItemName,Price,Stock,MakerName,Description,Color,Series,Size) 
+		(ItemID,Status,ItemName,Price,Stock,StripeAccountID,Description,Color,Series,Size) 
 	VALUES 
 		(?,?,?,?,?,?,?,?,?,?)`,
-		ItemID, ItemMain.Status, ItemMain.Name, ItemMain.Price, ItemMain.Stock, MakerName, ItemMain.Description, ItemMain.Color, ItemMain.Series, ItemMain.Size)
-	log.Print("res:", res, "err:", err)
+		ItemID, ItemMain.Status, ItemMain.Name, ItemMain.Price, ItemMain.Stock, StripeAccountID, ItemMain.Description, ItemMain.Color, ItemMain.Series, ItemMain.Size)
 }
 
 // Itemの詳細の作成
-func ItemDetailCreate(ItemDetail ItemDetail, MakerName string) {
+func ItemDetailCreate(ItemDetail ItemDetail, StripeAccountID string) {
 	db := ConnectSQL()
 	defer db.Close()
 	// SQLの実行
-	res, err := db.Exec(`
+	db.Exec(`
 	UPDATE
 		Item
 	SET
@@ -291,7 +308,8 @@ func ItemDetailCreate(ItemDetail ItemDetail, MakerName string) {
 		Series = ?,
 		Size = ?
 	WHERE
-		ItemID = ?`,
-		ItemDetail.Description, ItemDetail.Color, ItemDetail.Series, ItemDetail.Size, ItemDetail.ItemID)
-	log.Print("res:", res, "err:", err)
+		ItemID = ?
+		AND
+		StripeAccountID = ?`,
+		ItemDetail.Description, ItemDetail.Color, ItemDetail.Series, ItemDetail.Size, ItemDetail.ItemID, StripeAccountID)
 }

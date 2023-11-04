@@ -9,28 +9,27 @@ import (
 
 type Customer struct {
 	UserID           string `json:"UserID"`
-	Name             string `json:"Name"`
+	CustomerName     string `json:"Name"`
 	ZipCode          string `json:"ZipCode"`
 	Address1         string `json:"Address1"`
 	Address2         string `json:"Address2"`
-	Address3         string `json:"Address3"`
+	Address3         string `json:"Address3,omitempty"`
 	PhoneNumber      string `json:"PhoneNumber"`
 	Email            string `json:"Contact"`
 	IsRegistered     bool   `json:"IsRegistered"`
 	CreatedDate      string `json:"CreatedDate"`
 	IsEmailVerified  bool   `json:"IsEmailVerified"`
-	CartID           string `json:"CartID"`
 	StripeAccountID  string `json:"StripeAccountID,omitempty"`
 	LastAccessedDate string `json:"LastAccessedDate"`
-	MakerName        string `json:"MakerName,omitempty"`
+	Role             string `json:"role"`
 }
 type CustomerRegisterPayload struct {
-	Name        string `json:"Name"`
-	ZipCode     string `json:"ZipCode"`
-	Address1    string `json:"Address1"`
-	Address2    string `json:"Address2"`
-	Address3    string `json:"Address3"`
-	PhoneNumber string `json:"PhoneNumber"`
+	CustomerName string `json:"Name"`
+	ZipCode      string `json:"ZipCode"`
+	Address1     string `json:"Address1"`
+	Address2     string `json:"Address2"`
+	Address3     string `json:"Address3"`
+	PhoneNumber  string `json:"PhoneNumber"`
 }
 
 func CustomerSignUp(c validation.CustomerReqPayload) error {
@@ -66,7 +65,7 @@ func CustomerRegister(UserID string, customer validation.CustomerRegisterPayload
 	UPDATE 
 		Customer 
 	SET 
-		Name = ?,
+		CustomerName = ?,
 		ZipCode = ?,
 		Address1 = ?,
 		Address2 = ?,
@@ -229,9 +228,9 @@ func (c *Customer) CustomerGet(UserID string) {
 	db := ConnectSQL()
 	c.UserID = UserID
 	// SQLの実行
-	rows, _ := db.Query(`
+	rows, err := db.Query(`
 	SELECT 
-		Name,
+		CustomerName,
 		ZipCode,
 		Address1,
 		Address2,
@@ -242,19 +241,20 @@ func (c *Customer) CustomerGet(UserID string) {
 		CreatedDate,
 		LastAccessedDate,
 		IsEmailVerified,
-		CartID,
-		StripeAccountID,
-		MakerName
+		role
 	FROM 
 		Customer 
 
 	WHERE 
 		UserID= ?`, UserID)
+	if err != nil {
+		log.Print(err)
+	}
 	defer rows.Close()
 	defer db.Close()
 	// SQLの実行
 	for rows.Next() {
-		rows.Scan(&c.Name, &c.ZipCode, &c.Address1, &c.Address2, &c.Address3, &c.PhoneNumber, &c.Email, &c.IsRegistered, &c.CreatedDate, &c.LastAccessedDate, &c.IsEmailVerified, &c.CartID, &c.StripeAccountID, &c.MakerName)
+		rows.Scan(&c.CustomerName, &c.ZipCode, &c.Address1, &c.Address2, &c.Address3, &c.PhoneNumber, &c.Email, &c.IsRegistered, &c.CreatedDate, &c.LastAccessedDate, &c.IsEmailVerified, &c.Role)
 	}
 	if c.Email == "" {
 		log.Print("not found")

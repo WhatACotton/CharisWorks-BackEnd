@@ -11,8 +11,6 @@
 [GIN-debug] POST   /go/SessionEnd            --> github.com/WhatACotton/go-backend-test/internal/handler.LogOut (5 handlers)
 [GIN-debug] GET    /go/GetCustomer           --> github.com/WhatACotton/go-backend-test/internal/handler.GetCustomer (5 handlers)
 [GIN-debug] GET    /go/GetTransactions       --> github.com/WhatACotton/go-backend-test/internal/handler.GetTransaction (5 handlers)
-[GIN-debug] POST   /go/PostCart              --> github.com/WhatACotton/go-backend-test/internal/handler.PostCart (5 handlers)
-[GIN-debug] GET    /go/GetCart               --> github.com/WhatACotton/go-backend-test/internal/handler.GetCart (5 handlers)
 [GIN-debug] POST   /go/Transaction           --> github.com/WhatACotton/go-backend-test/internal/handler.BuyItem (5 handlers)
 [GIN-debug] POST   /go/stripe                --> github.com/WhatACotton/go-backend-test/internal/handler.Webhook (5 handlers)
 [GIN-debug] GET    /go/item/top              --> github.com/WhatACotton/go-backend-test/internal/handler.Top (5 handlers)
@@ -32,31 +30,17 @@
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8080
-[GIN] 2023/10/26 - 04:38:33 | 401 |    3.174651ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/26 - 04:38:33 | 200 |    7.192555ms |       127.0.0.1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:34 | 401 |    4.101843ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/26 - 04:38:34 | 200 |   12.051404ms |       127.0.0.1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:34 | 401 |    9.662636ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/26 - 04:38:34 | 200 |     9.37517ms |       127.0.0.1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:34 | 401 |    11.17958ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/26 - 04:38:36 | 200 |   12.638819ms |       127.0.0.1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:43 | 200 |  208.113789ms |             ::1 | POST     "/go/Login"
-[GIN] 2023/10/26 - 04:38:44 | 200 |   29.878899ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/26 - 04:38:44 | 200 |   26.307491ms |             ::1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:44 | 200 |   14.057243ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/26 - 04:38:44 | 200 |    13.76758ms |             ::1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:44 | 200 |    17.89908ms |       127.0.0.1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:46 | 200 |    4.456385ms |             ::1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:47 | 200 |   21.883351ms |       127.0.0.1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:47 | 200 |   15.156593ms |             ::1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:54 | 200 |    6.749992ms |       127.0.0.1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:55 | 200 |   13.588755ms |             ::1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:38:55 | 200 |    1.903641ms |       127.0.0.1 | GET      "/go/item/all"
-[GIN] 2023/10/26 - 04:38:59 | 200 |    1.949143ms |             ::1 | GET      "/go/item/details/ItemID"
-[GIN] 2023/10/26 - 04:38:59 | 200 |   16.030399ms |       127.0.0.1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:39:00 | 200 |    1.589131ms |             ::1 | GET      "/go/item/details/ItemID"
-[GIN] 2023/10/26 - 04:39:00 | 200 |   14.701997ms |       127.0.0.1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:39:04 | 200 |     23.9931ms |             ::1 | POST     "/go/PostCart"
-[GIN] 2023/10/26 - 04:39:08 | 200 |    4.030231ms |       127.0.0.1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:39:09 | 200 |   16.752593ms |             ::1 | GET      "/go/GetCart"
-[GIN] 2023/10/26 - 04:39:09 | 200 |   16.999908ms |       127.0.0.1 | GET      "/go/GetCart"
+[GIN] 2023/11/04 - 03:03:38 | 401 |    1.141268ms |             ::1 | POST     "/go/Transaction"
+[GIN] 2023/11/04 - 03:03:41 | 401 |    1.267608ms |       127.0.0.1 | POST     "/go/Transaction"
+[GIN] 2023/11/04 - 03:03:53 | 401 |     119.302µs |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 03:04:05 | 200 |  282.343015ms |       127.0.0.1 | POST     "/go/Login"
+[GIN] 2023/11/04 - 03:04:05 | 200 |    10.60885ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 03:45:05 | 200 |   31.264339ms |       127.0.0.1 | GET      "/go/item/all"
+[GIN] 2023/11/04 - 03:45:23 | 200 |    3.789573ms |             ::1 | GET      "/go/item/all"
+[GIN] 2023/11/04 - 03:46:16 | 200 |  125.268098ms |       127.0.0.1 | POST     "/go/Login"
+[GIN] 2023/11/04 - 03:46:17 | 200 |   17.654822ms |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 03:46:29 | 200 |   39.082898ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 03:46:37 | 200 |   42.833257ms |             ::1 | GET      "/go/GetTransactions"
+[GIN] 2023/11/04 - 03:46:42 | 200 |    1.866158ms |       127.0.0.1 | GET      "/go/item/all"
+[GIN] 2023/11/04 - 03:46:56 | 200 |    3.686869ms |             ::1 | GET      "/go/item/all"
+[GIN] 2023/11/04 - 03:47:03 | 200 |    3.949143ms |       127.0.0.1 | GET      "/go/item/all"

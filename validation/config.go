@@ -64,8 +64,7 @@ func GetUUID() string {
 
 func SessionConfig(r *gin.Engine) {
 	store := cookie.NewStore([]byte(GenerateRandomKey()))
-	cookies := []string{"CartSessionKey", "SessionKey"}
-	r.Use(sessions.SessionsMany(cookies, store))
+	r.Use(sessions.Sessions("SessionKey", store))
 }
 
 // アカウント関連のロギング

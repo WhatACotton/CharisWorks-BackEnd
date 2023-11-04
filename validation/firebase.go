@@ -57,7 +57,6 @@ func verifyIDToken(ctx context.Context, app *firebase.App, idToken string) *auth
 func get_IdToken(r *http.Request) (token string) {
 	// Authorizationヘッダーの値を取得
 	token = r.Header.Get("Authorization")
-	log.Printf("authHeader: %v\n", token)
 	// Bearerトークンの抽出
 	return token
 	// tokenを利用して任意の処理を行う

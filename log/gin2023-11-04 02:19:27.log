@@ -11,8 +11,6 @@
 [GIN-debug] POST   /go/SessionEnd            --> github.com/WhatACotton/go-backend-test/internal/handler.LogOut (5 handlers)
 [GIN-debug] GET    /go/GetCustomer           --> github.com/WhatACotton/go-backend-test/internal/handler.GetCustomer (5 handlers)
 [GIN-debug] GET    /go/GetTransactions       --> github.com/WhatACotton/go-backend-test/internal/handler.GetTransaction (5 handlers)
-[GIN-debug] POST   /go/PostCart              --> github.com/WhatACotton/go-backend-test/internal/handler.PostCart (5 handlers)
-[GIN-debug] GET    /go/GetCart               --> github.com/WhatACotton/go-backend-test/internal/handler.GetCart (5 handlers)
 [GIN-debug] POST   /go/Transaction           --> github.com/WhatACotton/go-backend-test/internal/handler.BuyItem (5 handlers)
 [GIN-debug] POST   /go/stripe                --> github.com/WhatACotton/go-backend-test/internal/handler.Webhook (5 handlers)
 [GIN-debug] GET    /go/item/top              --> github.com/WhatACotton/go-backend-test/internal/handler.Top (5 handlers)
@@ -32,29 +30,6 @@
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8080
-[GIN] 2023/11/01 - 00:04:11 | 200 |    1.791145ms |       127.0.0.1 | GET      "/go/item/all"
-[GIN] 2023/11/01 - 00:04:19 | 401 |    6.719271ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:04:19 | 401 |     9.34095ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:04:22 | 200 |   17.590397ms |             ::1 | POST     "/go/SessionEnd"
-[GIN] 2023/11/01 - 00:04:23 | 200 |    1.600844ms |       127.0.0.1 | GET      "/go/item/all"
-[GIN] 2023/11/01 - 00:04:26 | 401 |     10.1626ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:04:47 | 200 |  244.764802ms |       127.0.0.1 | POST     "/go/Login"
-[GIN] 2023/11/01 - 00:04:48 | 200 |   22.256761ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:04:48 | 200 |   17.268216ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:04:52 | 200 |    4.436089ms |             ::1 | GET      "/go/item/all"
-[GIN] 2023/11/01 - 00:04:55 | 200 |   27.170674ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:04:55 | 200 |   19.314073ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:04:55 | 200 |   23.126042ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:05:04 | 401 |    6.457339ms |             ::1 | GET      "/go/Maker/Details"
-[GIN] 2023/11/01 - 00:05:05 | 200 |   17.524252ms |       127.0.0.1 | GET      "/go/Maker/Details"
-[GIN] 2023/11/01 - 00:05:05 | 200 |   16.718556ms |             ::1 | GET      "/go/Maker/Details"
-[GIN] 2023/11/01 - 00:05:12 | 200 |   20.901338ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:05:12 | 200 |   23.999711ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:05:12 | 200 |   15.202689ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:06:07 | 200 |   20.314064ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:06:07 | 200 |   21.418762ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:06:07 | 200 |    19.04159ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/11/01 - 00:06:16 | 500 |   23.814805ms |       127.0.0.1 | GET      "/go/GetTransactions"
-[GIN] 2023/11/01 - 00:09:26 | 200 |   66.467898ms |             ::1 | GET      "/go/GetTransactions"
-[GIN] 2023/11/01 - 00:12:05 | 200 |  137.370874ms |       127.0.0.1 | GET      "/go/GetTransactions"
-[GIN] 2023/11/01 - 00:12:47 | 200 |   63.017846ms |             ::1 | GET      "/go/GetTransactions"
+[GIN] 2023/11/04 - 02:19:35 | 200 |  125.720028ms |       127.0.0.1 | POST     "/go/Login"
+[GIN] 2023/11/04 - 02:19:35 | 200 |   15.177676ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 02:19:40 | 500 |  704.813046ms |             ::1 | POST     "/go/Transaction"

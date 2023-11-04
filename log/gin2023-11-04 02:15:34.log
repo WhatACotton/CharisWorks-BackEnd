@@ -11,8 +11,6 @@
 [GIN-debug] POST   /go/SessionEnd            --> github.com/WhatACotton/go-backend-test/internal/handler.LogOut (5 handlers)
 [GIN-debug] GET    /go/GetCustomer           --> github.com/WhatACotton/go-backend-test/internal/handler.GetCustomer (5 handlers)
 [GIN-debug] GET    /go/GetTransactions       --> github.com/WhatACotton/go-backend-test/internal/handler.GetTransaction (5 handlers)
-[GIN-debug] POST   /go/PostCart              --> github.com/WhatACotton/go-backend-test/internal/handler.PostCart (5 handlers)
-[GIN-debug] GET    /go/GetCart               --> github.com/WhatACotton/go-backend-test/internal/handler.GetCart (5 handlers)
 [GIN-debug] POST   /go/Transaction           --> github.com/WhatACotton/go-backend-test/internal/handler.BuyItem (5 handlers)
 [GIN-debug] POST   /go/stripe                --> github.com/WhatACotton/go-backend-test/internal/handler.Webhook (5 handlers)
 [GIN-debug] GET    /go/item/top              --> github.com/WhatACotton/go-backend-test/internal/handler.Top (5 handlers)
@@ -32,17 +30,6 @@
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8080
-[GIN] 2023/10/31 - 15:40:32 | 401 |    8.105847ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/31 - 15:40:33 | 401 |   10.693649ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/31 - 15:40:40 | 200 |  113.843894ms |             ::1 | POST     "/go/Login"
-[GIN] 2023/10/31 - 15:40:40 | 200 |    20.56408ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/31 - 15:40:43 | 200 |      19.717ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/31 - 15:40:57 | 200 |   82.118309ms |       127.0.0.1 | POST     "/go/Login"
-[GIN] 2023/10/31 - 15:40:58 | 200 |   25.219338ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/31 - 15:41:00 | 200 |   25.090628ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/31 - 15:41:16 | 200 |    78.20923ms |             ::1 | POST     "/go/Login"
-[GIN] 2023/10/31 - 15:41:16 | 200 |   24.164457ms |       127.0.0.1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/31 - 15:41:20 | 200 |   24.736923ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/31 - 15:41:42 | 200 |    89.96472ms |       127.0.0.1 | POST     "/go/Login"
-[GIN] 2023/10/31 - 15:41:43 | 200 |   35.656063ms |             ::1 | GET      "/go/GetCustomer"
-[GIN] 2023/10/31 - 15:41:48 | 200 |   19.639846ms |       127.0.0.1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 02:15:37 | 401 |     202.654µs |             ::1 | GET      "/go/GetCustomer"
+[GIN] 2023/11/04 - 02:15:45 | 200 |  137.768062ms |             ::1 | POST     "/go/Login"
+[GIN] 2023/11/04 - 02:15:45 | 200 |    15.29573ms |       127.0.0.1 | GET      "/go/GetCustomer"
