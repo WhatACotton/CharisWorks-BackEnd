@@ -8,17 +8,12 @@ import (
 
 type CartContent struct {
 
-	//Auto Incrment
-	Order int `json:"Order"`
 	//From CartRequestPayload
 	ItemID   string `json:"ItemID"`
 	Quantity int    `json:"Quantity"`
 	//From Item
 	Status string `json:"Status"`
-	//From Item
-	ItemName string `json:"ItemName"`
-	Price    int    `json:"Price"`
-	Stock    int    `json:"Stock"`
+	Price  int    `json:"Price"`
 }
 type CartContents []CartContent
 type Transaction struct {

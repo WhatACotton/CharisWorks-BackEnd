@@ -15,7 +15,7 @@ func BuyItem(c *gin.Context) {
 	log.Print("Creating PaymentIntent...")
 	log.Print(c)
 	UserID := GetDatafromSessionKey(c)
-	CartContents := new(database.CartContents)
+	CartContents := new(CartRequestPayloads)
 	err := c.BindJSON(&CartContents)
 	if err != nil {
 		log.Fatal(err)
@@ -26,19 +26,21 @@ func BuyItem(c *gin.Context) {
 		Customer.CustomerGet(UserID)
 		log.Print("Customer:", Customer.CustomerName)
 		if Customer.IsRegistered && Customer.IsEmailVerified {
-			if inspectCart(*CartContents) {
-				TotalPrice := totalPrice(*CartContents)
+			TotalPrice := CartContents.inspectCart()
+			if TotalPrice != 0 {
 				stripeInfo, err := cashing.Purchase(TotalPrice)
 				if err != nil {
 					log.Fatal(err)
 				}
 				TransactionID := validation.GetUUID()
-				database.TransactionPost(*Customer, stripeInfo, TransactionID, *CartContents)
+
+				database.TransactionPost(*Customer, stripeInfo, TransactionID, ConstructCart(*CartContents))
 
 				c.JSON(http.StatusOK, gin.H{"message": "購入リンクが発行されました。", "url": stripeInfo.URL})
 			} else {
 				c.JSON(http.StatusUnauthorized, gin.H{"message": "カートの中身に購入不可能な商品が含まれています。"})
 			}
+
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "本登録・またはEmail認証が完了していません。", "errcode": "401"})
 		}
@@ -47,28 +49,53 @@ func BuyItem(c *gin.Context) {
 	}
 
 }
+func ConstructCart(Cart CartRequestPayloads) (CartContents database.CartContents) {
+	for _, CartContent := range Cart {
+		Item := new(database.Item)
+		Item.ItemGet(CartContent.ItemID)
+		CartContent := new(database.CartContent)
+		CartContent.Price = Item.Price
+		CartContent.Status = Item.Status
+		CartContents = append(CartContents, *CartContent)
+	}
+	return CartContents
+}
 
 // カートの中身を確認し、購入可能かどうかを判定する。
-func inspectCart(carts database.CartContents) bool {
-	if len(carts) == 0 {
-		return false
+func (carts *CartRequestPayloads) inspectCart() int {
+	price := 0
+	if len(*carts) == 0 {
+		return 0
 	}
-	for _, Cart := range carts {
-		if Cart.Status != "Available" {
-			return false
+	for _, Cart := range *carts {
+		Item := new(database.Item)
+		Item.ItemGet(Cart.ItemID)
+		if Item.Status != "Available" {
+			return 0
 		}
 		flag, stock := database.IsItemExist(Cart.ItemID)
 		if !flag {
-			return false
+			return 0
+		}
+		if stock <= 0 {
+			return 0
 		}
 		if stock < Cart.Quantity {
-			return false
+			return 0
 		}
 	}
-	return hasDuplicates(carts)
+	if hasDuplicates(*carts) {
+		for _, Cart := range *carts {
+			Item := new(database.Item)
+			Item.ItemGet(Cart.ItemID)
+			price += Item.Price * Cart.Quantity
+		}
+		return price
+	}
+	return 0
 }
 
-func hasDuplicates(slice database.CartContents) bool {
+func hasDuplicates(slice CartRequestPayloads) bool {
 	encountered := make(map[string]bool)
 	for _, item := range slice {
 		if encountered[item.ItemID] {
@@ -77,14 +104,6 @@ func hasDuplicates(slice database.CartContents) bool {
 		encountered[item.ItemID] = true
 	}
 	return true
-}
-
-// カートの合計金額を計算する。
-func totalPrice(Carts database.CartContents) (TotalPrice int) {
-	for _, Cart := range Carts {
-		TotalPrice += Cart.Price * Cart.Quantity
-	}
-	return TotalPrice
 }
 
 // 購入履歴を取得する。
