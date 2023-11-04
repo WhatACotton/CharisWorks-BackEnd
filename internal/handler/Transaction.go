@@ -64,7 +64,17 @@ func inspectCart(carts database.CartContents) bool {
 		if stock < Cart.Quantity {
 			return false
 		}
+	}
+	return hasDuplicates(carts)
+}
 
+func hasDuplicates(slice database.CartContents) bool {
+	encountered := make(map[string]bool)
+	for _, item := range slice {
+		if encountered[item.ItemID] {
+			return false
+		}
+		encountered[item.ItemID] = true
 	}
 	return true
 }
