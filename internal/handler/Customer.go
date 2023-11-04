@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -132,4 +133,32 @@ func GetDatafromSessionKey(c *gin.Context) (UserID string) {
 
 	}
 	return UserID
+}
+
+type CartRequestPayload struct {
+	ItemID   string `json:"ItemID"`
+	Quantity int    `json:"Quantity"`
+}
+type CartRequestPayloads []CartRequestPayload
+
+func Cart(c *gin.Context) {
+	UserID := GetDatafromSessionKey(c)
+	if UserID != "" {
+		CartContents := new(CartRequestPayloads)
+		err := c.BindJSON(&CartContents)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Print(CartContents)
+		if CartContents.inspectCart() != 0 {
+			jsonBytes, err := json.Marshal(CartContents)
+			if err != nil {
+				log.Fatal(err)
+			}
+			database.CartSave(UserID, string(jsonBytes))
+		}
+		c.JSON(http.StatusOK, gin.H{"Cart": CartContents})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "未ログインです。"})
+	}
 }

@@ -242,7 +242,8 @@ func (c *Customer) CustomerGet(UserID string) {
 		CreatedDate,
 		LastAccessedDate,
 		IsEmailVerified,
-		role
+		role,
+		Cart
 	FROM 
 		Customer 
 
@@ -255,7 +256,7 @@ func (c *Customer) CustomerGet(UserID string) {
 	defer db.Close()
 	// SQLの実行
 	for rows.Next() {
-		rows.Scan(&c.CustomerName, &c.ZipCode, &c.Address1, &c.Address2, &c.Address3, &c.PhoneNumber, &c.Email, &c.IsRegistered, &c.CreatedDate, &c.LastAccessedDate, &c.IsEmailVerified, &c.Role)
+		rows.Scan(&c.CustomerName, &c.ZipCode, &c.Address1, &c.Address2, &c.Address3, &c.PhoneNumber, &c.Email, &c.IsRegistered, &c.CreatedDate, &c.LastAccessedDate, &c.IsEmailVerified, &c.Role, &c.Cart)
 	}
 	if c.Email == "" {
 		log.Print("not found")
@@ -335,4 +336,19 @@ func GetCartID(UID string) (CartID string) {
 		}
 	}
 	return CartID
+}
+func CartSave(UserID string, Cart string) {
+	db := ConnectSQL()
+	ins, _ := db.Prepare(`
+	UPDATE 
+		Customer 
+	
+	SET 
+		Cart = ? 
+	
+	WHERE 
+		UserID = ?`)
+	ins.Exec(Cart, UserID)
+	defer ins.Close()
+	defer db.Close()
 }
