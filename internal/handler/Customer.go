@@ -135,22 +135,16 @@ func GetDatafromSessionKey(c *gin.Context) (UserID string) {
 	return UserID
 }
 
-type CartRequestPayload struct {
-	ItemID   string `json:"ItemID"`
-	Quantity int    `json:"Quantity"`
-}
-type CartRequestPayloads []CartRequestPayload
-
 func Cart(c *gin.Context) {
 	UserID := GetDatafromSessionKey(c)
 	if UserID != "" {
-		CartContents := new(CartRequestPayloads)
+		CartContents := new(database.CartRequestPayloads)
 		err := c.BindJSON(&CartContents)
 		if err != nil {
 			log.Fatal(err)
 		}
 		log.Print(CartContents)
-		if CartContents.inspectCart() != 0 {
+		if CartContents.InspectCart() != 0 {
 			jsonBytes, err := json.Marshal(CartContents)
 			if err != nil {
 				log.Fatal(err)

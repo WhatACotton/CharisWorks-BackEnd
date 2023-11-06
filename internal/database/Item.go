@@ -335,3 +335,21 @@ func CartDetails(ItemID string) (CartContent CartContent) {
 	}
 	return CartContent
 }
+func GetStripeID(ItemID string) (StripeAccountID string) {
+	db := ConnectSQL()
+	defer db.Close()
+	// SQLの実行
+	rows, _ := db.Query(
+		`SELECT
+			StripeAccountID
+		FROM 
+			Item  
+		WHERE 
+			ItemID = ?`,
+		ItemID)
+	defer rows.Close()
+	for rows.Next() {
+		rows.Scan(&StripeAccountID)
+	}
+	return StripeAccountID
+}

@@ -40,9 +40,14 @@ type TransactionDetail struct {
 	Quantity      int    `json:"Quantity"`
 }
 type TransactionDetails []TransactionDetail
+type CartRequestPayload struct {
+	ItemID   string `json:"ItemID"`
+	Quantity int    `json:"Quantity"`
+}
+type CartRequestPayloads []CartRequestPayload
 
 // 取引履歴の作成
-func TransactionPost(Customer Customer, StripeInfo cashing.StripeInfo, TransactionID string, CartContents CartContents) {
+func TransactionPost(Customer Customer, StripeInfo cashing.StripeInfo, TransactionID string, CartRequestPayloads CartRequestPayloads) {
 	t := new(Transaction)
 	t.UserID = Customer.UserID
 	t.TransactionID = TransactionID
@@ -57,17 +62,12 @@ func TransactionPost(Customer Customer, StripeInfo cashing.StripeInfo, Transacti
 	t.Status = "決済前"
 	t.ZipCode = Customer.ZipCode
 	t.transactionPost()
-	TransactionContents := new(TransactionDetail)
-	for _, CartContent := range CartContents {
-		TransactionContents.transactionConstruct(CartContent, TransactionID)
-		TransactionContents.transactionDetailsPost()
+	for _, CartRequestPayload := range CartRequestPayloads {
+		CartRequestPayload.transactionDetailsPost(TransactionID)
 	}
+	PurchasedCart(Customer.UserID)
 }
-func (t *TransactionDetail) transactionConstruct(CartContent CartContent, TransactionID string) {
-	t.TransactionID = TransactionID
-	t.ItemID = CartContent.ItemID
-	t.Quantity = CartContent.Quantity
-}
+
 func (t *Transaction) transactionPost() {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
@@ -175,7 +175,7 @@ func TransactionGetUserIDfromStripeID(ID string) (StripeID string) {
 }
 
 // 取引履歴の登録
-func (t *TransactionDetail) transactionDetailsPost() error {
+func (t *CartRequestPayload) transactionDetailsPost(TransactionID string) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	defer db.Close()
@@ -196,7 +196,7 @@ func (t *TransactionDetail) transactionDetailsPost() error {
 	// SQLの実行
 	_, err = ins.Exec(
 		t.ItemID,
-		t.TransactionID,
+		TransactionID,
 		t.Quantity,
 	)
 	if err != nil {
@@ -227,6 +227,25 @@ func Purchased(TransactionDetail TransactionDetail) {
 		panic(err)
 	}
 }
+func PurchasedCart(UserID string) {
+	// データベースのハンドルを取得する
+	db := ConnectSQL()
+	defer db.Close()
+	// SQLの準備
+	ins, err := db.Prepare(`UPDATE Customer SET Cart='Purchased' WHERE UserID = ?`)
+	if err != nil {
+		panic(err)
+	}
+	defer ins.Close()
+
+	// SQLの実行
+	_, err = ins.Exec(
+		UserID,
+	)
+	if err != nil {
+		panic(err)
+	}
+}
 
 // 取引履歴の詳細の取得
 func (t *Transaction) TransactionDetailsGet() (TransacitonDetails TransactionDetails) {
@@ -241,8 +260,7 @@ func (t *Transaction) TransactionDetailsGet() (TransacitonDetails TransactionDet
 	defer rows.Close()
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&TransactionDetail.TransactionID, &TransactionDetail.Quantity, &TransactionDetail.ItemOrder, &TransactionDetail.ItemID)
-		log.Print("TransactionContent:", TransactionDetail, "err:", err)
+		rows.Scan(&TransactionDetail.TransactionID, &TransactionDetail.Quantity, &TransactionDetail.ItemOrder, &TransactionDetail.ItemID)
 		TransacitonDetails = append(TransacitonDetails, *TransactionDetail)
 	}
 	return TransacitonDetails
@@ -304,4 +322,48 @@ func TransactionGetID(StripeID string) (TransactionID string) {
 	}
 	log.Print("TransactionID:", TransactionID)
 	return TransactionID
+}
+
+// カートの中身を確認し、購入可能かどうかを判定する。
+func (carts *CartRequestPayloads) InspectCart() int {
+	price := 0
+	if len(*carts) == 0 {
+		return 0
+	}
+	for _, Cart := range *carts {
+		Item := new(Item)
+		Item.ItemGet(Cart.ItemID)
+		if Item.Status != "Available" {
+			return 0
+		}
+		flag, stock := IsItemExist(Cart.ItemID)
+		if !flag {
+			return 0
+		}
+		if Cart.Quantity <= 0 {
+			return 0
+		}
+		if stock < Cart.Quantity {
+			return 0
+		}
+	}
+	if hasDuplicates(*carts) {
+		for _, Cart := range *carts {
+			Item := new(Item)
+			Item.ItemGet(Cart.ItemID)
+			price += Item.Price * Cart.Quantity
+		}
+		return price
+	}
+	return 0
+}
+func hasDuplicates(slice CartRequestPayloads) bool {
+	encountered := make(map[string]bool)
+	for _, item := range slice {
+		if encountered[item.ItemID] {
+			return false
+		}
+		encountered[item.ItemID] = true
+	}
+	return true
 }
