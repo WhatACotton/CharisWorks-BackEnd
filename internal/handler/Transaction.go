@@ -15,7 +15,7 @@ func BuyItem(c *gin.Context) {
 	log.Print("Creating PaymentIntent...")
 	log.Print(c)
 	UserID := GetDatafromSessionKey(c)
-	CartContents := new(CartRequestPayloads)
+	CartContents := new(database.CartRequestPayloads)
 	err := c.BindJSON(&CartContents)
 	if err != nil {
 		log.Fatal(err)
@@ -26,7 +26,7 @@ func BuyItem(c *gin.Context) {
 		Customer.CustomerGet(UserID)
 		log.Print("Customer:", Customer.CustomerName)
 		if Customer.IsRegistered && Customer.IsEmailVerified {
-			TotalPrice := CartContents.inspectCart()
+			TotalPrice := CartContents.InspectCart()
 			if TotalPrice != 0 {
 				stripeInfo, err := cashing.Purchase(TotalPrice)
 				if err != nil {
@@ -34,7 +34,7 @@ func BuyItem(c *gin.Context) {
 				}
 				TransactionID := validation.GetUUID()
 
-				database.TransactionPost(*Customer, stripeInfo, TransactionID, ConstructCart(*CartContents))
+				database.TransactionPost(*Customer, stripeInfo, TransactionID, *CartContents)
 
 				c.JSON(http.StatusOK, gin.H{"message": "購入リンクが発行されました。", "url": stripeInfo.URL})
 			} else {
@@ -49,7 +49,7 @@ func BuyItem(c *gin.Context) {
 	}
 
 }
-func ConstructCart(Cart CartRequestPayloads) (CartContents database.CartContents) {
+func ConstructCart(Cart database.CartRequestPayloads) (CartContents database.CartContents) {
 	for _, CartContent := range Cart {
 		Item := new(database.Item)
 		Item.ItemGet(CartContent.ItemID)
@@ -59,51 +59,6 @@ func ConstructCart(Cart CartRequestPayloads) (CartContents database.CartContents
 		CartContents = append(CartContents, *CartContent)
 	}
 	return CartContents
-}
-
-// カートの中身を確認し、購入可能かどうかを判定する。
-func (carts *CartRequestPayloads) inspectCart() int {
-	price := 0
-	if len(*carts) == 0 {
-		return 0
-	}
-	for _, Cart := range *carts {
-		Item := new(database.Item)
-		Item.ItemGet(Cart.ItemID)
-		if Item.Status != "Available" {
-			return 0
-		}
-		flag, stock := database.IsItemExist(Cart.ItemID)
-		if !flag {
-			return 0
-		}
-		if Cart.Quantity <= 0 {
-			return 0
-		}
-		if stock < Cart.Quantity {
-			return 0
-		}
-	}
-	if hasDuplicates(*carts) {
-		for _, Cart := range *carts {
-			Item := new(database.Item)
-			Item.ItemGet(Cart.ItemID)
-			price += Item.Price * Cart.Quantity
-		}
-		return price
-	}
-	return 0
-}
-
-func hasDuplicates(slice CartRequestPayloads) bool {
-	encountered := make(map[string]bool)
-	for _, item := range slice {
-		if encountered[item.ItemID] {
-			return false
-		}
-		encountered[item.ItemID] = true
-	}
-	return true
 }
 
 // 購入履歴を取得する。
@@ -143,8 +98,9 @@ func completePayment(ID string, status string) (err error) {
 		database.Purchased(TransactionDetail)
 		Item := new(database.Item)
 		Item.ItemGet(TransactionDetail.ItemID)
+		StripeAccountID := database.GetStripeID(TransactionDetail.ItemID)
 		amount := float64(Item.Price) * float64(TransactionDetail.Quantity) * 0.97 * 0.964
-		cashing.Transfer(amount, Item.StripeAccountID, Item.Name)
+		cashing.Transfer(amount, StripeAccountID, Item.Name)
 	}
 	UserID := database.TransactionGetUserIDfromStripeID(ID)
 	database.ClearCart(UserID)

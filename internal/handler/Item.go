@@ -62,7 +62,7 @@ func ItemMakerIDGet(c *gin.Context) {
 
 }
 func CartDetails(c *gin.Context) {
-	Carts := new(CartRequestPayloads)
+	Carts := new(database.CartRequestPayloads)
 	if err := c.BindJSON(&Carts); err != nil {
 		log.Print(err)
 	}
