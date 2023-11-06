@@ -77,7 +77,7 @@ func (carts *CartRequestPayloads) inspectCart() int {
 		if !flag {
 			return 0
 		}
-		if stock <= 0 {
+		if Cart.Quantity <= 0 {
 			return 0
 		}
 		if stock < Cart.Quantity {
@@ -122,18 +122,18 @@ func GetTransaction(c *gin.Context) {
 
 // stripeからのwebhookを受け取る
 func Webhook(c *gin.Context) {
-	ID, err := cashing.PaymentComplete(c.Writer, c.Request)
+	ID, status, err := cashing.PaymentComplete(c.Writer, c.Request)
 	if err != nil {
 		c.JSON(400, gin.H{"message": "error"})
 	}
 	if ID != "" {
-		completePayment(ID)
+		completePayment(ID, status)
 	}
 }
 
 // 購入を完了させる
-func completePayment(ID string) (err error) {
-	database.TransactionSetStatus("決済完了", ID)
+func completePayment(ID string, status string) (err error) {
+	database.TransactionSetStatus(status, ID)
 	Transaction := new(database.Transaction)
 	Transaction.TransactionID = database.TransactionGetID(ID)
 	TransactionDetails := Transaction.TransactionDetailsGet()
@@ -147,7 +147,7 @@ func completePayment(ID string) (err error) {
 		cashing.Transfer(amount, Item.StripeAccountID, Item.Name)
 	}
 	UserID := database.TransactionGetUserIDfromStripeID(ID)
-	database.CustomerSetCartID(UserID, validation.GetUUID())
+	database.ClearCart(UserID)
 	return nil
 }
 

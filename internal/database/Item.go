@@ -313,3 +313,25 @@ func ItemDetailCreate(ItemDetail ItemDetail, StripeAccountID string) {
 		StripeAccountID = ?`,
 		ItemDetail.Description, ItemDetail.Color, ItemDetail.Series, ItemDetail.Size, ItemDetail.ItemID, StripeAccountID)
 }
+func CartDetails(ItemID string) (CartContent CartContent) {
+	db := ConnectSQL()
+	defer db.Close()
+	// SQLの実行
+	rows, _ := db.Query(
+		`SELECT
+			ItemID,
+			ItemName,
+			Price,
+			Status,
+			Stock
+		FROM 
+			Item  
+		WHERE 
+			ItemID = ?`,
+		ItemID)
+	defer rows.Close()
+	for rows.Next() {
+		rows.Scan(&CartContent.ItemID, &CartContent.Name, &CartContent.Price, &CartContent.Status, &CartContent.Stock)
+	}
+	return CartContent
+}

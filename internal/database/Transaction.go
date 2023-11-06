@@ -14,6 +14,8 @@ type CartContent struct {
 	//From Item
 	Status string `json:"Status"`
 	Price  int    `json:"Price"`
+	Name   string `json:"Name"`
+	Stock  int    `json:"Stock"`
 }
 type CartContents []CartContent
 type Transaction struct {

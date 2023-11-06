@@ -61,3 +61,20 @@ func ItemMakerIDGet(c *gin.Context) {
 	c.JSON(200, Items)
 
 }
+func CartDetails(c *gin.Context) {
+	Carts := new(CartRequestPayloads)
+	if err := c.BindJSON(&Carts); err != nil {
+		log.Print(err)
+	}
+	CartContents := []database.CartContent{}
+	for _, Cart := range *Carts {
+		CartContent := database.CartDetails(Cart.ItemID)
+		CartContent.Quantity = Cart.Quantity
+		CartContents = append(CartContents, CartContent)
+	}
+	if len(CartContents) > 0 {
+		c.JSON(200, gin.H{"Cart": CartContents})
+	} else {
+		c.JSON(404, "{Not Found}")
+	}
+}
