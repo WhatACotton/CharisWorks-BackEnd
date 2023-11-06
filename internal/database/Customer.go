@@ -352,3 +352,18 @@ func CartSave(UserID string, Cart string) {
 	defer ins.Close()
 	defer db.Close()
 }
+func ClearCart(UserID string) {
+	db := ConnectSQL()
+	ins, _ := db.Prepare(`
+	UPDATE 
+		Customer 
+	
+	SET 
+		Cart = "" 
+	
+	WHERE 
+		UserID = ?`)
+	ins.Exec(UserID)
+	defer ins.Close()
+	defer db.Close()
+}

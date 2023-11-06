@@ -50,7 +50,7 @@ func createCheckoutSession(amount int64) (StripeInfo, error) {
 			},
 		},
 		SuccessURL: stripe.String("http://" + os.Getenv("IP_ADDRESS") + ":80/mypage"),
-		CancelURL:  stripe.String("http://" + os.Getenv("IP_ADDRESS") + ":80/signin"),
+		CancelURL:  stripe.String("http://" + os.Getenv("IP_ADDRESS") + ":80/user/signIn"),
 	}
 	s, _ := session.New(params)
 	log.Print(s.ID)
@@ -62,7 +62,7 @@ func createCheckoutSession(amount int64) (StripeInfo, error) {
 	}
 	return stripe_info, nil
 }
-func PaymentComplete(w http.ResponseWriter, req *http.Request) (string, error) {
+func PaymentComplete(w http.ResponseWriter, req *http.Request) (string, string, error) {
 	const MaxBodyBytes = int64(65536)
 	req.Body = http.MaxBytesReader(w, req.Body, MaxBodyBytes)
 
@@ -70,7 +70,7 @@ func PaymentComplete(w http.ResponseWriter, req *http.Request) (string, error) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading request body: %v\n", err)
 		w.WriteHeader(http.StatusServiceUnavailable)
-		return "", err
+		return "", "", err
 	}
 
 	// Pass the request body and Stripe-Signature header to ConstructEvent, along with the webhook signing key
@@ -80,7 +80,7 @@ func PaymentComplete(w http.ResponseWriter, req *http.Request) (string, error) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error verifying webhook signature: %v\n", err)
 		w.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
-		return "", err
+		return "", "", err
 	}
 
 	// Handle the checkout.session.completed event
@@ -90,7 +90,7 @@ func PaymentComplete(w http.ResponseWriter, req *http.Request) (string, error) {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
 			w.WriteHeader(http.StatusBadRequest)
-			return "", err
+			return "", "", err
 		}
 
 		params := &stripe.CheckoutSessionParams{}
@@ -99,13 +99,32 @@ func PaymentComplete(w http.ResponseWriter, req *http.Request) (string, error) {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
 			w.WriteHeader(http.StatusBadRequest)
-			return "", err
+			return "", "", err
 		}
-		return sessions.ID, nil
+		return sessions.ID, "決済完了", nil
+	}
+	if event.Type == "checkout.session.cancelled" {
+		var sessions stripe.CheckoutSession
+		err := json.Unmarshal(event.Data.Raw, &sessions)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return "", "", err
+		}
+
+		params := &stripe.CheckoutSessionParams{}
+		params.AddExpand("line_items")
+		log.Print(sessions.ID)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return "", "", err
+		}
+		return sessions.ID, "キャンセル済み", nil
 	}
 
 	w.WriteHeader(http.StatusOK)
-	return "", nil
+	return "", "", nil
 }
 func CreateStripeAccount(email string) (stripeID string, URL string) {
 	stripe.Key = "sk_test_51Nj1urA3bJzqElthx8UK5v9CdaucJOZj3FwkOHZ8KjDt25IAvplosSab4uybQOyE2Ne6xxxI4Rnh8pWEbYUwPoPG00wvseAHzl"

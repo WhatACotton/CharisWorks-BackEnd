@@ -51,7 +51,7 @@ func main() {
 	r.GET("/go/item/color/:color", handler.Color)
 	r.GET("/go/item/maker/:MakerName", handler.ItemMakerGet)
 	r.GET("/go/item/maker/id/:StripeAccountID", handler.ItemMakerIDGet)
-
+	r.POST("/go/item/CartDetails", handler.CartDetails)
 	r.POST("/go/Maker/AccountCreate", handler.MakerStripeAccountCreate)
 	r.POST("/go/Maker/ItemMainCreate", handler.MakerItemMainCreate)
 	r.POST("/go/Maker/ItemDetailCreate", handler.MakerItemDetailCreate)
