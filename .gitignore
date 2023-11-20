@@ -1,8 +1,11 @@
 environment.sh
 application_default_credentials.json
+application_default_credentials_charis.json
 
 Start.sh
 accountlog.txt
 log/*
 transferlog.txt
 logfile.txt
+
+dump-CharisWorks-202311202033.sql

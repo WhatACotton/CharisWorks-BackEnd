@@ -40,9 +40,12 @@ func main() {
 	r.GET("/go/GetTransactions", handler.GetTransaction)
 
 	r.POST("/go/Cart", handler.Cart)
+
+	r.GET("/go/GetCart", handler.GetCart)
 	// 購入処理
 	r.POST("/go/Transaction", handler.BuyItem)
 	r.POST("/go/stripe", handler.Webhook)
+
 	//商品API
 	r.GET("/go/item/top", handler.Top)
 	r.GET("/go/item/all", handler.ALL)
@@ -52,6 +55,8 @@ func main() {
 	r.GET("/go/item/maker/:MakerName", handler.ItemMakerGet)
 	r.GET("/go/item/maker/id/:StripeAccountID", handler.ItemMakerIDGet)
 	r.POST("/go/item/CartDetails", handler.CartDetails)
+
+	//MakerAPI
 	r.POST("/go/Maker/AccountCreate", handler.MakerStripeAccountCreate)
 	r.POST("/go/Maker/ItemMainCreate", handler.MakerItemMainCreate)
 	r.POST("/go/Maker/ItemDetailCreate", handler.MakerItemDetailCreate)

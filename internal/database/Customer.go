@@ -312,30 +312,30 @@ func GetEmail(UserID string) (Email string) {
 }
 
 // CartIDを取得
-func GetCartID(UID string) (CartID string) {
+func GetCart(UserID string) (Carts string) {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 
 	// SQLの実行
 	rows, _ := db.Query(`
 	SELECT 
-		CartID
+		Cart
 	FROM 
 		Customer 
 	WHERE 
-		UserID = ?`, UID)
+		UserID = ?`, UserID)
 
 	defer rows.Close()
 	defer db.Close()
 	// SQLの実行
 	for rows.Next() {
-		err := rows.Scan(&CartID)
+		err := rows.Scan(&Carts)
 
 		if err != nil {
 			log.Print(err)
 		}
 	}
-	return CartID
+	return Carts
 }
 func CartSave(UserID string, Cart string) {
 	db := ConnectSQL()

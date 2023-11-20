@@ -156,3 +156,13 @@ func Cart(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "未ログインです。"})
 	}
 }
+func GetCart(c *gin.Context) {
+	UserID := GetDatafromSessionKey(c)
+	if UserID != "" {
+		CartContents := database.GetCart(UserID)
+
+		c.JSON(http.StatusOK, gin.H{"Cart": CartContents})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "未ログインです。"})
+	}
+}
