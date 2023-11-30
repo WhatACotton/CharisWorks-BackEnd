@@ -19,7 +19,7 @@ func CORS(r *gin.Engine) {
 	r.Use(cors.New(cors.Config{
 		// アクセス許可するオリジン
 		AllowOrigins: []string{
-			"http://localhost:3000",
+			os.Getenv("FRONTEND_URL"),
 		},
 		// アクセス許可するHTTPメソッド
 		AllowMethods: []string{
@@ -43,6 +43,7 @@ func CORS(r *gin.Engine) {
 		// preflightリクエストの結果をキャッシュする時間
 		MaxAge: 24 * time.Hour,
 	}))
+	log.Print(r)
 }
 
 // SessionKeyの発行

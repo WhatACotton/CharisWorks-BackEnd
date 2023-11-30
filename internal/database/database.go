@@ -23,7 +23,7 @@ type PatchRequestPayload struct {
 
 func ConnectSQL() (db *sql.DB) {
 	// データベースのハンドルを取得する
-	db, err := sql.Open("mysql", os.Getenv("MYSQL_USER")+":"+os.Getenv("MYSQL_PASS")+"@tcp(localhost:3306)/CharisWorks")
+	db, err := sql.Open("mysql", os.Getenv("MYSQL_USER")+":"+os.Getenv("MYSQL_PASS")+"@tcp(db:3306)/CharisWorks")
 
 	if err != nil {
 		// ここではエラーを返さない
@@ -34,7 +34,7 @@ func ConnectSQL() (db *sql.DB) {
 
 func TestSQL() {
 	// データベースのハンドルを取得する
-	mysql := os.Getenv("MYSQL_USER") + ":" + os.Getenv("MYSQL_PASS") + "@tcp(localhost:3306)/CharisWorks"
+	mysql := os.Getenv("MYSQL_USER") + ":" + os.Getenv("MYSQL_PASS") + "@tcp(db:3306)/CharisWorks"
 	log.Println(mysql)
 	db, err := sql.Open("mysql", mysql)
 	if err != nil {
@@ -46,7 +46,7 @@ func TestSQL() {
 	err = db.Ping()
 	if err != nil {
 		log.Println("データベースに接続できません。MySQLが起動しているか、環境変数が設定されているか確認してください。")
-		log.Fatal(err)
+		//log.Fatal(err)
 		return
 	} else {
 		log.Println("データベース接続確認")
