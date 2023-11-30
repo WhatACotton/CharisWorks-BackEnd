@@ -46,7 +46,7 @@ func TestSQL() {
 	err = db.Ping()
 	if err != nil {
 		log.Println("データベースに接続できません。MySQLが起動しているか、環境変数が設定されているか確認してください。")
-		log.Fatal(err)
+		//log.Fatal(err)
 		return
 	} else {
 		log.Println("データベース接続確認")
