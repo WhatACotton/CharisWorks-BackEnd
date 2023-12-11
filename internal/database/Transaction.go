@@ -31,6 +31,7 @@ type Transaction struct {
 	TransactionTime string `json:"TransactionTime"`
 	StripeID        string `json:"StripeID"`
 	Status          string `json:"status"`
+	ShipID          string `json:"ShipID"`
 }
 type Transactions []Transaction
 type TransactionDetail struct {
@@ -282,7 +283,8 @@ func TransactionGet(UserID string) (Transactions Transactions) {
 		PhoneNumber,
 		TransactionTime,
 		StripeID,
-		Status
+		Status,
+		ShipID
 	FROM 
 		Transactions 
 	WHERE 
@@ -295,7 +297,7 @@ func TransactionGet(UserID string) (Transactions Transactions) {
 	for rows.Next() {
 		Transaction := new(Transaction)
 		//err := rows.Scan(&Customer)
-		rows.Scan(&Transaction.TransactionID, &Transaction.CustomerName, &Transaction.TotalAmount, &Transaction.ZipCode, &Transaction.Address1, &Transaction.Address2, &Transaction.Address3, &Transaction.PhoneNumber, &Transaction.TransactionTime, &Transaction.StripeID, &Transaction.Status)
+		rows.Scan(&Transaction.TransactionID, &Transaction.CustomerName, &Transaction.TotalAmount, &Transaction.ZipCode, &Transaction.Address1, &Transaction.Address2, &Transaction.Address3, &Transaction.PhoneNumber, &Transaction.TransactionTime, &Transaction.StripeID, &Transaction.Status, &Transaction.ShipID)
 		Transactions = append(Transactions, *Transaction)
 	}
 	return Transactions
