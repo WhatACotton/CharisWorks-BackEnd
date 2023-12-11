@@ -148,6 +148,7 @@ Transactions{
     TransactionTime timestamp "取引された時間"
     StripeID string "Stripeから振られたID"
     Status string "取引の状態"
+    ShipID string "郵便局の追跡番号"
 }
 LogInLog{
     UserID string PK
