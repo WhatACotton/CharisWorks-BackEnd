@@ -20,7 +20,7 @@ type CartContent struct {
 type CartContents []CartContent
 type Transaction struct {
 	TransactionID   string `json:"TransactionID"`
-	UserID          string `json:"UserID"`
+	UserID          string `json:"UserID,omitempty"`
 	CustomerName    string `json:"Name"`
 	TotalAmount     int    `json:"TotalAmount"`
 	ZipCode         string `json:"ZipCode"`
