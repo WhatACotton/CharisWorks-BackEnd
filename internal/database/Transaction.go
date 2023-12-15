@@ -21,13 +21,13 @@ type CartContents []CartContent
 type Transaction struct {
 	TransactionID   string `json:"TransactionID"`
 	UserID          string `json:"UserID,omitempty"`
-	CustomerName    string `json:"Name"`
+	CustomerName    string `json:"Name,omitempty"`
 	TotalAmount     int    `json:"TotalAmount"`
-	ZipCode         string `json:"ZipCode"`
-	Address1        string `json:"Address1"`
-	Address2        string `json:"Address2"`
-	Address3        string `json:"Address3"`
-	PhoneNumber     string `json:"PhoneNumber"`
+	ZipCode         string `json:"ZipCode,omitempty"`
+	Address1        string `json:"Address1,omitempty"`
+	Address2        string `json:"Address2,omitempty"`
+	Address3        string `json:"Address3,omitempty"`
+	PhoneNumber     string `json:"PhoneNumber,omitempty"`
 	TransactionTime string `json:"TransactionTime"`
 	StripeID        string `json:"StripeID"`
 	Status          string `json:"status"`
@@ -39,6 +39,7 @@ type TransactionDetail struct {
 	TransactionID string `json:"TransactionID"`
 	ItemID        string `json:"ItemID"`
 	Quantity      int    `json:"Quantity"`
+	ItemName      string `json:"ItemName"`
 }
 type TransactionDetails []TransactionDetail
 type CartRequestPayload struct {
@@ -255,13 +256,33 @@ func (t *Transaction) TransactionDetailsGet() (TransacitonDetails TransactionDet
 	defer db.Close()
 	TransactionDetail := new(TransactionDetail)
 	// SQLの実行
-	rows, _ := db.Query(`
-		SELECT TransactionID,Quantity,ItemOrder,ItemID FROM TransactionDetails WHERE TransactionID = ?`, t.TransactionID)
-
+	rows, err := db.Query(`
+		SELECT 
+			TransactionDetails.TransactionID,
+			TransactionDetails.Quantity,
+			TransactionDetails.ItemOrder,
+			TransactionDetails.ItemID,
+			Item.ItemName
+		FROM 
+			TransactionDetails 
+		JOIN
+			Item
+		ON
+			TransactionDetails.ItemID = Item.ItemID
+		WHERE 
+			TransactionID = ?
+		`, t.TransactionID)
+	if err != nil {
+		log.Print(err)
+	}
 	defer rows.Close()
-	// SQLの実行
+	//
+
 	for rows.Next() {
-		rows.Scan(&TransactionDetail.TransactionID, &TransactionDetail.Quantity, &TransactionDetail.ItemOrder, &TransactionDetail.ItemID)
+		err := rows.Scan(&TransactionDetail.TransactionID, &TransactionDetail.Quantity, &TransactionDetail.ItemOrder, &TransactionDetail.ItemID, &TransactionDetail.ItemName)
+		if err != nil {
+			log.Print(err)
+		}
 		TransacitonDetails = append(TransacitonDetails, *TransactionDetail)
 	}
 	return TransacitonDetails
@@ -274,13 +295,12 @@ func TransactionGet(UserID string) (Transactions Transactions) {
 	rows, _ := db.Query(`
 	SELECT 
 		TransactionID,
-		CustomerName,
 		TotalAmount,
-		ZipCode,
+		CustomerName,
 		Address1,
 		Address2,
 		Address3,
-		PhoneNumber,
+		ZipCode,
 		TransactionTime,
 		StripeID,
 		Status,
@@ -297,7 +317,7 @@ func TransactionGet(UserID string) (Transactions Transactions) {
 	for rows.Next() {
 		Transaction := new(Transaction)
 		//err := rows.Scan(&Customer)
-		rows.Scan(&Transaction.TransactionID, &Transaction.CustomerName, &Transaction.TotalAmount, &Transaction.ZipCode, &Transaction.Address1, &Transaction.Address2, &Transaction.Address3, &Transaction.PhoneNumber, &Transaction.TransactionTime, &Transaction.StripeID, &Transaction.Status, &Transaction.ShipID)
+		rows.Scan(&Transaction.TransactionID, &Transaction.TotalAmount, &Transaction.CustomerName, &Transaction.Address1, &Transaction.Address2, &Transaction.Address3, &Transaction.ZipCode, &Transaction.TransactionTime, &Transaction.StripeID, &Transaction.Status, &Transaction.ShipID)
 		Transactions = append(Transactions, *Transaction)
 	}
 	return Transactions
