@@ -348,7 +348,8 @@ func CartSave(UserID string, Cart string) {
 	
 	WHERE 
 		UserID = ?`)
-	ins.Exec(Cart, UserID)
+	res, err := ins.Exec(Cart, UserID)
+	log.Print(res, err)
 	defer ins.Close()
 	defer db.Close()
 }
