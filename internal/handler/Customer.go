@@ -137,7 +137,9 @@ func GetDatafromSessionKey(c *gin.Context) (UserID string) {
 
 func Cart(c *gin.Context) {
 	UserID := GetDatafromSessionKey(c)
-	if UserID != "" {
+	if UserID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "未ログインです。"})
+	} else {
 		CartContents := new(database.CartRequestPayloads)
 		err := c.BindJSON(&CartContents)
 		if err != nil {
@@ -150,10 +152,10 @@ func Cart(c *gin.Context) {
 				log.Fatal(err)
 			}
 			database.CartSave(UserID, string(jsonBytes))
+		} else {
+			database.CartSave(UserID, "")
 		}
 		c.JSON(http.StatusOK, gin.H{"Cart": CartContents})
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "未ログインです。"})
 	}
 }
 func GetCart(c *gin.Context) {
