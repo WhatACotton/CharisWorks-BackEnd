@@ -104,7 +104,7 @@ func MakerUploadImage(c *gin.Context) {
 func makerStripeAccountIDGet(c *gin.Context) (StripeAccountID string) {
 	UserID := GetDatafromSessionKey(c)
 	role := database.CustomerGetStripeAccountID(UserID)
-	if role == "Seller" {
+	if role == "Seller" || role == "Admin" {
 		StripeAccountID = database.MakerGetStripeID(UserID)
 		log.Print("StripeAccountID:", StripeAccountID)
 		return StripeAccountID
