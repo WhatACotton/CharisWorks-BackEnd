@@ -109,18 +109,29 @@ func makerStripeAccountIDGet(c *gin.Context) (StripeAccountID string) {
 		log.Print("StripeAccountID:", StripeAccountID)
 		return StripeAccountID
 	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "出品者登録が完了していません。", "errcode": "401"})
-		return ""
+		if role == "preseller" {
+			return "preseller"
+		} else {
+			return ""
+		}
 	}
 }
 
 func MakerDetailsGet(c *gin.Context) {
 	StripeAccountID := makerStripeAccountIDGet(c)
 	if StripeAccountID != "" {
-		Maker := new(database.Maker)
-		Maker.StripeAccountID = StripeAccountID
-		Maker.MakerDetailsGet()
-		c.JSON(http.StatusOK, gin.H{"Maker": Maker})
+		if StripeAccountID == "preseller" {
+			maker := new(database.Maker)
+			maker.MakerName = "preseller"
+			c.JSON(http.StatusOK, gin.H{"Maker": maker})
+		} else {
+			Maker := new(database.Maker)
+			Maker.StripeAccountID = StripeAccountID
+			Maker.MakerDetailsGet()
+			c.JSON(http.StatusOK, gin.H{"Maker": Maker})
+		}
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"Maker": new(database.Maker)})
 	}
 }
 func MakerAccountRegister(c *gin.Context) {
