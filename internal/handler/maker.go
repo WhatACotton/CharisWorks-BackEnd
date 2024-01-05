@@ -15,14 +15,16 @@ import (
 func MakerStripeAccountCreate(c *gin.Context) {
 	UserID := GetDatafromSessionKey(c)
 	role := database.CustomerGetStripeAccountID(UserID)
-	if role == "preseller" {
+	if role == "preSeller" {
 		email := database.GetEmail(UserID)
 		AccountID, URL := cashing.CreateStripeAccount(email)
 		database.MakerAccountCreate(UserID, AccountID)
 		c.JSON(http.StatusOK, gin.H{"message": "アカウント作成のリンクが作成されました。", "URL": URL})
 	} else {
 		if role == "seller" {
-			c.JSON(http.StatusOK, gin.H{"message": "アカウントが作成されています。"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "アカウントが作成されています。"})
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "権限がありません。"})
 		}
 	}
 }
@@ -109,8 +111,8 @@ func makerStripeAccountIDGet(c *gin.Context) (StripeAccountID string) {
 		log.Print("StripeAccountID:", StripeAccountID)
 		return StripeAccountID
 	} else {
-		if role == "preseller" {
-			return "preseller"
+		if role == "preSeller" {
+			return "preSeller"
 		} else {
 			return ""
 		}
@@ -120,9 +122,9 @@ func makerStripeAccountIDGet(c *gin.Context) (StripeAccountID string) {
 func MakerDetailsGet(c *gin.Context) {
 	StripeAccountID := makerStripeAccountIDGet(c)
 	if StripeAccountID != "" {
-		if StripeAccountID == "preseller" {
+		if StripeAccountID == "preSeller" {
 			maker := new(database.Maker)
-			maker.MakerName = "preseller"
+			maker.MakerName = "preSeller"
 			c.JSON(http.StatusOK, gin.H{"Maker": maker})
 		} else {
 			Maker := new(database.Maker)
