@@ -28,17 +28,33 @@ func CustomerGetStripeAccountID(UserID string) (role string) {
 }
 
 // Stripeのアカウント作成
-func MakerAccountCreate(MakerName string, StripeAccountID string) {
+func MakerAccountCreate(UserID string, StripeAccountID string) {
 	db := ConnectSQL()
-	ins, _ := db.Prepare(`
+	tx, _ := db.Begin()
+	_, err := tx.Exec(`
 	INSERT INTO
 		Maker
 		(UserID,StripeAccountID)
 	VALUES
-		(?,?)`)
+		(?,?)`, UserID, StripeAccountID)
+	if err != nil {
+		log.Print(err)
+		tx.Rollback()
+	}
+	_, err = tx.Exec(`
+	UPDATE 
+		Customer 
+	SET 
+		role = 'Seller' 
+	WHERE 
+		UserID = ?`, UserID)
+	if err != nil {
+		log.Print(err)
 
-	ins.Exec(MakerName, StripeAccountID)
-	defer ins.Close()
+		tx.Rollback()
+	}
+	tx.Commit()
+	defer db.Close()
 }
 
 // Stripeのアカウント情報の修正

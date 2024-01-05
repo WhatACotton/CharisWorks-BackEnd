@@ -22,7 +22,9 @@ func MakerStripeAccountCreate(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "アカウント作成のリンクが作成されました。", "URL": URL})
 	} else {
 		if role == "seller" {
-			c.JSON(http.StatusOK, gin.H{"message": "アカウントが作成されています。"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "アカウントが作成されています。"})
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "権限がありません。"})
 		}
 	}
 }
