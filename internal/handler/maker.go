@@ -15,7 +15,7 @@ import (
 func MakerStripeAccountCreate(c *gin.Context) {
 	UserID := GetDatafromSessionKey(c)
 	role := database.CustomerGetStripeAccountID(UserID)
-	if role == "preseller" {
+	if role == "preSeller" {
 		email := database.GetEmail(UserID)
 		AccountID, URL := cashing.CreateStripeAccount(email)
 		database.MakerAccountCreate(UserID, AccountID)
@@ -109,8 +109,8 @@ func makerStripeAccountIDGet(c *gin.Context) (StripeAccountID string) {
 		log.Print("StripeAccountID:", StripeAccountID)
 		return StripeAccountID
 	} else {
-		if role == "preseller" {
-			return "preseller"
+		if role == "preSeller" {
+			return "preSeller"
 		} else {
 			return ""
 		}
@@ -120,9 +120,9 @@ func makerStripeAccountIDGet(c *gin.Context) (StripeAccountID string) {
 func MakerDetailsGet(c *gin.Context) {
 	StripeAccountID := makerStripeAccountIDGet(c)
 	if StripeAccountID != "" {
-		if StripeAccountID == "preseller" {
+		if StripeAccountID == "preSeller" {
 			maker := new(database.Maker)
-			maker.MakerName = "preseller"
+			maker.MakerName = "preSeller"
 			c.JSON(http.StatusOK, gin.H{"Maker": maker})
 		} else {
 			Maker := new(database.Maker)

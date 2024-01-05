@@ -21,7 +21,7 @@ type Customer struct {
 	IsEmailVerified  bool   `json:"IsEmailVerified"`
 	StripeAccountID  string `json:"StripeAccountID,omitempty"`
 	LastAccessedDate string `json:"LastAccessedDate"`
-	Role             string `json:"role"`
+	Role             string `json:"Role"`
 	Cart             string `json:"Cart"`
 }
 type CustomerRegisterPayload struct {
