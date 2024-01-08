@@ -37,11 +37,7 @@ func CustomerSignUp(c validation.CustomerReqPayload) error {
 	// データベースのハンドルを取得する
 	db := ConnectSQL()
 	ins, err := db.Prepare(`
-	INSERT INTO
-		Customer
-		(UserID,Email,IsEmailVerified)
-		VALUES
-		(?,?,?)`)
+	INSERT INTO Customer (UserID,Email,IsEmailVerified) VALUES (?,?,?)`)
 	if err != nil {
 		return err
 	}
