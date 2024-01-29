@@ -43,11 +43,11 @@ func main() {
 
 	r.GET("/go/GetCart", handler.GetCart)
 	// 購入処理
-	r.POST("/go/Transaction", handler.BuyItem)
+	r.POST("/go/Transaction", func(ctx *gin.Context) {handler.BuyItem(ctx,handler.GetUserIDTestimpl{})})
 	r.POST("/go/stripe", handler.Webhook)
 
 	//商品API
-	r.GET("/go/item/top", handler.Top)
+	r.GET("/go/item/top", func(ctx *gin.Context){handler.Top(ctx,handler.TopItemimpl{})})
 	r.GET("/go/item/all", handler.ALL)
 	r.GET("/go/item/details/:ItemID", handler.ItemDetails)
 	r.GET("/go/item/category/:category", handler.Category)

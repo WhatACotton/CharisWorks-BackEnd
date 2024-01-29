@@ -7,8 +7,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Top(c *gin.Context) {
-	TopItemList, err := database.ItemGetTop()
+type TopItem interface{
+	ItemGetTop()(database.TopItems,error)
+}
+
+type TopItemimpl struct{
+
+}
+
+func (t TopItemimpl)ItemGetTop()(database.TopItems,error){
+	return database.ItemGetTop()
+}
+
+func Top(c *gin.Context,impl TopItemimpl) {
+	TopItemList, err := impl.ItemGetTop()
 	if err != nil {
 		log.Print(err)
 	}

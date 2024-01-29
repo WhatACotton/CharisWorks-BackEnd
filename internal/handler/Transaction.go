@@ -9,12 +9,29 @@ import (
 	"github.com/WhatACotton/go-backend-test/validation"
 	"github.com/gin-gonic/gin"
 )
+type GetUserID interface{
+	GetUserID(*gin.Context)string
+	
+}
+type GetUserIDimpl struct{
 
+}
+type GetUserIDTestimpl struct{
+
+}
+func (g GetUserIDimpl) GetUserID(c *gin.Context)string{
+	return GetDatafromSessionKey(c)
+}
+
+func (g GetUserIDTestimpl) GetUserID(c *gin.Context)string{
+	return ""
+}
 // 商品の購入リクエストを作成。
-func BuyItem(c *gin.Context) {
+func BuyItem(c *gin.Context,f GetUserID) {
 	log.Print("Creating PaymentIntent...")
 	log.Print(c)
-	UserID := GetDatafromSessionKey(c)
+	//UserID := GetDatafromSessionKey(c)
+	UserID:=f.GetUserID(c)
 	CartContents := new(database.CartRequestPayloads)
 	err := c.BindJSON(&CartContents)
 	if err != nil {
