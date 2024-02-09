@@ -1,9 +1,39 @@
-<mxfile host="app.diagrams.net" modified="2024-02-09T04:58:36.581Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" version="23.1.0" etag="HGOQB3Q2HFn4_eo_mZHm" type="github">
+<mxfile host="app.diagrams.net" modified="2024-02-09T05:03:57.008Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="_9XW47igVDoyE7Un-KJM" version="23.1.0" type="github">
   <diagram name="Page-1" id="jLlFM_F5NksKxQO8hD2W">
-    <mxGraphModel>
+    <mxGraphModel dx="1432" dy="752" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="uj_ap4ycRLuaeX6Qjcuv-1" value="Front End server" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="150" y="290" width="160" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="uj_ap4ycRLuaeX6Qjcuv-2" value="Back End server" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="500" y="290" width="160" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="uj_ap4ycRLuaeX6Qjcuv-3" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="350" y="310" as="sourcePoint" />
+            <mxPoint x="460" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uj_ap4ycRLuaeX6Qjcuv-4" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="460" y="390" as="sourcePoint" />
+            <mxPoint x="350" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uj_ap4ycRLuaeX6Qjcuv-5" value="Request" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="370" y="280" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="uj_ap4ycRLuaeX6Qjcuv-6" value="JSON" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="375" y="360" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="uj_ap4ycRLuaeX6Qjcuv-8" value="{&lt;br&gt;&quot;name&quot;:&quot;whatacotton&quot;,&lt;br&gt;&quot;age&quot;:20&lt;br&gt;}" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;imageAlign=left;" vertex="1" parent="1">
+          <mxGeometry x="350" y="400" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="uj_ap4ycRLuaeX6Qjcuv-11" value="GET /name" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="355" y="310" width="100" height="40" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
